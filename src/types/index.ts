@@ -163,6 +163,16 @@ export interface Asset {
   specs: Record<string, string>;
   notes?: string;
   legalDocs?: HeavyEquipmentDocs;
+  gpsLocation?: {
+    latitude: number;
+    longitude: number;
+    siteName: string;
+    cityName: string;
+    provinceName: string;
+    lastGpsPing?: string;
+    speedKmh?: number;
+    ignitionOn?: boolean;
+  };
 }
 
 export type ProductType = 'SERIALIZED' | 'QUANTITY_BASED' | 'SERVICE';
@@ -588,3 +598,20 @@ export interface SystemSettings {
   deliveryPrefix: string;
   strictAssetLocking: boolean;
 }
+
+export interface AppNotification {
+  id: string;
+  timestamp: string;
+  sourceDepartment: string; // e.g. 'Operasional Lapangan', 'Technical Service (Bengkel)', 'Sales & CRM', 'Procurement', 'Finance & FAT', 'Asset Control', 'Divisi IT'
+  sourceUserName: string;
+  title: string;
+  message: string;
+  category: 'OPERATIONAL' | 'FINANCIAL' | 'MAINTENANCE' | 'COMMERCIAL' | 'LEGAL' | 'SYSTEM';
+  severity: 'INFO' | 'SUCCESS' | 'WARNING' | 'CRITICAL';
+  targetRoles?: UserRole[];
+  relatedEntity?: string;
+  relatedEntityId?: string;
+  targetTab?: string;
+  isRead: boolean;
+}
+

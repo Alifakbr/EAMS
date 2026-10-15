@@ -1,6 +1,24 @@
-import React, { useState } from 'react';
-import { User, UserRole } from '../types/index.ts';
-import { ShieldCheck, RefreshCw, LogOut, Printer, FileSpreadsheet, Menu, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { User, UserRole, AppNotification } from '../types/index.ts';
+import { api } from '../services/api.ts';
+import {
+  ShieldCheck,
+  RefreshCw,
+  LogOut,
+  Printer,
+  FileSpreadsheet,
+  Menu,
+  X,
+  Bell,
+  CheckCircle2,
+  AlertTriangle,
+  Info,
+  ShieldAlert,
+  ArrowRight,
+  Check,
+  Clock,
+  ExternalLink,
+} from 'lucide-react';
 
 interface HeaderProps {
   currentUser?: User | null;
@@ -12,6 +30,7 @@ interface HeaderProps {
   onLogout?: () => void;
   isRefreshing?: boolean;
   onRefresh?: () => void;
+  onToggleMobileSidebar?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -24,9 +43,56 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
   isRefreshing,
   onRefresh,
+  onToggleMobileSidebar,
 }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [notifFilter, setNotifFilter] = useState<'ALL' | 'UNREAD' | 'OPERATIONAL' | 'MAINTENANCE' | 'COMMERCIAL' | 'FINANCIAL'>('ALL');
+
+  const loadNotifications = async () => {
+    try {
+      const res = await api.getNotifications();
+      setNotifications(res.data);
+      setUnreadNotifCount(res.unreadCount);
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleMarkAllRead = async () => {
+    try {
+      await api.markAllNotificationsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setUnreadNotifCount(0);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleNotificationClick = async (notif: AppNotification) => {
+    if (!notif.isRead) {
+      try {
+        await api.markNotificationRead(notif.id);
+        setNotifications((prev) => prev.map((n) => (n.id === notif.id ? { ...n, isRead: true } : n)));
+        setUnreadNotifCount((prev) => Math.max(0, prev - 1));
+      } catch {
+        // ignore
+      }
+    }
+    if (notif.targetTab) {
+      onTabChange(notif.targetTab);
+      setShowNotifications(false);
+    }
+  };
 
   // Role-specific top navbar links exactly mapped to user requirements
   const roleNavItems: Record<UserRole, { id: string; label: string; highlight?: boolean }[]> = {
@@ -129,11 +195,18 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Zone 1: Wordmark & Mobile Toggle */}
         <div className="flex items-center gap-3 shrink-0">
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            type="button"
+            onClick={() => {
+              if (onToggleMobileSidebar) {
+                onToggleMobileSidebar();
+              } else {
+                setMobileMenuOpen(!mobileMenuOpen);
+              }
+            }}
             className="lg:hidden p-1.5 text-slate-600 hover:text-slate-900 rounded border border-slate-200 cursor-pointer"
-            title="Toggle Menu Navigasi"
+            title="Buka Menu Navigasi"
           >
-            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            <Menu className="w-4 h-4" />
           </button>
 
           <a
@@ -194,6 +267,24 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Zone 3: Global Print, Role Switcher, Quick Action, Profile */}
         <div className="flex items-center gap-2 shrink-0">
+          {/* Notification Bell Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setShowNotifications(!showNotifications);
+              loadNotifications();
+            }}
+            title="Pusat Notifikasi Aktivitas Lintas Peran"
+            className="relative p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded border border-slate-200 transition-colors cursor-pointer"
+          >
+            <Bell className="w-4 h-4 text-slate-700" />
+            {unreadNotifCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] px-1 bg-rose-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+              </span>
+            )}
+          </button>
+
           {/* Global Print Report Button */}
           <button
             onClick={() => window.print()}
@@ -316,6 +407,170 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* PUSAT NOTIFIKASI & AKTIVITAS LINTAS PERAN MODAL */}
+      {showNotifications && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-lg shadow-2xl border border-slate-200 max-w-2xl w-full max-h-[90vh] flex flex-col text-slate-900 overflow-hidden">
+            {/* Modal Header */}
+            <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/70 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                  <Bell className="w-4 h-4 text-amber-700" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    Pusat Notifikasi &amp; Pembaruan Lintas Peran
+                    {unreadNotifCount > 0 && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">
+                        {unreadNotifCount} Baru
+                      </span>
+                    )}
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Transparansi aktivitas antar divisi: Lapangan, Bengkel Servis, Sales, Pengadaan, FAT &amp; IT.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {unreadNotifCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleMarkAllRead}
+                    className="px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:text-slate-900 hover:bg-white rounded border border-slate-200 cursor-pointer flex items-center gap-1 shadow-2xs"
+                  >
+                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    Tandai Semua Dibaca
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowNotifications(false)}
+                  className="p-1.5 text-slate-400 hover:text-slate-700 rounded cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="px-4 py-2 border-b border-slate-100 bg-white flex items-center gap-1.5 overflow-x-auto shrink-0 text-xs font-medium">
+              {[
+                { id: 'ALL', label: 'Semua' },
+                { id: 'UNREAD', label: `Belum Dibaca (${unreadNotifCount})` },
+                { id: 'OPERATIONAL', label: 'Operasional Lapangan' },
+                { id: 'MAINTENANCE', label: 'Servis Bengkel' },
+                { id: 'COMMERCIAL', label: 'Sales & Kontrak' },
+                { id: 'FINANCIAL', label: 'Keuangan & FAT' },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setNotifFilter(f.id as any)}
+                  className={`px-2.5 py-1 rounded text-[11px] font-medium whitespace-nowrap cursor-pointer transition-colors ${
+                    notifFilter === f.id
+                      ? 'bg-slate-900 text-white font-bold'
+                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Notification List */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-2.5 bg-slate-50/50">
+              {notifications
+                .filter((n) => {
+                  if (notifFilter === 'UNREAD') return !n.isRead;
+                  if (notifFilter === 'OPERATIONAL') return n.category === 'OPERATIONAL' || n.sourceDepartment.toLowerCase().includes('lapangan');
+                  if (notifFilter === 'MAINTENANCE') return n.category === 'MAINTENANCE' || n.sourceDepartment.toLowerCase().includes('technical');
+                  if (notifFilter === 'COMMERCIAL') return n.category === 'COMMERCIAL' || n.sourceDepartment.toLowerCase().includes('sales');
+                  if (notifFilter === 'FINANCIAL') return n.category === 'FINANCIAL' || n.sourceDepartment.toLowerCase().includes('fat') || n.sourceDepartment.toLowerCase().includes('procurement');
+                  return true;
+                })
+                .map((notif) => {
+                  const getSeverityIcon = () => {
+                    switch (notif.severity) {
+                      case 'CRITICAL':
+                        return <ShieldAlert className="w-4 h-4 text-rose-600" />;
+                      case 'WARNING':
+                        return <AlertTriangle className="w-4 h-4 text-amber-600" />;
+                      case 'SUCCESS':
+                        return <CheckCircle2 className="w-4 h-4 text-emerald-600" />;
+                      default:
+                        return <Info className="w-4 h-4 text-indigo-600" />;
+                    }
+                  };
+
+                  return (
+                    <div
+                      key={notif.id}
+                      onClick={() => handleNotificationClick(notif)}
+                      className={`p-3.5 rounded-lg border transition-all cursor-pointer space-y-1.5 ${
+                        !notif.isRead
+                          ? 'bg-white border-amber-300 shadow-xs ring-1 ring-amber-100'
+                          : 'bg-white/80 border-slate-200 hover:bg-white text-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-200 font-mono">
+                            Dari: {notif.sourceDepartment}
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-medium">
+                            · Oleh: <strong className="text-slate-700">{notif.sourceUserName}</strong>
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-slate-400" />
+                            {new Date(notif.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          {!notif.isRead && (
+                            <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" title="Belum dibaca" />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-2">
+                        <div className="mt-0.5 shrink-0">{getSeverityIcon()}</div>
+                        <div className="flex-1 space-y-0.5">
+                          <div className="text-xs font-bold text-slate-900">{notif.title}</div>
+                          <p className="text-xs text-slate-600 leading-relaxed">{notif.message}</p>
+                        </div>
+                      </div>
+
+                      {notif.targetTab && (
+                        <div className="pt-1 flex items-center justify-between border-t border-slate-100/80 text-[11px]">
+                          <span className="text-slate-400">
+                            Entitas: <strong className="text-slate-700 font-mono">{notif.relatedEntityId || notif.relatedEntity || '-'}</strong>
+                          </span>
+                          <span className="text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">
+                            Buka Modul Terkait ({notif.targetTab}) <ArrowRight className="w-3 h-3" />
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+
+            {/* Footer */}
+            <div className="p-3 border-t border-slate-200 bg-white flex items-center justify-between text-xs shrink-0 text-slate-500">
+              <span className="text-[11px]">Sistem notifikasi real-time aktif EARMS Enterprise</span>
+              <button
+                type="button"
+                onClick={() => setShowNotifications(false)}
+                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded font-medium text-xs cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}

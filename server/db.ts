@@ -20,6 +20,7 @@ import {
   HeavyEquipmentOperator,
   AssetDailyStatusLog,
   OperatorAttendanceLog,
+  AppNotification,
 } from '../src/types/index.ts';
 
 // Decimal-safe helper functions
@@ -69,6 +70,7 @@ export interface DatabaseState {
   operators: HeavyEquipmentOperator[];
   statusLogs: AssetDailyStatusLog[];
   attendanceLogs: OperatorAttendanceLog[];
+  notifications: AppNotification[];
 }
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
@@ -100,6 +102,9 @@ export class EamsDatabase {
           if (!parsed.attendanceLogs) {
             parsed.attendanceLogs = fresh.attendanceLogs;
           }
+          if (!parsed.notifications || parsed.notifications.length === 0) {
+            parsed.notifications = fresh.notifications;
+          }
           fresh.assets.forEach((fa) => {
             if (!parsed.assets.some((pa: Asset) => pa.id === fa.id || pa.assetTag === fa.assetTag)) {
               parsed.assets.unshift(fa);
@@ -109,6 +114,9 @@ export class EamsDatabase {
             const seedA = fresh.assets.find((sa) => sa.id === a.id);
             if (seedA?.legalDocs && !a.legalDocs) {
               a.legalDocs = seedA.legalDocs;
+            }
+            if (seedA?.gpsLocation) {
+              a.gpsLocation = seedA.gpsLocation;
             }
           });
           return parsed;
@@ -202,6 +210,16 @@ export class EamsDatabase {
   public getOperators(): HeavyEquipmentOperator[] { return this.state.operators || []; }
   public getStatusLogs(): AssetDailyStatusLog[] { return this.state.statusLogs || []; }
   public getAttendanceLogs(): OperatorAttendanceLog[] { return this.state.attendanceLogs || []; }
+  public getNotifications(): AppNotification[] { return this.state.notifications || []; }
+  public addNotification(notification: AppNotification): void {
+    if (!this.state.notifications) {
+      this.state.notifications = [];
+    }
+    this.state.notifications.unshift(notification);
+    if (this.state.notifications.length > 200) {
+      this.state.notifications.pop();
+    }
+  }
 
   // Seed Data Generation
   private generateSeedData(): DatabaseState {
@@ -452,6 +470,16 @@ export class EamsDatabase {
           siaFileName: 'SIA_Kelaikan_Kemenaker.pdf',
           documentStatus: 'VALID',
         },
+        gpsLocation: {
+          latitude: -2.545,
+          longitude: 121.353,
+          siteName: 'Site Tambang Nikel & Smelter Morowali',
+          cityName: 'Morowali',
+          provinceName: 'Sulawesi Tengah',
+          lastGpsPing: '2026-10-15T08:15:00Z',
+          speedKmh: 0,
+          ignitionOn: true,
+        },
       },
       {
         id: 'AST-10088',
@@ -490,6 +518,16 @@ export class EamsDatabase {
           siaFileName: 'SIA_Crane_250T.pdf',
           documentStatus: 'VALID',
         },
+        gpsLocation: {
+          latitude: -0.974,
+          longitude: 116.702,
+          siteName: 'Proyek Jembatan Pulau Balang & Dermaga Logistik',
+          cityName: 'Sepaku, IKN Nusantara',
+          provinceName: 'Kalimantan Timur',
+          lastGpsPing: '2026-10-15T08:20:00Z',
+          speedKmh: 0,
+          ignitionOn: true,
+        },
       },
       {
         id: 'AST-1001',
@@ -517,6 +555,16 @@ export class EamsDatabase {
         imageUrl: '/src/assets/images/industrial_generator_cat_1791998455250.jpg',
         specs: { Output: '1250 kVA / 1000 kW', Fuel: 'Diesel Heavy Fuel', SoundLevel: '68 dBA @ 7m' },
         notes: 'Under active 60-day lease contract with Vertex Energy Bayport Terminal.',
+        gpsLocation: {
+          latitude: -7.202,
+          longitude: 112.731,
+          siteName: 'Kawasan Industri Maspion & Dermaga Petrokimia',
+          cityName: 'Gresik / Surabaya',
+          provinceName: 'Jawa Timur',
+          lastGpsPing: '2026-10-15T08:10:00Z',
+          speedKmh: 0,
+          ignitionOn: true,
+        },
       },
       {
         id: 'AST-1002',
@@ -528,7 +576,7 @@ export class EamsDatabase {
         model: 'ERC-080-VG',
         status: 'AVAILABLE',
         condition: 'EXCELLENT',
-        warehouseLocation: 'Fort Worth Logistics Dock C',
+        warehouseLocation: 'Central Equipment Yard & Workshop Cakung',
         purchaseCost: 42000,
         currentBookValue: 39900,
         depreciationRateAnnual: 10,
@@ -541,30 +589,49 @@ export class EamsDatabase {
         imageUrl: '/src/assets/images/forklift_electric_warehouse_1791998455396.jpg',
         specs: { Capacity: '8,000 lbs (3,600 kg)', Mast: 'Triple 189 in', Battery: '80V 750Ah Lithium-Ion' },
         notes: 'Freshly calibrated and safety certified. Ready for immediate deployment or sale.',
+        gpsLocation: {
+          latitude: -6.175,
+          longitude: 106.945,
+          siteName: 'Central Equipment Yard Cakung & Head Office',
+          cityName: 'Jakarta Timur',
+          provinceName: 'DKI Jakarta',
+          lastGpsPing: '2026-10-15T08:30:00Z',
+          speedKmh: 12,
+          ignitionOn: true,
+        },
       },
       {
         id: 'AST-1003',
         assetTag: 'AST-1003',
         serialNumber: 'THERMO-I7-339182',
-        name: 'ThermoTech InspectPro i7 Industrial Thermal Camera',
-        category: 'Diagnostic Tools',
-        brand: 'ThermoTech',
-        model: 'InspectPro i7',
-        status: 'AVAILABLE',
-        condition: 'EXCELLENT',
-        warehouseLocation: 'Austin Tech Depot Tool Room',
-        purchaseCost: 9800,
-        currentBookValue: 8820,
-        depreciationRateAnnual: 15,
+        name: 'Atlas Copco XAS 188 Portable Diesel Air Compressor',
+        category: 'Air & Pneumatic',
+        brand: 'Atlas Copco',
+        model: 'XAS 188',
+        status: 'IN_MAINTENANCE',
+        condition: 'NEEDS_REPAIR',
+        warehouseLocation: 'Depot & Workshop Balikpapan',
+        purchaseCost: 38000,
+        currentBookValue: 34200,
+        depreciationRateAnnual: 10,
         purchaseDate: '2025-05-18',
         warrantyExpiry: '2028-05-18',
-        dailyRentalRate: 140,
-        weeklyRentalRate: 650,
-        monthlyRentalRate: 2100,
-        sellPrice: 12500,
-        imageUrl: '/src/assets/images/thermal_imager_scanner_1791998455824.jpg',
-        specs: { Resolution: '320x240 IR Pixels', TempRange: '-20C to 650C', ThermalSensitivity: '<0.04C' },
-        notes: 'Includes hardened field transport case and NIST traceable calibration cert.',
+        dailyRentalRate: 180,
+        weeklyRentalRate: 850,
+        monthlyRentalRate: 2800,
+        sellPrice: 42000,
+        specs: { FreeAirDelivery: '11.1 m³/min', Pressure: '7-12 bar', Engine: 'Deutz 4-Cylinder' },
+        notes: 'Sedang dalam pengerjaan teknis servis oleh tim mekanik bengkel.',
+        gpsLocation: {
+          latitude: -1.269,
+          longitude: 116.831,
+          siteName: 'Depot Utama & Workshop Kariangau',
+          cityName: 'Balikpapan',
+          provinceName: 'Kalimantan Timur',
+          lastGpsPing: '2026-10-15T08:05:00Z',
+          speedKmh: 0,
+          ignitionOn: false,
+        },
       },
       {
         id: 'AST-1004',
@@ -574,9 +641,9 @@ export class EamsDatabase {
         category: 'Heavy Machinery',
         brand: 'Komatsu',
         model: 'PC210LC-11',
-        status: 'RESERVED',
+        status: 'RENTED',
         condition: 'GOOD',
-        warehouseLocation: 'Dallas Heavy Equipment Yard',
+        warehouseLocation: 'Site Project Weda Bay',
         purchaseCost: 185000,
         currentBookValue: 157250,
         depreciationRateAnnual: 12,
@@ -590,7 +657,17 @@ export class EamsDatabase {
         monthlyRentalRate: 14500,
         sellPrice: 210000,
         specs: { OperatingWeight: '22,120 kg', EnginePower: '165 HP', BucketCapacity: '1.2 m³' },
-        notes: 'Allocated to Sales Order SO-2026-002 for Horizon Round Rock site.',
+        notes: 'Operasi di area tambang dan pematangan lahan Weda Bay.',
+        gpsLocation: {
+          latitude: 0.472,
+          longitude: 127.915,
+          siteName: 'Site Industrial Park & Tambang Nikel',
+          cityName: 'Weda Bay, Halmahera Tengah',
+          provinceName: 'Maluku Utara',
+          lastGpsPing: '2026-10-15T08:25:00Z',
+          speedKmh: 4,
+          ignitionOn: true,
+        },
       },
       {
         id: 'AST-1005',
@@ -1632,6 +1709,112 @@ export class EamsDatabase {
       },
     ];
 
+    const notifications: AppNotification[] = [
+      {
+        id: 'NTF-2026-001',
+        timestamp: '2026-10-15T08:25:00Z',
+        sourceDepartment: 'Operasional Lapangan',
+        sourceUserName: 'Agus Santoso (Operator Alat)',
+        title: 'Laporan Kerusakan Unit Lapangan (Mogok)',
+        message: 'Unit Kompresor Atlas Copco [AST-1003] di Site Morowali dilaporkan mati mendadak setelah 2 jam operasi. Tiket perbaikan darurat WO-2026-001 diteruskan ke tim Technical Service.',
+        category: 'MAINTENANCE',
+        severity: 'CRITICAL',
+        targetRoles: ['TECHNICAL_SERVICE', 'EXECUTIVE', 'ADMIN_IT', 'MANAGEMENT_OPERATION'],
+        relatedEntity: 'ASSET',
+        relatedEntityId: 'AST-1003',
+        targetTab: 'technical-service',
+        isRead: false,
+      },
+      {
+        id: 'NTF-2026-002',
+        timestamp: '2026-10-15T07:45:00Z',
+        sourceDepartment: 'Technical Service (Bengkel)',
+        sourceUserName: 'Derrick Vance (Kepala Mekanik)',
+        title: 'Mulai Pengerjaan Servis & Penggantian Sparepart',
+        message: 'Mekanik telah memindai barcode unit Excavator CAT 320D [AST-10024] dan memulai penggantian O-Ring Seal Kit hidrolik dari stok pengadaan. Status alat dialihkan menjadi Sedang Diservis.',
+        category: 'OPERATIONAL',
+        severity: 'INFO',
+        targetRoles: ['EXECUTIVE', 'ADMIN_IT', 'MANAGEMENT_OPERATION', 'ASSET_CONTROL'],
+        relatedEntity: 'WORK_ORDER',
+        relatedEntityId: 'WO-2026-002',
+        targetTab: 'maintenance',
+        isRead: false,
+      },
+      {
+        id: 'NTF-2026-003',
+        timestamp: '2026-10-15T07:15:00Z',
+        sourceDepartment: 'Sales & Marketing',
+        sourceUserName: 'Elena Rostova (Commercial Lead)',
+        title: 'Quotation Disetujui & Sales Order Diterbitkan',
+        message: 'Penawaran sewa alat QT-2026-0042 untuk PT Freeport Indonesia telah disetujui klien (Termin Lumpsum + Mob/Demob Fee). Sales Order SO-2026-0089 otomatis dibuat dan siap mobilisasi.',
+        category: 'COMMERCIAL',
+        severity: 'SUCCESS',
+        targetRoles: ['SALES_MARKETING', 'EXECUTIVE', 'ADMIN_IT', 'ASSET_CONTROL', 'FINANCE_ACCOUNTING_TAX'],
+        relatedEntity: 'QUOTATION',
+        relatedEntityId: 'QT-2026-0042',
+        targetTab: 'sales',
+        isRead: false,
+      },
+      {
+        id: 'NTF-2026-004',
+        timestamp: '2026-10-15T06:50:00Z',
+        sourceDepartment: 'Pengadaan (Procurement)',
+        sourceUserName: 'Dewi Lestari (Procurement Manager)',
+        title: 'Purchase Order Disetujui & Tagihan Masuk ke FAT',
+        message: 'PO-2026-0038 pengadaan sparepart filter hidrolik & oli mesin senilai Rp 14.500.000 ke PT United Tractors Tbk telah disetujui. Tagihan vendor dengan termin NET 30 telah masuk ke tim FAT Finance.',
+        category: 'FINANCIAL',
+        severity: 'INFO',
+        targetRoles: ['PROCUREMENT', 'FINANCE_ACCOUNTING_TAX', 'EXECUTIVE', 'ADMIN_IT'],
+        relatedEntity: 'PO',
+        relatedEntityId: 'PO-2026-0038',
+        targetTab: 'procurement',
+        isRead: false,
+      },
+      {
+        id: 'NTF-2026-005',
+        timestamp: '2026-10-14T16:30:00Z',
+        sourceDepartment: 'Asset Control (Legalitas Alat)',
+        sourceUserName: 'Bambang Pratama (Asset Control)',
+        title: 'Peringatan: Masa Berlaku SIA Alat Segera Habis',
+        message: 'Surat Ijin Alat (SIA) Kemenaker untuk unit Crane Kobelco 250T [AST-10088] tersisa 14 hari sebelum kedaluwarsa. Jadwalkan uji riksa keselamatan kerja (K3) dengan Disnaker.',
+        category: 'LEGAL',
+        severity: 'WARNING',
+        targetRoles: ['ASSET_CONTROL', 'MANAGEMENT_OPERATION', 'EXECUTIVE', 'ADMIN_IT'],
+        relatedEntity: 'ASSET',
+        relatedEntityId: 'AST-10088',
+        targetTab: 'assets',
+        isRead: true,
+      },
+      {
+        id: 'NTF-2026-006',
+        timestamp: '2026-10-14T14:10:00Z',
+        sourceDepartment: 'AR Management (Piutang)',
+        sourceUserName: 'Reza Ramadhan (AR Specialist)',
+        title: 'Tagihan Piutang Menunggak (Overdue 45 Hari)',
+        message: 'Invoice INV-2026-0105 senilai Rp 85.000.000 atas nama PT Vale Indonesia telah melewati jatuh tempo 45 hari. Dibutuhkan eskalasi penagihan resmi.',
+        category: 'FINANCIAL',
+        severity: 'WARNING',
+        targetRoles: ['AR_MANAGEMENT', 'FINANCE_ACCOUNTING_TAX', 'EXECUTIVE', 'ADMIN_IT'],
+        relatedEntity: 'INVOICE',
+        relatedEntityId: 'INV-2026-0105',
+        targetTab: 'invoices',
+        isRead: true,
+      },
+      {
+        id: 'NTF-2026-007',
+        timestamp: '2026-10-14T09:00:00Z',
+        sourceDepartment: 'Divisi IT & Infrastruktur',
+        sourceUserName: 'Hendra Wijaya (IT Administrator)',
+        title: 'Aktivasi Hak Akses Role Technical Service',
+        message: 'Pembaruan sistem: Menu Technical Service & Scanner Barcode Bengkel telah aktif untuk seluruh personil mekanik lapangan dan workshop.',
+        category: 'SYSTEM',
+        severity: 'SUCCESS',
+        targetRoles: ['ADMIN_IT', 'TECHNICAL_SERVICE', 'EXECUTIVE'],
+        targetTab: 'user-management',
+        isRead: true,
+      },
+    ];
+
     return {
       users,
       assets,
@@ -1652,6 +1835,7 @@ export class EamsDatabase {
       operators,
       statusLogs,
       attendanceLogs,
+      notifications,
     };
   }
 }

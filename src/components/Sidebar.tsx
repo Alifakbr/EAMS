@@ -32,9 +32,18 @@ interface SidebarProps {
     openInvoices?: number;
     pendingWorkOrders?: number;
   };
+  isOpenOnMobile?: boolean;
+  onCloseMobile?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, userRole = 'EXECUTIVE', counts }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  currentTab,
+  onSelectTab,
+  userRole = 'EXECUTIVE',
+  counts,
+  isOpenOnMobile = false,
+  onCloseMobile,
+}) => {
   // Define permitted tabs for each of the 8 enterprise roles
   const rolePermissions: Record<UserRole, string[]> = {
     // 1. Executive: Semua fitur komersial & operasional, utamakan laporan eksekutif, KECUALI fitur admin IT
@@ -221,61 +230,92 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, userR
   };
 
   return (
-    <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0 min-h-[calc(100vh-53px)] border-r border-slate-800 no-print select-none">
-      {/* Role Indicator Banner */}
-      <div className="px-4 py-3 bg-slate-950/60 border-b border-slate-800 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-amber-400" />
-          <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider">
-            {roleBadgeLabels[userRole] || userRole}
-          </span>
-        </div>
-        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-1.5 py-0.5 rounded">
-          Active
-        </span>
-      </div>
+    <>
+      {/* Mobile Drawer Backdrop */}
+      {isOpenOnMobile && (
+        <div
+          onClick={onCloseMobile}
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden cursor-pointer"
+        />
+      )}
 
-      <div className="p-3 flex-1 overflow-y-auto space-y-5">
-        {sections.map((section) => (
-          <div key={section.label} className="space-y-1">
-            <h4 className="px-3 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-              {section.label}
-            </h4>
-            <div className="mt-1 space-y-0.5">
-              {section.items.map((item) => {
-                const Icon = item.icon;
-                const isActive = currentTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => onSelectTab(item.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors whitespace-nowrap text-left cursor-pointer ${
-                      isActive
-                        ? 'bg-slate-800 text-white font-semibold shadow-xs'
-                        : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-amber-400' : 'text-slate-400'}`} />
-                      <span className="truncate">{item.label}</span>
-                    </div>
-                    {item.badge !== undefined && item.badge > 0 && (
-                      <span className="text-[10px] font-mono font-medium px-1.5 py-0.2 bg-slate-700 text-slate-200 rounded">
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+      <aside
+        className={`bg-slate-900 text-slate-300 flex flex-col shrink-0 min-h-[calc(100vh-53px)] border-r border-slate-800 no-print select-none transition-all duration-200 ${
+          isOpenOnMobile
+            ? 'fixed inset-y-0 left-0 z-50 w-72 shadow-2xl flex'
+            : 'hidden lg:flex lg:w-64'
+        }`}
+      >
+        {/* Role Indicator Banner */}
+        <div className="px-4 py-3 bg-slate-950/60 border-b border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-amber-400" />
+            <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider">
+              {roleBadgeLabels[userRole] || userRole}
+            </span>
           </div>
-        ))}
-      </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-1.5 py-0.5 rounded">
+              Active
+            </span>
+            {isOpenOnMobile && (
+              <button
+                type="button"
+                onClick={onCloseMobile}
+                className="lg:hidden p-1 text-slate-400 hover:text-white rounded ml-1 cursor-pointer"
+                title="Tutup Menu"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
 
-      <div className="p-3 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
-        <span className="font-semibold text-slate-300">Apex Commercial</span>
-        <span className="font-mono text-slate-500">v2.4 Enterprise</span>
-      </div>
-    </aside>
+        <div className="p-3 flex-1 overflow-y-auto space-y-5">
+          {sections.map((section) => (
+            <div key={section.label} className="space-y-1">
+              <h4 className="px-3 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                {section.label}
+              </h4>
+              <div className="mt-1 space-y-0.5">
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = currentTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        onSelectTab(item.id);
+                        if (onCloseMobile) onCloseMobile();
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors whitespace-nowrap text-left cursor-pointer ${
+                        isActive
+                          ? 'bg-slate-800 text-white font-semibold shadow-xs'
+                          : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-amber-400' : 'text-slate-400'}`} />
+                        <span className="truncate">{item.label}</span>
+                      </div>
+                      {item.badge !== undefined && item.badge > 0 && (
+                        <span className="text-[10px] font-mono font-medium px-1.5 py-0.2 bg-slate-700 text-slate-200 rounded">
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="p-3 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+          <span className="font-semibold text-slate-300">Apex Commercial</span>
+          <span className="font-mono text-slate-500">v2.4 Enterprise</span>
+        </div>
+      </aside>
+    </>
   );
 };

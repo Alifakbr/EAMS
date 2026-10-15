@@ -23,6 +23,10 @@ import {
   Sliders,
   AlertTriangle,
   QrCode,
+  Copy,
+  Check,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 interface UserManagementViewProps {
@@ -238,6 +242,17 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
   const [customizingPermissionsUser, setCustomizingPermissionsUser] = useState<User | null>(null);
   const [activePermissions, setActivePermissions] = useState<UserPermissionMatrix>(DEFAULT_ROLE_PERMISSIONS.OPERATOR_USER);
   const [printingBadgeUser, setPrintingBadgeUser] = useState<User | null>(null);
+  const [resettingUser, setResettingUser] = useState<User | null>(null);
+  const [customPasswordInput, setCustomPasswordInput] = useState('');
+  const [forcePasswordChange, setForcePasswordChange] = useState(true);
+  const [resetSuccessData, setResetSuccessData] = useState<{
+    temporaryPassword: string;
+    userEmail: string;
+    userName: string;
+    resetAt?: string;
+  } | null>(null);
+  const [passwordCopied, setPasswordCopied] = useState(false);
+  const [showPasswordText, setShowPasswordText] = useState(true);
 
   // New User Form State
   const [formName, setFormName] = useState('');
@@ -311,17 +326,43 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
     }
   };
 
-  // Handle Reset Password
-  const handleResetPassword = async (user: User) => {
-    if (confirm(`Apakah Anda yakin ingin me-reset password untuk ${user.name} (${user.email})?`)) {
-      try {
-        const res = await api.resetUserPassword(user.id);
-        alert(`${res.message}\nPassword Sementara: ${res.temporaryPassword}`);
-        await loadUsers();
-      } catch (err: any) {
-        alert(`Gagal reset password: ${err.message}`);
-      }
+  // Handle Open Reset Password Modal
+  const handleOpenResetModal = (user: User) => {
+    setResettingUser(user);
+    setCustomPasswordInput('');
+    setForcePasswordChange(true);
+    setResetSuccessData(null);
+    setPasswordCopied(false);
+  };
+
+  // Execute Password Reset
+  const handleExecuteResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resettingUser) return;
+    try {
+      const res = await api.resetUserPassword(resettingUser.id, {
+        customPassword: customPasswordInput.trim() || undefined,
+        forcePasswordChange,
+      });
+      setResetSuccessData({
+        temporaryPassword: res.temporaryPassword,
+        userEmail: resettingUser.email,
+        userName: resettingUser.name,
+        resetAt: new Date().toLocaleTimeString('id-ID'),
+      });
+      await loadUsers();
+      if (onRefresh) onRefresh();
+    } catch (err: any) {
+      alert(`Gagal reset password: ${err.message}`);
     }
+  };
+
+  const handleCopyCredentials = () => {
+    if (!resetSuccessData) return;
+    const text = `KREDENSIAL LOGIN EARMS\nNama: ${resetSuccessData.userName}\nEmail: ${resetSuccessData.userEmail}\nPassword Baru: ${resetSuccessData.temporaryPassword}\nStatus: Aktif\nCatatan: Harap segera mengganti password setelah berhasil masuk ke sistem.`;
+    navigator.clipboard.writeText(text);
+    setPasswordCopied(true);
+    setTimeout(() => setPasswordCopied(false), 3000);
   };
 
   // Handle Toggle Status (Active / Suspended)
@@ -590,11 +631,12 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           type="button"
-                          onClick={() => handleResetPassword(user)}
-                          title="Reset Password Pengguna"
-                          className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-amber-700 cursor-pointer"
+                          onClick={() => handleOpenResetModal(user)}
+                          title="Buka Menu Reset Password Pengguna"
+                          className="px-2 py-1 rounded bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 cursor-pointer flex items-center gap-1 text-[11px] font-semibold"
                         >
-                          <Key className="w-3.5 h-3.5" />
+                          <Key className="w-3.5 h-3.5 text-amber-700" />
+                          <span>Reset Pass</span>
                         </button>
 
                         <button
@@ -1050,6 +1092,162 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: Dedicated Reset Password Modal (Menu IT Administrator) */}
+      {resettingUser && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-2xl border border-slate-200 max-w-md w-full p-6 text-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                  <Key className="w-4 h-4 text-amber-700" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Menu Reset Password Pengguna
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Otoritas Manajemen Keamanan &amp; Akun Divisi IT
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setResettingUser(null);
+                  setResetSuccessData(null);
+                }}
+                className="text-slate-400 hover:text-slate-700 p-1 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Target User Info Card */}
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1 font-mono text-[11px]">
+              <div className="text-slate-900 font-bold font-sans text-xs">{resettingUser.name}</div>
+              <div className="text-slate-600">Email: <span className="font-semibold text-slate-800">{resettingUser.email}</span></div>
+              <div className="text-slate-600">Badge ID: <span className="font-semibold text-slate-800">{resettingUser.employeeBadge || '-'}</span> · Peran: <span className="font-semibold text-indigo-700">{resettingUser.role}</span></div>
+              <div className="text-slate-500 text-[10px]">Cabang / Site: {resettingUser.assignedBranch || 'Kantor Pusat Jakarta'}</div>
+            </div>
+
+            {/* If reset has succeeded: show credential card */}
+            {resetSuccessData ? (
+              <div className="space-y-3">
+                <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-lg space-y-2 text-center">
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div className="font-bold text-sm text-emerald-900">
+                    Password Berhasil Di-Reset!
+                  </div>
+                  <p className="text-[11px] text-emerald-800">
+                    Kredensial baru telah diterbitkan oleh sistem dan tercatat dalam Audit Log IT.
+                  </p>
+
+                  {/* Password Display Box */}
+                  <div className="bg-white border-2 border-emerald-400 rounded-md p-3 flex items-center justify-between gap-2 shadow-2xs mt-2">
+                    <div className="text-left font-mono font-bold text-sm text-slate-900 tracking-wider">
+                      {showPasswordText ? resetSuccessData.temporaryPassword : '••••••••••••'}
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswordText(!showPasswordText)}
+                        className="p-1 text-slate-500 hover:text-slate-800 rounded"
+                        title={showPasswordText ? 'Sembunyikan' : 'Tampilkan'}
+                      >
+                        {showPasswordText ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCopyCredentials}
+                        className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-semibold text-[11px] flex items-center gap-1 cursor-pointer shadow-2xs"
+                      >
+                        {passwordCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        {passwordCopied ? 'Tersalin!' : 'Salin Kredensial'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-[11px] text-slate-500 space-y-1 bg-amber-50/70 p-2.5 rounded border border-amber-200 text-amber-900">
+                  <div className="font-semibold flex items-center gap-1">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-700" /> Instruksi Penggunaan:
+                  </div>
+                  <p>
+                    Salin kredensial di atas dan sampaikan kepada pegawai yang bersangkutan melalui saluran resmi perusahaan (WhatsApp / Email korporat).
+                  </p>
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setResettingUser(null);
+                      setResetSuccessData(null);
+                    }}
+                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded cursor-pointer text-xs"
+                  >
+                    Selesai &amp; Tutup
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Reset Form */
+              <form onSubmit={handleExecuteResetPassword} className="space-y-3.5">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Password Baru Kustom (Opsional)
+                  </label>
+                  <input
+                    type="text"
+                    value={customPasswordInput}
+                    onChange={(e) => setCustomPasswordInput(e.target.value)}
+                    placeholder="Kosongkan jika ingin sistem men-generate password otomatis"
+                    className="w-full p-2 border border-slate-300 rounded font-mono text-xs focus:border-slate-800 outline-none"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">
+                    Minimal 6 karakter jika diisi, atau biarkan kosong untuk random string (cth: ApexPass#4819).
+                  </span>
+                </div>
+
+                <div className="p-3 bg-slate-50 rounded border border-slate-200 space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-slate-700 font-medium">
+                    <input
+                      type="checkbox"
+                      checked={forcePasswordChange}
+                      onChange={(e) => setForcePasswordChange(e.target.checked)}
+                      className="w-4 h-4 accent-amber-600 rounded"
+                    />
+                    <span>Wajibkan ganti password saat login pertama</span>
+                  </label>
+                  <p className="text-[10px] text-slate-400 pl-6">
+                    Sistem akan meminta pengguna menetapkan password pribadi saat sesi login berikutnya.
+                  </p>
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setResettingUser(null)}
+                    className="px-4 py-2 border border-slate-300 rounded text-slate-700 hover:bg-slate-50 cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <Key className="w-4 h-4" />
+                    Reset Password Sekarang
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

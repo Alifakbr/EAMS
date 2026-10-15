@@ -142,6 +142,7 @@ export const api = {
   getAttendanceLogs: () => request<{ data: any[]; total: number }>('/operators/attendance'),
   checkInAttendance: (data: any) => request<any>('/operators/attendance/check-in', { method: 'POST', body: JSON.stringify(data) }),
   checkOutAttendance: (data: any) => request<any>('/operators/attendance/check-out', { method: 'POST', body: JSON.stringify(data) }),
+  updateAttendanceLog: (id: string, data: any) => request<any>(`/operators/attendance/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   reportBreakdown: (data: any) => request<any>('/operators/attendance/report-breakdown', { method: 'POST', body: JSON.stringify(data) }),
 
   // Technical Service (Dashboard, Repair Requests, In-Progress, Scan Start & Complete)
@@ -174,7 +175,11 @@ export const api = {
   getAuthUsers: () => request<{ data: any[]; total: number }>('/auth/users'),
   createUser: (data: Partial<User>) => request<User>('/auth/users', { method: 'POST', body: JSON.stringify(data) }),
   updateUser: (id: string, data: Partial<User>) => request<User>(`/auth/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  resetUserPassword: (id: string) => request<{ message: string; temporaryPassword: string }>(`/auth/users/${id}/reset-password`, { method: 'POST' }),
+  resetUserPassword: (id: string, body?: { customPassword?: string; forcePasswordChange?: boolean }) =>
+    request<{ message: string; temporaryPassword: string; resetAt?: string; userEmail?: string }>(
+      `/auth/users/${id}/reset-password`,
+      { method: 'POST', body: JSON.stringify(body || {}) }
+    ),
   deleteUser: (id: string) => request<{ message: string }>(`/auth/users/${id}`, { method: 'DELETE' }),
   login: (credentials: { email: string; password?: string; role?: string }) =>
     request<{ message: string; user: any; token: string }>('/auth/login', {
@@ -182,4 +187,9 @@ export const api = {
       body: JSON.stringify(credentials),
     }),
   logout: () => request<{ message: string }>('/auth/logout', { method: 'POST' }),
+
+  // Notifications
+  getNotifications: () => request<{ data: any[]; total: number; unreadCount: number }>('/notifications'),
+  markNotificationRead: (id: string) => request<any>(`/notifications/${id}/read`, { method: 'PUT' }),
+  markAllNotificationsRead: () => request<{ message: string }>('/notifications/mark-all-read', { method: 'POST' }),
 };

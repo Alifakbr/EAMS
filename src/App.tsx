@@ -78,6 +78,7 @@ export default function App() {
   });
 
   const [preselectedInvoiceIdForPayment, setPreselectedInvoiceIdForPayment] = useState<string | undefined>();
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const loadAllData = useCallback(async () => {
     setIsRefreshing(true);
@@ -242,6 +243,7 @@ export default function App() {
         onLogout={handleLogout}
         isRefreshing={isRefreshing}
         onRefresh={loadAllData}
+        onToggleMobileSidebar={() => setIsMobileSidebarOpen((prev) => !prev)}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -259,10 +261,12 @@ export default function App() {
             openInvoices: openInvoicesCount,
             pendingWorkOrders: pendingWorkOrdersCount,
           }}
+          isOpenOnMobile={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
 
         {/* Main Content Area */}
-        <main className="flex-1 p-6 overflow-y-auto max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-3 sm:p-6 overflow-y-auto max-w-7xl w-full mx-auto">
           {activeTab === 'dashboard' && (
             activeRole !== 'EXECUTIVE' && activeRole !== 'ADMIN_IT' ? (
               <div className="bg-white border border-slate-200 rounded-md p-8 text-center space-y-3">

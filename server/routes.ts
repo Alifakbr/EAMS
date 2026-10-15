@@ -165,19 +165,74 @@ apiRouter.put('/auth/users/:id', (req: Request, res: Response) => {
 
 apiRouter.post('/auth/users/:id/reset-password', (req: Request, res: Response) => {
   const { id } = req.params;
+  const { customPassword, forcePasswordChange } = req.body || {};
   const user = db.getUsers().find((u) => u.id === id);
   if (!user) {
     return res.status(404).json({ error: 'Pengguna tidak ditemukan' });
   }
 
+  const temporaryPassword = customPassword && customPassword.trim().length >= 6
+    ? customPassword.trim()
+    : `ApexPass#${Math.floor(1000 + Math.random() * 9000)}`;
+
   const operatorName = (req.headers['x-user-name'] as string) || 'IT Admin';
-  db.logAudit(operatorName, 'PASSWORD_RESET', 'USER', id, `Password reset requested and issued for user ${user.name} (${user.email})`);
+  db.logAudit(operatorName, 'PASSWORD_RESET', 'USER', id, `Password reset issued for user ${user.name} (${user.email}). Temporary password generated.`);
+
+  db.addNotification({
+    id: `NTF-${Date.now().toString().slice(-6)}`,
+    timestamp: new Date().toISOString(),
+    sourceDepartment: 'Divisi IT & Keamanan Sistem',
+    sourceUserName: operatorName,
+    title: `Reset Kredensial: ${user.name}`,
+    message: `Password akun untuk ${user.name} (${user.email} · ${user.department}) berhasil di-reset oleh Administrator IT. Kredensial baru telah diterbitkan.`,
+    category: 'SYSTEM',
+    severity: 'INFO',
+    relatedEntity: 'USER',
+    relatedEntityId: user.id,
+    targetTab: 'user-management',
+    isRead: false,
+  });
+
   db.save();
 
   res.json({
-    message: `Password untuk ${user.name} berhasil di-reset. Kredensial sementara dikirim ke ${user.email}`,
-    temporaryPassword: `ApexPass#${Math.floor(1000 + Math.random() * 9000)}`,
+    message: `Password untuk ${user.name} berhasil di-reset oleh Divisi IT.`,
+    temporaryPassword,
+    forcePasswordChange: !!forcePasswordChange,
+    userEmail: user.email,
+    userName: user.name,
+    resetAt: new Date().toISOString(),
   });
+});
+
+// Notifications Endpoints
+apiRouter.get('/notifications', (req: Request, res: Response) => {
+  const all = db.getNotifications();
+  const unreadCount = all.filter((n) => !n.isRead).length;
+  res.json({
+    data: all,
+    total: all.length,
+    unreadCount,
+  });
+});
+
+apiRouter.put('/notifications/:id/read', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const list = db.getNotifications();
+  const item = list.find((n) => n.id === id);
+  if (item) {
+    item.isRead = true;
+    db.save();
+    return res.json(item);
+  }
+  res.status(404).json({ error: 'Notification not found' });
+});
+
+apiRouter.post('/notifications/mark-all-read', (_req: Request, res: Response) => {
+  const list = db.getNotifications();
+  list.forEach((n) => { n.isRead = true; });
+  db.save();
+  res.json({ message: 'Semua notifikasi ditandai telah dibaca.' });
 });
 
 apiRouter.delete('/auth/users/:id', (req: Request, res: Response) => {
@@ -2146,6 +2201,34 @@ apiRouter.post('/operators/attendance/check-out', (req: Request, res: Response) 
   });
 
   res.json(updatedLog);
+});
+
+apiRouter.patch('/operators/attendance/:id', (req: Request, res: Response) => {
+  const log = db.getAttendanceLogs().find((a) => a.id === req.params.id);
+  if (!log) return res.status(404).json({ error: 'Timesheet log tidak ditemukan' });
+
+  const { date, checkInTime, checkOutTime, checkInHourMeter, checkOutHourMeter, workingHours, notes, status, verifiedForBilling } = req.body;
+
+  db.transaction(() => {
+    if (date !== undefined) log.date = date;
+    if (checkInTime !== undefined) log.checkInTime = checkInTime;
+    if (checkOutTime !== undefined) log.checkOutTime = checkOutTime;
+    if (checkInHourMeter !== undefined) log.checkInHourMeter = Number(checkInHourMeter);
+    if (checkOutHourMeter !== undefined) log.checkOutHourMeter = Number(checkOutHourMeter);
+    if (workingHours !== undefined) {
+      log.workingHours = Number(workingHours);
+    } else if (log.checkOutHourMeter && log.checkInHourMeter) {
+      log.workingHours = Math.max(0, Number((log.checkOutHourMeter - log.checkInHourMeter).toFixed(1)));
+    }
+    if (notes !== undefined) log.notes = notes;
+    if (status !== undefined) log.status = status;
+    if (verifiedForBilling !== undefined) log.verifiedForBilling = verifiedForBilling;
+
+    const user = (req.headers['x-user-name'] as string) || 'Admin';
+    db.logAudit(user, 'TIMESHEET_ADJUSTED', 'ATTENDANCE', log.id, `Adjusted timesheet summary for ${log.operatorName} on ${log.assetTag} (Date: ${log.date}, In: ${log.checkInTime}, Out: ${log.checkOutTime}, Hours: ${log.workingHours})`);
+  });
+
+  res.json(log);
 });
 
 apiRouter.post('/operators/attendance/report-breakdown', (req: Request, res: Response) => {
