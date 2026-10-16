@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Asset, AssetStatus, HeavyEquipmentDocs } from '../types/index.ts';
 import { api } from '../services/api.ts';
+import { FleetGpsMap } from './FleetGpsMap.tsx';
 import {
   Cpu,
   Search,
@@ -24,6 +25,9 @@ import {
   Building2,
   FileCheck,
   Eye,
+  MapPin,
+  Navigation,
+  Layers,
 } from 'lucide-react';
 
 interface AssetsViewProps {
@@ -32,6 +36,7 @@ interface AssetsViewProps {
 }
 
 export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => {
+  const [assetViewMode, setAssetViewMode] = useState<'map' | 'table'>('map');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [docFilter, setDocFilter] = useState<string>('ALL');
@@ -254,6 +259,34 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {/* View Mode Switcher: Map vs Table */}
+          <div className="flex items-center bg-slate-100 p-0.5 rounded border border-slate-300">
+            <button
+              type="button"
+              onClick={() => setAssetViewMode('map')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-colors ${
+                assetViewMode === 'map'
+                  ? 'bg-slate-900 text-amber-300 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Navigation className="w-3.5 h-3.5" />
+              <span>Peta Aktual GPS</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setAssetViewMode('table')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-colors ${
+                assetViewMode === 'table'
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Katalog &amp; Legalitas</span>
+            </button>
+          </div>
+
           <button
             onClick={() => setShowCreateModal(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded shadow-xs cursor-pointer"
@@ -264,8 +297,19 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white p-3 rounded-md border border-slate-200 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center text-xs">
+      {/* 1. Live Fleet GPS Telematics Map (Aktual Lokasi Alat Berat) */}
+      {assetViewMode === 'map' && (
+        <FleetGpsMap
+          assets={assets}
+          onOpenLegalDocs={(asset) => handleOpenDocsModal(asset)}
+        />
+      )}
+
+      {/* Table & Legal Vault View */}
+      {assetViewMode === 'table' && (
+        <>
+          {/* Filter and Search Bar */}
+          <div className="bg-white p-3 rounded-md border border-slate-200 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center text-xs">
         <div className="sm:col-span-6 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
           <input
@@ -432,6 +476,8 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
           </table>
         </div>
       </div>
+      </>
+      )}
 
       {/* MODAL 1: Centralized Document Vault & Upload (STNK, BPKB, SIA) */}
       {managingDocsAsset && (

@@ -18,6 +18,7 @@ import {
   Settings,
   ShieldCheck,
   QrCode,
+  X,
 } from 'lucide-react';
 
 import { UserRole } from '../types/index.ts';

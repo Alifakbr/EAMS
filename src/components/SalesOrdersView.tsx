@@ -10,7 +10,9 @@ import {
   X,
   FileCheck,
   Package,
+  FileText,
 } from 'lucide-react';
+import { DocumentPreviewModal, SupportedDocType } from './DocumentPreviewModal.tsx';
 
 interface SalesOrdersViewProps {
   salesOrders: SalesOrder[];
@@ -34,6 +36,7 @@ export const SalesOrdersView: React.FC<SalesOrdersViewProps> = ({
   const [showDirectOrderModal, setShowDirectOrderModal] = useState(false);
   const [cancellingOrder, setCancellingOrder] = useState<SalesOrder | null>(null);
   const [cancelReason, setCancelReason] = useState('');
+  const [previewDoc, setPreviewDoc] = useState<{ type: SupportedDocType; data: any } | null>(null);
 
   // Direct Order Form
   const [customerId, setCustomerId] = useState(customers[0]?.id || '');
@@ -178,8 +181,35 @@ export const SalesOrdersView: React.FC<SalesOrdersViewProps> = ({
                 return (
                   <tr key={order.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3 px-4 font-mono">
-                      <div className="font-bold text-slate-900">{order.orderNumber}</div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">Ref PO: {order.customerPoReference}</div>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewDoc({ type: 'SALES_ORDER', data: order })}
+                        className="text-left font-mono font-bold text-indigo-700 hover:text-indigo-900 hover:underline cursor-pointer flex items-center gap-1"
+                        title="Klik untuk membuka view data Sales Order resmi"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                        <span>{order.orderNumber}</span>
+                      </button>
+                      {order.customerPoReference && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPreviewDoc({
+                              type: 'CLIENT_PO',
+                              data: {
+                                ...order,
+                                customerPoNumber: order.customerPoReference,
+                                poNumber: order.customerPoReference,
+                                clientPoNumber: order.customerPoReference,
+                              },
+                            })
+                          }
+                          className="text-[11px] text-sky-700 hover:text-sky-900 hover:underline cursor-pointer mt-0.5 block text-left font-mono font-semibold"
+                          title="Klik untuk membuka view data PO dari Client"
+                        >
+                          PO Client: {order.customerPoReference}
+                        </button>
+                      )}
                       {order.quotationReference && (
                         <div className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
                           QT: {order.quotationReference}
@@ -443,6 +473,15 @@ export const SalesOrdersView: React.FC<SalesOrdersViewProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Document Preview Modal */}
+      {previewDoc && (
+        <DocumentPreviewModal
+          docType={previewDoc.type}
+          data={previewDoc.data}
+          onClose={() => setPreviewDoc(null)}
+        />
       )}
     </div>
   );

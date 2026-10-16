@@ -329,9 +329,14 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-xs bg-slate-900 text-amber-400 px-2 py-0.5 rounded">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPoPreview(po)}
+                      className="font-mono font-bold text-xs bg-slate-900 text-amber-400 hover:bg-slate-800 hover:text-amber-300 px-2 py-0.5 rounded cursor-pointer transition-colors"
+                      title="Klik untuk membuka view data dokumen Purchase Order resmi"
+                    >
                       {po.poNumber}
-                    </span>
+                    </button>
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                         po.status === 'GOODS_RECEIVED'

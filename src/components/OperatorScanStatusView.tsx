@@ -23,6 +23,10 @@ import {
   Activity,
   X,
   TrendingUp,
+  Edit2,
+  Download,
+  Filter,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 interface OperatorScanStatusViewProps {
@@ -43,8 +47,25 @@ export const OperatorScanStatusView: React.FC<OperatorScanStatusViewProps> = ({
   const [attendanceLogs, setAttendanceLogs] = useState<OperatorAttendanceLog[]>([]);
   const [isScanningActive, setIsScanningActive] = useState(false);
 
-  // Mode: ATTENDANCE (Absen Datang/Pulang) or BREAKDOWN (Lapor Rusak)
+  // Mode: ATTENDANCE (Absen Datang/Pulang) or BREAKDOWN (Lapor Rusak) or TIMESHEET_SUMMARY
   const [activeActionTab, setActiveActionTab] = useState<'ATTENDANCE' | 'REPORT_BREAKDOWN' | 'HISTORY_TIMESHEET'>('ATTENDANCE');
+
+  // Timesheet Period Adjuster States
+  const [periodPreset, setPeriodPreset] = useState<'ALL' | 'TODAY' | '7D' | 'MONTH' | 'LAST_MONTH'>('MONTH');
+  const [timesheetStartDate, setTimesheetStartDate] = useState<string>('2026-10-01');
+  const [timesheetEndDate, setTimesheetEndDate] = useState<string>('2026-10-31');
+
+  // Timesheet Jam Datang & Pulang Adjuster Modal State
+  const [editingTimesheetLog, setEditingTimesheetLog] = useState<OperatorAttendanceLog | null>(null);
+  const [editDate, setEditDate] = useState<string>('');
+  const [editCheckInTime, setEditCheckInTime] = useState<string>('');
+  const [editCheckOutTime, setEditCheckOutTime] = useState<string>('');
+  const [editCheckInHourMeter, setEditCheckInHourMeter] = useState<string>('');
+  const [editCheckOutHourMeter, setEditCheckOutHourMeter] = useState<string>('');
+  const [editNotes, setEditNotes] = useState<string>('');
+  const [editStatus, setEditStatus] = useState<'CHECKED_IN' | 'CHECKED_OUT' | 'BREAKDOWN_REPORTED'>('CHECKED_OUT');
+  const [editVerifiedForBilling, setEditVerifiedForBilling] = useState<boolean>(true);
+  const [savingTimesheetEdit, setSavingTimesheetEdit] = useState<boolean>(false);
 
   // Attendance Form State
   const [hourMeterInput, setHourMeterInput] = useState<string>('2450.5');
@@ -314,7 +335,7 @@ export const OperatorScanStatusView: React.FC<OperatorScanStatusViewProps> = ({
           }`}
         >
           <FileCheck className="w-4 h-4 text-indigo-600" />
-          Riwayat Timesheet &amp; Lampiran Tagihan ({attendanceLogs.length})
+          Timesheet Summary (Ringkasan Jam Kerja &amp; Absensi) ({attendanceLogs.length})
         </button>
       </div>
 
@@ -650,94 +671,518 @@ export const OperatorScanStatusView: React.FC<OperatorScanStatusViewProps> = ({
         </form>
       )}
 
-      {/* TAB 3: RIWAYAT TIMESHEET & LAMPIRAN TAGIHAN BULANAN */}
-      {activeActionTab === 'HISTORY_TIMESHEET' && (
-        <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-xs space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <FileCheck className="w-5 h-5 text-indigo-600" />
-                Riwayat Timesheet Absensi Alat &amp; Operator Lapangan
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Riwayat scan ini menjadi lampiran sah dan resmi untuk penagihan bulanan (Monthly Timesheet Attachment) ke customer.
-              </p>
+      {/* TAB 3: TIMESHEET SUMMARY & PERIOD ADJUSTER */}
+      {activeActionTab === 'HISTORY_TIMESHEET' && (() => {
+        // Filter attendance logs by selected period
+        const filteredLogs = attendanceLogs.filter((log) => {
+          if (periodPreset === 'ALL') return true;
+          if (!log.date) return true;
+          return log.date >= timesheetStartDate && log.date <= timesheetEndDate;
+        });
+
+        const periodTotalHours = filteredLogs.reduce((acc, log) => acc + (log.workingHours || 0), 0);
+        const periodVerifiedCount = filteredLogs.filter((l) => l.status === 'CHECKED_OUT').length;
+        const periodActiveCount = filteredLogs.filter((l) => l.status === 'CHECKED_IN').length;
+
+        const handleSetPreset = (preset: 'ALL' | 'TODAY' | '7D' | 'MONTH' | 'LAST_MONTH') => {
+          setPeriodPreset(preset);
+          const now = new Date();
+          const toYmd = (d: Date) => d.toISOString().split('T')[0];
+
+          if (preset === 'ALL') {
+            setTimesheetStartDate('2026-01-01');
+            setTimesheetEndDate('2026-12-31');
+          } else if (preset === 'TODAY') {
+            const todayStr = toYmd(now);
+            setTimesheetStartDate(todayStr);
+            setTimesheetEndDate(todayStr);
+          } else if (preset === '7D') {
+            const past7 = new Date();
+            past7.setDate(past7.getDate() - 7);
+            setTimesheetStartDate(toYmd(past7));
+            setTimesheetEndDate(toYmd(now));
+          } else if (preset === 'MONTH') {
+            setTimesheetStartDate('2026-10-01');
+            setTimesheetEndDate('2026-10-31');
+          } else if (preset === 'LAST_MONTH') {
+            setTimesheetStartDate('2026-09-01');
+            setTimesheetEndDate('2026-09-30');
+          }
+        };
+
+        const handleOpenAdjustModal = (log: OperatorAttendanceLog) => {
+          setEditingTimesheetLog(log);
+          setEditDate(log.date || '2026-10-16');
+          setEditCheckInTime(log.checkInTime || '07:30');
+          setEditCheckOutTime(log.checkOutTime || '17:00');
+          setEditCheckInHourMeter(log.checkInHourMeter?.toString() || '2450.0');
+          setEditCheckOutHourMeter(log.checkOutHourMeter?.toString() || '2458.5');
+          setEditNotes(log.notes || '');
+          setEditStatus(log.status);
+          setEditVerifiedForBilling(log.status === 'CHECKED_OUT');
+        };
+
+        const handleSaveAdjustedTimesheet = async (e: React.FormEvent) => {
+          e.preventDefault();
+          if (!editingTimesheetLog) return;
+          setSavingTimesheetEdit(true);
+          try {
+            const inHm = parseFloat(editCheckInHourMeter) || 0;
+            const outHm = parseFloat(editCheckOutHourMeter) || inHm;
+            const computedWorkingHours = outHm > inHm ? Math.round((outHm - inHm) * 10) / 10 : editingTimesheetLog.workingHours || 8.0;
+
+            await api.updateAttendanceLog(editingTimesheetLog.id, {
+              date: editDate,
+              checkInTime: editCheckInTime,
+              checkOutTime: editCheckOutTime,
+              checkInHourMeter: inHm,
+              checkOutHourMeter: outHm,
+              workingHours: computedWorkingHours,
+              notes: editNotes,
+              status: editStatus,
+            });
+
+            await loadAttendance();
+            if (onRefreshAll) onRefreshAll();
+            setEditingTimesheetLog(null);
+            setSubmitMessage({
+              type: 'success',
+              text: `Timesheet #${editingTimesheetLog.id} unit ${editingTimesheetLog.assetTag} berhasil disesuaikan: Jam Datang ${editCheckInTime}, Jam Pulang ${editCheckOutTime}, HM Aktif: ${computedWorkingHours} Jam.`,
+            });
+          } catch (err: any) {
+            console.error('Failed to update timesheet:', err);
+            alert('Gagal menyimpan penyesuaian timesheet. Silakan coba kembali.');
+          } finally {
+            setSavingTimesheetEdit(false);
+          }
+        };
+
+        const handleExportTimesheetExcel = () => {
+          const filename = `Apex_Timesheet_Summary_${timesheetStartDate}_sd_${timesheetEndDate}.xls`;
+          const rows = filteredLogs.map((l) => `
+            <tr>
+              <td>${l.date}</td>
+              <td>${l.operatorName}</td>
+              <td><strong>${l.assetTag}</strong></td>
+              <td>${l.assetName}</td>
+              <td>${l.checkInTime}</td>
+              <td>${l.checkInHourMeter}</td>
+              <td>${l.checkOutTime || '-'}</td>
+              <td>${l.checkOutHourMeter || '-'}</td>
+              <td><strong>${l.workingHours || 0} HM</strong></td>
+              <td>${l.status}</td>
+              <td>${l.notes || '-'}</td>
+            </tr>
+          `).join('');
+
+          const content = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+              <head><meta charset="utf-8"/></head>
+              <body>
+                <h2>APEX EAMS - TIMESHEET SUMMARY ALAT &amp; OPERATOR LAPANGAN</h2>
+                <p>Periode: ${timesheetStartDate} s/d ${timesheetEndDate} | Total Jam Kerja: ${periodTotalHours.toFixed(1)} HM</p>
+                <table border="1">
+                  <tr style="background:#0f172a; color:#fff; font-weight:bold;">
+                    <th>Tanggal</th><th>Operator</th><th>Tag Alat</th><th>Nama Unit</th>
+                    <th>Jam Datang</th><th>HM Masuk</th><th>Jam Pulang</th><th>HM Keluar</th>
+                    <th>Jam Kerja (HM)</th><th>Status</th><th>Catatan Lapangan</th>
+                  </tr>
+                  ${rows}
+                  <tr style="background:#f1f5f9; font-weight:bold;">
+                    <td colspan="8" align="right">TOTAL JAM KERJA TERVERIFIKASI:</td>
+                    <td>${periodTotalHours.toFixed(1)} HM</td>
+                    <td colspan="2"></td>
+                  </tr>
+                </table>
+              </body>
+            </html>
+          `;
+          const blob = new Blob([content], { type: 'application/vnd.ms-excel;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          link.click();
+          URL.revokeObjectURL(url);
+        };
+
+        return (
+          <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-xs space-y-5">
+            {/* Header Timesheet Summary */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <FileCheck className="w-5 h-5 text-indigo-600" />
+                  <h3 className="text-base font-bold text-slate-900">
+                    Timesheet Summary (Ringkasan Jam Kerja &amp; Absensi Alat Lapangan)
+                  </h3>
+                  <span className="text-xs px-2 py-0.5 rounded font-mono font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                    {filteredLogs.length} Log Terfilter
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Rekapitulasi jam datang, jam pulang, hour meter fisik, dan verifikasi lampiran tagihan resmi per periode kerja.
+                </p>
+              </div>
+
+              {/* Action Buttons: Export Excel & Cetak PDF */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleExportTimesheetExcel}
+                  className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-semibold rounded flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  title="Unduh data timesheet terfilter dalam format Excel"
+                >
+                  <Download className="w-3.5 h-3.5 text-emerald-700" />
+                  Download Excel
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowPrintTimesheetModal(true)}
+                  className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Cetak lampiran tagihan resmi pelanggan"
+                >
+                  <Printer className="w-3.5 h-3.5 text-amber-400" />
+                  Cetak Lampiran Tagihan (PDF)
+                </button>
+              </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setShowPrintTimesheetModal(true)}
-              className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded flex items-center gap-1.5 shadow-2xs cursor-pointer"
-            >
-              <Printer className="w-4 h-4 text-amber-400" />
-              Cetak Lampiran Tagihan Bulanan Customer
-            </button>
-          </div>
+            {/* PERIOD ADJUSTER TOOLBAR */}
+            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-3">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                {/* Presets */}
+                <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                  <span className="font-semibold text-slate-700 flex items-center gap-1 mr-1">
+                    <Calendar className="w-3.5 h-3.5 text-slate-500" /> Adjust Periode:
+                  </span>
+                  {[
+                    { id: 'ALL', label: 'Semua Data' },
+                    { id: 'TODAY', label: 'Hari Ini' },
+                    { id: '7D', label: '7 Hari Terakhir' },
+                    { id: 'MONTH', label: 'Bulan Ini (Okt 2026)' },
+                    { id: 'LAST_MONTH', label: 'Bulan Lalu (Sep 2026)' },
+                  ].map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => handleSetPreset(p.id as any)}
+                      className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
+                        periodPreset === p.id
+                          ? 'bg-slate-900 text-white shadow-2xs'
+                          : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border border-slate-200 rounded">
-              <thead className="bg-slate-100 text-slate-700 font-semibold uppercase text-[10px]">
-                <tr>
-                  <th className="p-2.5">Tanggal</th>
-                  <th className="p-2.5">Operator</th>
-                  <th className="p-2.5">Alat Berat / Barcode</th>
-                  <th className="p-2.5">Jam Datang &amp; HM</th>
-                  <th className="p-2.5">Jam Pulang &amp; HM</th>
-                  <th className="p-2.5 text-right">Jam Aktif (HM)</th>
-                  <th className="p-2.5 text-center">Status</th>
-                  <th className="p-2.5">Lampiran Billing</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {attendanceLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50">
-                    <td className="p-2.5 font-mono text-slate-800">{log.date}</td>
-                    <td className="p-2.5 font-medium text-slate-900">{log.operatorName}</td>
-                    <td className="p-2.5">
-                      <span className="font-mono font-semibold bg-slate-100 px-1.5 py-0.5 rounded text-slate-800">
-                        {log.assetTag}
-                      </span>
-                      <div className="text-[11px] text-slate-500 mt-0.5">{log.assetName}</div>
-                    </td>
-                    <td className="p-2.5 font-mono text-[11px] text-slate-600">
-                      {log.checkInTime} ({log.checkInHourMeter} HM)
-                    </td>
-                    <td className="p-2.5 font-mono text-[11px] text-slate-600">
-                      {log.checkOutTime ? `${log.checkOutTime} (${log.checkOutHourMeter} HM)` : '—'}
-                    </td>
-                    <td className="p-2.5 text-right font-mono font-bold text-slate-900">
-                      {log.workingHours ? `${log.workingHours} Jam` : 'Sedang Kerja'}
-                    </td>
-                    <td className="p-2.5 text-center">
-                      <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                          log.status === 'CHECKED_OUT'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : log.status === 'BREAKDOWN_REPORTED'
-                            ? 'bg-rose-100 text-rose-800'
-                            : 'bg-amber-100 text-amber-800'
-                        }`}
-                      >
-                        {log.status === 'CHECKED_OUT' ? 'TERVERIFIKASI' : log.status === 'BREAKDOWN_REPORTED' ? 'RUSAK / TIKET' : 'BEKERJA'}
-                      </span>
-                    </td>
-                    <td className="p-2.5 text-slate-500 text-[11px]">
-                      {log.status === 'CHECKED_OUT' ? (
-                        <span className="text-emerald-700 font-semibold flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Siap Ditagihkan
-                        </span>
-                      ) : (
-                        <span className="text-slate-400">Belum Selesai</span>
-                      )}
-                    </td>
+                {/* Custom Date Range Adjuster */}
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="flex items-center gap-1">
+                    <span className="text-slate-500 text-[11px]">Dari:</span>
+                    <input
+                      type="date"
+                      value={timesheetStartDate}
+                      onChange={(e) => {
+                        setTimesheetStartDate(e.target.value);
+                        setPeriodPreset('ALL');
+                      }}
+                      className="px-2 py-1 text-xs border border-slate-300 rounded font-mono bg-white outline-none focus:border-slate-800"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-slate-500 text-[11px]">Sampai:</span>
+                    <input
+                      type="date"
+                      value={timesheetEndDate}
+                      onChange={(e) => {
+                        setTimesheetEndDate(e.target.value);
+                        setPeriodPreset('ALL');
+                      }}
+                      className="px-2 py-1 text-xs border border-slate-300 rounded font-mono bg-white outline-none focus:border-slate-800"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Dynamic Period Metrics */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 border-t border-slate-200/80 text-xs">
+                <div className="bg-white p-2.5 rounded border border-slate-200">
+                  <span className="text-[10px] text-slate-400 font-semibold block uppercase">Total Jam Kerja Aktif</span>
+                  <div className="text-lg font-bold font-mono text-emerald-700 mt-0.5">{periodTotalHours.toFixed(1)} HM</div>
+                  <span className="text-[10px] text-slate-500">Periode terfilter</span>
+                </div>
+                <div className="bg-white p-2.5 rounded border border-slate-200">
+                  <span className="text-[10px] text-slate-400 font-semibold block uppercase">Shift Selesai (Pulang)</span>
+                  <div className="text-lg font-bold font-mono text-blue-700 mt-0.5">{periodVerifiedCount} Shift</div>
+                  <span className="text-[10px] text-slate-500">Terverifikasi check-out</span>
+                </div>
+                <div className="bg-white p-2.5 rounded border border-slate-200">
+                  <span className="text-[10px] text-slate-400 font-semibold block uppercase">Sedang Beroperasi</span>
+                  <div className="text-lg font-bold font-mono text-amber-700 mt-0.5">{periodActiveCount} Unit</div>
+                  <span className="text-[10px] text-slate-500">Shift masih aktif</span>
+                </div>
+                <div className="bg-white p-2.5 rounded border border-slate-200">
+                  <span className="text-[10px] text-slate-400 font-semibold block uppercase">Rata-rata Durasi Shift</span>
+                  <div className="text-lg font-bold font-mono text-slate-900 mt-0.5">
+                    {periodVerifiedCount > 0 ? (periodTotalHours / periodVerifiedCount).toFixed(1) : '8.0'} Jam
+                  </div>
+                  <span className="text-[10px] text-slate-500">Efisiensi jam alat</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Timesheet Summary Table */}
+            <div className="overflow-x-auto border border-slate-200 rounded-md">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead className="bg-slate-100 text-slate-700 font-semibold uppercase text-[10px] border-b border-slate-200">
+                  <tr>
+                    <th className="py-2.5 px-3">Tanggal</th>
+                    <th className="py-2.5 px-3">Operator Lapangan</th>
+                    <th className="py-2.5 px-3">Alat Berat / Barcode</th>
+                    <th className="py-2.5 px-3">Jam Datang &amp; HM</th>
+                    <th className="py-2.5 px-3">Jam Pulang &amp; HM</th>
+                    <th className="py-2.5 px-3 text-right">Jam Aktif (HM)</th>
+                    <th className="py-2.5 px-3 text-center">Status</th>
+                    <th className="py-2.5 px-3">Catatan / Lokasi</th>
+                    <th className="py-2.5 px-3 text-right">Aksi</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {filteredLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="py-8 text-center text-slate-400">
+                        Tidak ada log timesheet pada periode {timesheetStartDate} s/d {timesheetEndDate}.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-2.5 px-3 font-mono font-medium text-slate-900 whitespace-nowrap">
+                          {log.date}
+                        </td>
+                        <td className="py-2.5 px-3 font-semibold text-slate-900 whitespace-nowrap">
+                          {log.operatorName}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <span className="font-mono font-bold bg-slate-900 text-amber-300 px-1.5 py-0.5 rounded text-[11px]">
+                            {log.assetTag}
+                          </span>
+                          <div className="text-[10px] text-slate-500 mt-0.5 truncate max-w-[140px]">{log.assetName}</div>
+                        </td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-slate-700 whitespace-nowrap">
+                          <div className="font-bold text-emerald-800 flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-emerald-600" /> {log.checkInTime || '07:30'}
+                          </div>
+                          <span className="text-[10px] text-slate-500">{log.checkInHourMeter} HM</span>
+                        </td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-slate-700 whitespace-nowrap">
+                          {log.checkOutTime ? (
+                            <>
+                              <div className="font-bold text-blue-800 flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3 text-blue-600" /> {log.checkOutTime}
+                              </div>
+                              <span className="text-[10px] text-slate-500">{log.checkOutHourMeter} HM</span>
+                            </>
+                          ) : (
+                            <span className="text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                              Belum Pulang
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+                          {log.workingHours ? `${log.workingHours} Jam` : 'Sedang Shift'}
+                        </td>
+                        <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                              log.status === 'CHECKED_OUT'
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                : log.status === 'BREAKDOWN_REPORTED'
+                                ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                                : 'bg-amber-100 text-amber-800 border border-amber-300'
+                            }`}
+                          >
+                            {log.status === 'CHECKED_OUT' ? 'TERVERIFIKASI' : log.status === 'BREAKDOWN_REPORTED' ? 'RUSAK' : 'BEKERJA'}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-[11px] text-slate-600 max-w-[180px] truncate" title={log.notes}>
+                          {log.notes || 'Operasi rutin shift'}
+                        </td>
+                        <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenAdjustModal(log)}
+                            className="px-2.5 py-1 text-[11px] font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded flex items-center gap-1 cursor-pointer transition-colors"
+                            title="Adjust Jam Datang, Jam Pulang & HM Mesin"
+                          >
+                            <Edit2 className="w-3 h-3 text-indigo-600" />
+                            <span>Adjust Jam &amp; Periode</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* MODAL ADJUST JAM DATANG & PULANG TIMESHEET */}
+            {editingTimesheetLog && (
+              <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+                <div className="bg-white rounded-lg shadow-2xl border border-slate-200 max-w-lg w-full p-6 text-slate-900 space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-indigo-600" />
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900">
+                          Adjust Jam Datang, Jam Pulang &amp; Periode Timesheet
+                        </h3>
+                        <p className="text-[11px] text-slate-500 font-mono">
+                          ID: {editingTimesheetLog.id} · Unit: {editingTimesheetLog.assetTag}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setEditingTimesheetLog(null)}
+                      className="text-slate-400 hover:text-slate-700 cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSaveAdjustedTimesheet} className="space-y-3.5 text-xs">
+                    <div className="p-2.5 bg-slate-50 border border-slate-200 rounded flex items-center justify-between">
+                      <div>
+                        <span className="text-slate-400 text-[10px] uppercase font-bold block">Alat Berat &amp; Operator</span>
+                        <span className="font-bold text-slate-900">[{editingTimesheetLog.assetTag}] {editingTimesheetLog.assetName}</span>
+                        <div className="text-[11px] text-slate-500">{editingTimesheetLog.operatorName}</div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Tanggal Absensi / Operasi</label>
+                      <input
+                        type="date"
+                        value={editDate}
+                        onChange={(e) => setEditDate(e.target.value)}
+                        className="w-full p-2 border border-slate-300 rounded font-mono focus:border-indigo-600 outline-none"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Jam Datang (Masuk Shift)
+                        </label>
+                        <input
+                          type="time"
+                          value={editCheckInTime}
+                          onChange={(e) => setEditCheckInTime(e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded font-mono focus:border-indigo-600 outline-none"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Hour Meter (HM) Masuk
+                        </label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={editCheckInHourMeter}
+                          onChange={(e) => setEditCheckInHourMeter(e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded font-mono focus:border-indigo-600 outline-none"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Jam Pulang (Selesai Shift)
+                        </label>
+                        <input
+                          type="time"
+                          value={editCheckOutTime}
+                          onChange={(e) => setEditCheckOutTime(e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded font-mono focus:border-indigo-600 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Hour Meter (HM) Pulang
+                        </label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={editCheckOutHourMeter}
+                          onChange={(e) => setEditCheckOutHourMeter(e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded font-mono focus:border-indigo-600 outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-2.5 bg-indigo-50/70 border border-indigo-200 rounded flex items-center justify-between">
+                      <span className="font-semibold text-indigo-900">Estimasi Total Jam Aktif (HM):</span>
+                      <span className="font-mono font-bold text-sm text-indigo-950">
+                        {Math.max(0, (parseFloat(editCheckOutHourMeter) || 0) - (parseFloat(editCheckInHourMeter) || 0)).toFixed(1)} Jam
+                      </span>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Status Kehadiran Shift</label>
+                      <select
+                        value={editStatus}
+                        onChange={(e) => setEditStatus(e.target.value as any)}
+                        className="w-full p-2 border border-slate-300 rounded bg-white outline-none cursor-pointer"
+                      >
+                        <option value="CHECKED_OUT">CHECKED_OUT (Shift Selesai &amp; Terverifikasi)</option>
+                        <option value="CHECKED_IN">CHECKED_IN (Sedang Beroperasi)</option>
+                        <option value="BREAKDOWN_REPORTED">BREAKDOWN_REPORTED (Alat Rusak / Diteruskan ke Mekanik)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Keterangan / Lokasi Kerja Lapangan</label>
+                      <input
+                        type="text"
+                        value={editNotes}
+                        onChange={(e) => setEditNotes(e.target.value)}
+                        placeholder="cth: Galian Blok B, cuaca kondusif..."
+                        className="w-full p-2 border border-slate-300 rounded outline-none focus:border-indigo-600"
+                      />
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setEditingTimesheetLog(null)}
+                        className="px-3.5 py-2 border border-slate-300 text-slate-700 font-semibold rounded hover:bg-slate-50 cursor-pointer"
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={savingTimesheetEdit}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      >
+                        {savingTimesheetEdit ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                        Simpan Penyesuaian Timesheet
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Modal Cetak Lampiran Tagihan Bulanan (Timesheet Attachment for Billing) */}
       {showPrintTimesheetModal && (

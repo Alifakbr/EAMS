@@ -29,6 +29,23 @@
   header, aside, button, select, input {
     display: none !important;
   }
+  /* Ensure modals and document previews print cleanly without dark backdrop */
+  .fixed.inset-0 {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+    box-shadow: none !important;
+  }
+  .max-h-\[92vh\], .max-h-\[90vh\], .max-h-\[85vh\] {
+    max-height: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
   main {
     padding: 0 !important;
     max-width: 100% !important;

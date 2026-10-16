@@ -833,6 +833,23 @@ apiRouter.post('/quotations', (req: Request, res: Response) => {
 
       db.getQuotations().unshift(quotation);
       db.logAudit(req.headers['x-user-name'] as string || 'Admin', 'QUOTATION_CREATED', 'QUOTATION', quotation.id, `Created quotation ${quotation.quotationNumber} for ${customer.name}`);
+
+      db.addNotification({
+        id: `NTF-QUO-${Date.now().toString().slice(-6)}`,
+        timestamp: new Date().toISOString(),
+        sourceDepartment: 'Divisi Sales & Marketing',
+        sourceUserName: (req.headers['x-user-name'] as string) || 'Sales Lead',
+        title: `Penawaran Dibuat: ${quotation.quotationNumber}`,
+        message: `Proposal penawaran harga resmi ${quotation.quotationNumber} untuk ${customer.name} senilai $${quotation.grandTotal.toLocaleString()} telah dibuat dan menunggu persetujuan (Status: ${quotation.status}).`,
+        category: 'COMMERCIAL',
+        severity: 'INFO',
+        targetRoles: ['SALES_MARKETING', 'EXECUTIVE', 'ADMIN_IT'],
+        relatedEntity: 'QUOTATION',
+        relatedEntityId: quotation.quotationNumber,
+        targetTab: 'quotations',
+        isRead: false,
+      });
+
       return quotation;
     });
 
@@ -851,6 +868,22 @@ apiRouter.post('/quotations/:id/approve', (req: Request, res: Response) => {
     quote.approvedBy = (req.headers['x-user-name'] as string) || 'Executive Sales Director';
     quote.approvalDate = new Date().toISOString();
     db.logAudit(quote.approvedBy, 'QUOTATION_APPROVED', 'QUOTATION', quote.id, `Approved quotation ${quote.quotationNumber}`);
+
+    db.addNotification({
+      id: `NTF-QUO-APP-${Date.now().toString().slice(-6)}`,
+      timestamp: new Date().toISOString(),
+      sourceDepartment: 'Direksi Eksekutif & Sales Lead',
+      sourceUserName: quote.approvedBy,
+      title: `Penawaran Disetujui: ${quote.quotationNumber}`,
+      message: `Penawaran resmi ${quote.quotationNumber} untuk ${quote.customerName} telah disetujui oleh ${quote.approvedBy}. Menunggu penerimaan / konversi pesanan dari klien.`,
+      category: 'COMMERCIAL',
+      severity: 'SUCCESS',
+      targetRoles: ['SALES_MARKETING', 'MANAGEMENT_OPERATION', 'ASSET_CONTROL', 'EXECUTIVE'],
+      relatedEntity: 'QUOTATION',
+      relatedEntityId: quote.quotationNumber,
+      targetTab: 'quotations',
+      isRead: false,
+    });
   });
 
   res.json(quote);
@@ -933,6 +966,23 @@ apiRouter.post('/quotations/:id/convert-to-order', (req: Request, res: Response)
 
       db.getSalesOrders().unshift(salesOrder);
       db.logAudit((req.headers['x-user-name'] as string) || 'Admin', 'SALES_ORDER_CONVERTED', 'SALES_ORDER', salesOrder.id, `Converted Quote ${quote.quotationNumber} to Sales Order ${salesOrder.orderNumber}`);
+
+      db.addNotification({
+        id: `NTF-SO-CONV-${Date.now().toString().slice(-6)}`,
+        timestamp: new Date().toISOString(),
+        sourceDepartment: 'Divisi Sales & Marketing',
+        sourceUserName: (req.headers['x-user-name'] as string) || 'Sales Lead',
+        title: `Quotation Dikonversi: ${salesOrder.orderNumber}`,
+        message: `Penawaran ${quote.quotationNumber} untuk ${customer.name} berhasil disetujui & dikonversi menjadi Sales Order ${salesOrder.orderNumber} senilai $${salesOrder.grandTotal.toLocaleString()}. Tim Gudang & Asset Control dipersiapkan untuk mobilisasi unit.`,
+        category: 'COMMERCIAL',
+        severity: 'SUCCESS',
+        targetRoles: ['SALES_MARKETING', 'MANAGEMENT_OPERATION', 'ASSET_CONTROL', 'FINANCE_ACCOUNTING_TAX', 'EXECUTIVE'],
+        relatedEntity: 'SALES_ORDER',
+        relatedEntityId: salesOrder.orderNumber,
+        targetTab: 'sales',
+        isRead: false,
+      });
+
       return salesOrder;
     });
 
@@ -2173,6 +2223,23 @@ apiRouter.post('/operators/attendance/check-out', (req: Request, res: Response) 
         asset.legalDocs.hourMeter = endHm;
       }
       db.logAudit(opName, 'ATTENDANCE_CHECK_OUT', 'ATTENDANCE', existing.id, `Operator ${opName} checked out on ${asset.assetTag}. Working hours: ${existing.workingHours} HM`);
+
+      db.addNotification({
+        id: `NTF-TS-${Date.now().toString().slice(-6)}`,
+        timestamp: new Date().toISOString(),
+        sourceDepartment: 'Operasional Lapangan & Operator',
+        sourceUserName: opName,
+        title: `Timesheet Shift Selesai: Unit ${asset.assetTag}`,
+        message: `Operator ${opName} telah menyelesaikan shift kerja pada unit ${asset.name} (${asset.assetTag}) di ${existing.projectName || asset.warehouseLocation}. Total jam operasi aktif: ${existing.workingHours} Jam (HM ${existing.checkInHourMeter} ke ${existing.checkOutHourMeter}). Data telah diverifikasi siap untuk lampiran billing bulanan klien.`,
+        category: 'OPERATIONAL',
+        severity: 'SUCCESS',
+        targetRoles: ['MANAGEMENT_OPERATION', 'FINANCE_ACCOUNTING_TAX', 'AR_MANAGEMENT', 'EXECUTIVE'],
+        relatedEntity: 'TIMESHEET',
+        relatedEntityId: existing.id,
+        targetTab: 'operator-status',
+        isRead: false,
+      });
+
       return existing;
     } else {
       // Single punch checkout
@@ -2196,6 +2263,23 @@ apiRouter.post('/operators/attendance/check-out', (req: Request, res: Response) 
         verifiedForBilling: true,
       };
       db.getAttendanceLogs().unshift(att);
+
+      db.addNotification({
+        id: `NTF-TS-${Date.now().toString().slice(-6)}`,
+        timestamp: new Date().toISOString(),
+        sourceDepartment: 'Operasional Lapangan & Operator',
+        sourceUserName: opName,
+        title: `Timesheet Shift Selesai: Unit ${asset.assetTag}`,
+        message: `Operator ${opName} mencatat absen pulang pada unit ${asset.assetTag}. Total jam operasi 8.0 Jam tercatat resmi untuk lampiran tagihan.`,
+        category: 'OPERATIONAL',
+        severity: 'SUCCESS',
+        targetRoles: ['MANAGEMENT_OPERATION', 'FINANCE_ACCOUNTING_TAX', 'AR_MANAGEMENT', 'EXECUTIVE'],
+        relatedEntity: 'TIMESHEET',
+        relatedEntityId: att.id,
+        targetTab: 'operator-status',
+        isRead: false,
+      });
+
       return att;
     }
   });
@@ -2224,8 +2308,24 @@ apiRouter.patch('/operators/attendance/:id', (req: Request, res: Response) => {
     if (status !== undefined) log.status = status;
     if (verifiedForBilling !== undefined) log.verifiedForBilling = verifiedForBilling;
 
-    const user = (req.headers['x-user-name'] as string) || 'Admin';
+    const user = (req.headers['x-user-name'] as string) || 'Admin Lapangan';
     db.logAudit(user, 'TIMESHEET_ADJUSTED', 'ATTENDANCE', log.id, `Adjusted timesheet summary for ${log.operatorName} on ${log.assetTag} (Date: ${log.date}, In: ${log.checkInTime}, Out: ${log.checkOutTime}, Hours: ${log.workingHours})`);
+
+    db.addNotification({
+      id: `NTF-ADJ-${Date.now().toString().slice(-6)}`,
+      timestamp: new Date().toISOString(),
+      sourceDepartment: 'Operasional Lapangan (Timesheet)',
+      sourceUserName: user,
+      title: `Penyesuaian Timesheet: ${log.assetTag}`,
+      message: `Data timesheet untuk operator ${log.operatorName} pada unit ${log.assetTag} (${log.date}) telah diadjust/disesuaikan oleh ${user}. Jam Datang: ${log.checkInTime}, Jam Pulang: ${log.checkOutTime || '-'}, Total Jam Aktif: ${log.workingHours} HM. Data sinkron dengan FAT.`,
+      category: 'OPERATIONAL',
+      severity: 'INFO',
+      targetRoles: ['MANAGEMENT_OPERATION', 'FINANCE_ACCOUNTING_TAX', 'EXECUTIVE'],
+      relatedEntity: 'TIMESHEET',
+      relatedEntityId: log.id,
+      targetTab: 'operator-status',
+      isRead: false,
+    });
   });
 
   res.json(log);

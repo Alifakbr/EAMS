@@ -12,6 +12,9 @@ import {
   CheckCircle2,
   Clock,
   ShieldCheck,
+  Download,
+  FileSpreadsheet,
+  FileText,
 } from 'lucide-react';
 
 interface InvoicesViewProps {
@@ -98,7 +101,7 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
           <span className="text-xs text-slate-400">({invoices.length} billing documents)</span>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -111,6 +114,66 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
             <option value="PAID">Paid</option>
             <option value="CREDITED">Credited</option>
           </select>
+
+          <button
+            type="button"
+            onClick={() => {
+              const filename = `Apex_Invoices_Report_${new Date().toISOString().slice(0, 10)}.xls`;
+              const rows = filtered
+                .map(
+                  (inv) => `
+                <tr>
+                  <td><strong>${inv.invoiceNumber}</strong></td>
+                  <td>${inv.type}</td>
+                  <td>${inv.customerName}</td>
+                  <td>${inv.issueDate}</td>
+                  <td>${inv.dueDate}</td>
+                  <td>$${inv.grandTotal.toFixed(2)}</td>
+                  <td>$${inv.paidAmount.toFixed(2)}</td>
+                  <td>$${inv.outstandingBalance.toFixed(2)}</td>
+                  <td>${inv.status}</td>
+                </tr>`
+                )
+                .join('');
+              const content = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+                  <head><meta charset="utf-8"/></head>
+                  <body>
+                    <h2>APEX COMMERCIAL INVOICING &amp; BILLING REPORT</h2>
+                    <table border="1">
+                      <tr style="background:#0f172a; color:#fff; font-weight:bold;">
+                        <th>Invoice #</th><th>Type</th><th>Customer</th><th>Issue Date</th><th>Due Date</th>
+                        <th>Grand Total</th><th>Paid Amount</th><th>Balance Due</th><th>Status</th>
+                      </tr>
+                      ${rows}
+                    </table>
+                  </body>
+                </html>
+              `;
+              const blob = new Blob([content], { type: 'application/vnd.ms-excel;charset=utf-8' });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = filename;
+              link.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded shadow-xs cursor-pointer"
+            title="Download Invoices to Excel"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-700" />
+            <span>Download Excel</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-800 bg-white hover:bg-slate-50 border border-slate-300 rounded shadow-xs cursor-pointer"
+            title="Print Invoices list to PDF"
+          >
+            <Printer className="w-3.5 h-3.5 text-slate-600" />
+            <span>Print PDF</span>
+          </button>
         </div>
       </div>
 
@@ -140,7 +203,15 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                 return (
                   <tr key={inv.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3 px-4 font-mono">
-                      <div className="font-bold text-slate-900">{inv.invoiceNumber}</div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPreviewInvoice(inv)}
+                        className="text-left font-mono font-bold text-indigo-700 hover:text-indigo-900 hover:underline cursor-pointer flex items-center gap-1"
+                        title="Klik untuk membuka view data Faktur Tagihan resmi"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                        <span>{inv.invoiceNumber}</span>
+                      </button>
                       <div className="text-[10px] text-slate-500 font-sans uppercase font-medium">
                         {inv.type.replace('_', ' ')}
                       </div>

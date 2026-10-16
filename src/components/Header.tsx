@@ -18,6 +18,7 @@ import {
   Check,
   Clock,
   ExternalLink,
+  Key,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -362,8 +363,21 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                   </div>
 
-                  <div className="pt-2">
+                  <div className="pt-2 space-y-1">
                     <button
+                      type="button"
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        onTabChange('user-management');
+                      }}
+                      className="w-full flex items-center gap-2 px-2.5 py-2 text-slate-700 hover:bg-slate-50 rounded transition-colors font-medium text-left cursor-pointer"
+                    >
+                      <Key className="w-4 h-4 text-amber-600" />
+                      <span>Manajemen Akun &amp; Reset Password</span>
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => {
                         setShowProfileMenu(false);
                         if (onLogout) onLogout();

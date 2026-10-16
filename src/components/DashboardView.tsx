@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   DollarSign,
   TrendingUp,
@@ -27,9 +27,19 @@ import {
   ShieldCheck,
   PackageSearch,
   QrCode,
+  MapPin,
+  Compass,
+  Eye,
+  Search,
+  FileCheck,
+  Receipt,
+  Building2,
 } from 'lucide-react';
-import { AuditLog, UserRole } from '../types/index.ts';
+import { AuditLog, UserRole, Asset } from '../types/index.ts';
 import { Sparkline, SparklinePoint } from './Sparkline.tsx';
+import { FleetGpsMap } from './FleetGpsMap.tsx';
+import { DocumentPreviewModal, SupportedDocType } from './DocumentPreviewModal.tsx';
+import { api } from '../services/api.ts';
 
 interface DashboardViewProps {
   metrics: {
@@ -153,6 +163,35 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [endDate, setEndDate] = useState('2026-04-30');
   const [showCustomInputs, setShowCustomInputs] = useState(false);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
+
+  // Fleet Asset Telemetry State for Live Dashboard Map
+  const [showDashboardMap, setShowDashboardMap] = useState(false);
+  const [dashboardAssets, setDashboardAssets] = useState<Asset[]>([]);
+
+  // Official documents state for role-specific dashboard report table (Requirements 6 & 7)
+  const [quotationsList, setQuotationsList] = useState<any[]>([]);
+  const [salesOrdersList, setSalesOrdersList] = useState<any[]>([]);
+  const [rentalsList, setRentalsList] = useState<any[]>([]);
+  const [invoicesList, setInvoicesList] = useState<any[]>([]);
+  const [purchaseOrdersList, setPurchaseOrdersList] = useState<any[]>([]);
+  const [deliveriesList, setDeliveriesList] = useState<any[]>([]);
+  const [operatorsList, setOperatorsList] = useState<any[]>([]);
+  const [previewModalDoc, setPreviewModalDoc] = useState<{ type: SupportedDocType; data: any } | null>(null);
+  const [tableFilterCategory, setTableFilterCategory] = useState<string>('ALL');
+  const [tableSearchTerm, setTableSearchTerm] = useState<string>('');
+
+  useEffect(() => {
+    api.getAssets().then((res) => setDashboardAssets(res.data)).catch((err) => {
+      console.warn('Could not load assets for dashboard map:', err);
+    });
+    api.getQuotations().then((res) => setQuotationsList(res.data || [])).catch(() => {});
+    api.getSalesOrders().then((res) => setSalesOrdersList(res.data || [])).catch(() => {});
+    api.getRentals().then((res) => setRentalsList(res.data || [])).catch(() => {});
+    api.getInvoices().then((res) => setInvoicesList(res.data || [])).catch(() => {});
+    api.getPurchaseOrders().then((res) => setPurchaseOrdersList(res.data || [])).catch(() => {});
+    api.getDeliveries().then((res) => setDeliveriesList(res.data || [])).catch(() => {});
+    api.getOperators().then((res) => setOperatorsList(res.data || [])).catch(() => {});
+  }, []);
 
   // Handle Preset Changes
   const handleSelectPreset = (p: DateRangePreset) => {
@@ -474,8 +513,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     ASSET_CONTROL: {
       title: '4. Ruang Kerja Asset Control (Asset Management)',
-      description: 'Mengurus registrasi aset, delivery, penomoran unit, dan kelengkapan dokumen legalitas alat berat: STNK, BPKB, SIA kelaikan Disnaker.',
+      description: 'Mengurus registrasi aset, peta aktual lokasi alat (GPS), delivery, penomoran unit, dan dokumen legalitas: STNK, BPKB, SIA kelaikan Disnaker.',
       quickActions: [
+        { id: 'gpsMap', label: 'Peta Aktual Lokasi Alat (GPS)', icon: Truck, action: () => onNavigate('assets') },
         { id: 'assets', label: 'Registrasi & Tagging Aset', icon: Boxes, action: () => onNavigate('assets') },
         { id: 'legalDocs', label: 'Dokumen Legal (STNK/SIA)', icon: FileText, action: () => onNavigate('assets') },
         { id: 'deliveries', label: 'Surat Jalan Delivery (DO)', icon: Truck, action: () => onNavigate('deliveries') },
@@ -542,6 +582,392 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const currentRoleWorkspace = (userRole && roleWorkspaces[userRole as UserRole]) ? roleWorkspaces[userRole as UserRole] : roleWorkspaces.EXECUTIVE;
 
+  // Combined official documents dataset strictly scoped to the active role on this dashboard (Requirements 6 & 7)
+  const roleDashboardDocs = useMemo(() => {
+    const list: Array<{
+      id: string;
+      type: SupportedDocType;
+      typeLabel: string;
+      badgeColor: string;
+      party: string;
+      date: string;
+      amount: number;
+      status: string;
+      raw: any;
+    }> = [];
+
+    // Requirement 7: Quotation & PO dari Client HANYA muncul di role:
+    // 1. Marketing sales (SALES_MARKETING)
+    // 2. AR management (AR_MANAGEMENT)
+    // 3. Asset Management (ASSET_CONTROL)
+    // 4. Executive (EXECUTIVE & ADMIN_IT)
+    // Dan PO yang dimaksud di sini adalah PO DARI CLIENT, BUKAN PO dari tim procurement!
+    const canSeeCommercialQuotesAndClientPo = [
+      'SALES_MARKETING',
+      'AR_MANAGEMENT',
+      'ASSET_CONTROL',
+      'EXECUTIVE',
+      'ADMIN_IT',
+    ].includes(userRole);
+
+    // 1. Quotations (Surat Penawaran Harga) -> HANYA untuk Marketing sales, AR management, Asset Management, executive
+    if (canSeeCommercialQuotesAndClientPo) {
+      quotationsList.forEach((q) => {
+        list.push({
+          id: q.quotationNumber || q.id,
+          type: 'QUOTATION',
+          typeLabel: 'Surat Penawaran Harga (Quotation)',
+          badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
+          party: q.customerName || 'PT Client Mitra Proyek',
+          date: q.date || q.issueDate || q.createdAt?.slice(0, 10) || '2026-10-15',
+          amount: q.grandTotal || q.totalAmount || q.subtotal || 0,
+          status: q.status || 'SENT',
+          raw: q,
+        });
+      });
+    }
+
+    // 2. PO dari Client (Customer Purchase Order) -> Surat Pesanan resmi dari Pelanggan (BUKAN PO tim procurement)
+    if (canSeeCommercialQuotesAndClientPo) {
+      salesOrdersList.forEach((so) => {
+        const clientPoId = so.customerPoReference || `PO-CLT-${so.orderNumber}`;
+        list.push({
+          id: clientPoId,
+          type: 'CLIENT_PO',
+          typeLabel: 'PO dari Client (Bukan PO Procurement)',
+          badgeColor: 'bg-sky-100 text-sky-900 border-sky-300',
+          party: so.customerName || 'PT Client Mitra Proyek',
+          date: so.orderDate || so.createdAt?.slice(0, 10) || '2026-10-15',
+          amount: so.grandTotal || so.totalAmount || 0,
+          status: so.status === 'COMPLETED' ? 'TERPENUHI (FULFILLED)' : 'DITERIMA (CONFIRMED)',
+          raw: {
+            ...so,
+            id: clientPoId,
+            poNumber: clientPoId,
+            customerPoReference: clientPoId,
+            customerPoNumber: clientPoId,
+            clientName: so.customerName,
+            type: 'CLIENT_PO',
+          },
+        });
+      });
+
+      // Approved quotations with client PO references
+      quotationsList.forEach((q) => {
+        if (q.status === 'ACCEPTED' || q.status === 'CONVERTED') {
+          const clientPoId = `PO-${(q.customerName || 'CLT').replace(/[^a-zA-Z0-9]/g, '').slice(0, 7).toUpperCase()}-${q.quotationNumber?.slice(-4) || '9912'}`;
+          if (!list.some((item) => item.id === clientPoId)) {
+            list.push({
+              id: clientPoId,
+              type: 'CLIENT_PO',
+              typeLabel: 'PO dari Client (Bukan PO Procurement)',
+              badgeColor: 'bg-sky-100 text-sky-900 border-sky-300',
+              party: q.customerName || 'PT Client Mitra Proyek',
+              date: q.approvalDate?.slice(0, 10) || q.date || '2026-10-10',
+              amount: q.grandTotal || q.totalAmount || 0,
+              status: 'DISETUJUI KLIEN',
+              raw: {
+                ...q,
+                id: clientPoId,
+                poNumber: clientPoId,
+                customerPoReference: clientPoId,
+                customerPoNumber: clientPoId,
+                type: 'CLIENT_PO',
+              },
+            });
+          }
+        }
+      });
+    }
+
+    // 3. Sales Orders -> Sales Marketing, Executive, Admin IT
+    if (['SALES_MARKETING', 'EXECUTIVE', 'ADMIN_IT'].includes(userRole)) {
+      salesOrdersList.forEach((so) => {
+        list.push({
+          id: so.orderNumber || so.id,
+          type: 'SALES_ORDER',
+          typeLabel: 'Surat Pesanan (Sales Order)',
+          badgeColor: 'bg-blue-100 text-blue-900 border-blue-300',
+          party: so.customerName || 'PT Client',
+          date: so.orderDate || so.createdAt?.slice(0, 10) || '2026-10-15',
+          amount: so.grandTotal || so.totalAmount || 0,
+          status: so.status || 'CONFIRMED',
+          raw: so,
+        });
+      });
+    }
+
+    // 4. Rental Contracts -> Sales Marketing, AR Management, Asset Control, Executive, Admin IT
+    if (['SALES_MARKETING', 'AR_MANAGEMENT', 'ASSET_CONTROL', 'EXECUTIVE', 'ADMIN_IT'].includes(userRole)) {
+      rentalsList.forEach((rc) => {
+        list.push({
+          id: rc.contractNumber || rc.id,
+          type: 'RENTAL',
+          typeLabel: 'Perjanjian Kontrak Sewa (Rental)',
+          badgeColor: 'bg-purple-100 text-purple-900 border-purple-300',
+          party: rc.customerName || 'PT Client',
+          date: rc.startDate || '2026-10-01',
+          amount: rc.grandTotal || rc.totalAmount || 0,
+          status: rc.status || 'ACTIVE',
+          raw: rc,
+        });
+      });
+    }
+
+    // 5. Commercial Invoices -> AR Management, Finance FAT, Executive, Admin IT
+    if (['AR_MANAGEMENT', 'FINANCE_ACCOUNTING_TAX', 'EXECUTIVE', 'ADMIN_IT'].includes(userRole)) {
+      invoicesList.forEach((inv) => {
+        list.push({
+          id: inv.invoiceNumber || inv.id,
+          type: 'INVOICE',
+          typeLabel: 'Faktur Tagihan (Invoice)',
+          badgeColor: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+          party: inv.customerName || 'PT Client',
+          date: inv.issueDate || '2026-10-10',
+          amount: inv.grandTotal || 0,
+          status: inv.status || 'ISSUED',
+          raw: inv,
+        });
+      });
+    }
+
+    // 6. PO dari Tim Procurement (Internal/Vendor PO) -> HANYA untuk Tim Procurement dan IT Audit
+    // BUKAN PO Client! Ini adalah PO pembelian internal ke vendor/supplier mitra
+    if (['PROCUREMENT', 'ADMIN_IT'].includes(userRole)) {
+      purchaseOrdersList.forEach((po) => {
+        list.push({
+          id: po.poNumber || po.id,
+          type: 'PURCHASE_ORDER',
+          typeLabel: 'PO Tim Procurement (Vendor PO)',
+          badgeColor: 'bg-indigo-100 text-indigo-900 border-indigo-300',
+          party: po.vendorName || 'Supplier Mitra',
+          date: po.orderDate || '2026-10-05',
+          amount: po.grandTotal || po.subtotal || 0,
+          status: po.status || 'ORDERED',
+          raw: po,
+        });
+      });
+    }
+
+    // 7. Deliveries (Surat Jalan DO) -> Asset Control, Sales Marketing, Management Operation, Executive, Admin IT
+    if (['ASSET_CONTROL', 'SALES_MARKETING', 'MANAGEMENT_OPERATION', 'EXECUTIVE', 'ADMIN_IT'].includes(userRole)) {
+      deliveriesList.forEach((del) => {
+        list.push({
+          id: del.deliveryNumber || del.id,
+          type: 'DELIVERY',
+          typeLabel: 'Surat Jalan (Delivery Order)',
+          badgeColor: 'bg-teal-100 text-teal-900 border-teal-300',
+          party: del.customerName || 'PT Client',
+          date: del.deliveryDate || '2026-10-12',
+          amount: 0,
+          status: del.status || 'DELIVERED',
+          raw: del,
+        });
+      });
+    }
+
+    // 8. Asset Register & Legalitas (STNK/BPKB/SIA) -> Asset Control, Management Operation, Operator, Service, Executive, Admin IT
+    if (['ASSET_CONTROL', 'MANAGEMENT_OPERATION', 'OPERATOR_USER', 'TECHNICAL_SERVICE', 'EXECUTIVE', 'ADMIN_IT'].includes(userRole)) {
+      dashboardAssets.forEach((ast) => {
+        list.push({
+          id: ast.assetTag || ast.id,
+          type: 'ASSET',
+          typeLabel: 'Register & Kelaikan Alat (SIA/STNK)',
+          badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
+          party: ast.name || 'Alat Berat',
+          date: ast.legalDocs?.siaExpiry || '2027-01-01',
+          amount: ast.purchaseCost || 0,
+          status: ast.status || 'AVAILABLE',
+          raw: ast,
+        });
+      });
+    }
+
+    // 9. Operator SIO Licenses -> Management Operation, Operator Lapangan, Executive, Admin IT
+    if (['MANAGEMENT_OPERATION', 'OPERATOR_USER', 'EXECUTIVE', 'ADMIN_IT'].includes(userRole)) {
+      operatorsList.forEach((opr) => {
+        list.push({
+          id: opr.badgeNumber || opr.id,
+          type: 'OPERATOR',
+          typeLabel: 'Lisensi Operator K3 (SIO)',
+          badgeColor: 'bg-cyan-100 text-cyan-900 border-cyan-300',
+          party: opr.name || 'Operator Lapangan',
+          date: opr.sioExpiry || '2027-06-30',
+          amount: 0,
+          status: opr.status || 'ACTIVE',
+          raw: opr,
+        });
+      });
+    }
+
+    // 10. Work Orders Perbaikan -> Technical Service, Executive, Admin IT
+    if (['TECHNICAL_SERVICE', 'EXECUTIVE', 'ADMIN_IT'].includes(userRole)) {
+      list.push(
+        {
+          id: 'WO-2026-0041',
+          type: 'WORK_ORDER',
+          typeLabel: 'Tiket Work Order (WO)',
+          badgeColor: 'bg-rose-100 text-rose-900 border-rose-300',
+          party: 'Site Morowali - Hydraulic Service',
+          date: '2026-10-14',
+          amount: 3200,
+          status: 'IN_PROGRESS',
+          raw: {
+            workOrderNumber: 'WO-2026-0041',
+            type: 'PREVENTIVE',
+            assetName: 'Komatsu PC200-8 Excavator',
+            assetTag: 'EXC-001',
+            serviceType: 'Pemeriksaan Rutin 500 Jam',
+            technicianName: 'Budi Santoso',
+            status: 'IN_PROGRESS',
+            laborCost: 1200,
+            partsCost: 2000,
+            grandTotal: 3200,
+          },
+        },
+        {
+          id: 'WO-2026-0038',
+          type: 'WORK_ORDER',
+          typeLabel: 'Tiket Work Order (WO)',
+          badgeColor: 'bg-rose-100 text-rose-900 border-rose-300',
+          party: 'Balikpapan Workshop - Engine Overhaul',
+          date: '2026-10-08',
+          amount: 5400,
+          status: 'COMPLETED',
+          raw: {
+            workOrderNumber: 'WO-2026-0038',
+            type: 'CORRECTIVE',
+            assetName: 'Caterpillar 320D Excavator',
+            assetTag: 'EXC-002',
+            serviceType: 'Penggantian Seal Silinder Boom',
+            technicianName: 'Hendra Wijaya',
+            status: 'COMPLETED',
+            laborCost: 1800,
+            partsCost: 3600,
+            grandTotal: 5400,
+          },
+        }
+      );
+    }
+
+    return list;
+  }, [userRole, quotationsList, salesOrdersList, rentalsList, invoicesList, purchaseOrdersList, deliveriesList, dashboardAssets, operatorsList]);
+
+  // Dynamic Category Pills for Table in Dashboard
+  const dashboardCategoryPills = useMemo(() => {
+    const pills: Array<{ id: string; label: string }> = [{ id: 'ALL', label: `Semua (${roleDashboardDocs.length})` }];
+    const counts: Record<string, number> = {};
+    roleDashboardDocs.forEach((d) => {
+      counts[d.type] = (counts[d.type] || 0) + 1;
+    });
+
+    const labelMap: Record<string, string> = {
+      QUOTATION: 'Quotation (Penawaran)',
+      CLIENT_PO: 'PO dari Client',
+      SALES_ORDER: 'Sales Order',
+      RENTAL: 'Kontrak Sewa',
+      INVOICE: 'Faktur Tagihan',
+      PURCHASE_ORDER: 'PO Tim Procurement',
+      DELIVERY: 'Surat Jalan DO',
+      ASSET: 'Register Alat (STNK/SIA)',
+      OPERATOR: 'Lisensi Operator SIO',
+      WORK_ORDER: 'Work Orders Servis',
+    };
+
+    Object.keys(counts).forEach((type) => {
+      pills.push({
+        id: type,
+        label: `${labelMap[type] || type} (${counts[type]})`,
+      });
+    });
+
+    return pills;
+  }, [roleDashboardDocs]);
+
+  // Filtered rows for the role-specific dashboard table
+  const filteredDashboardDocs = useMemo(() => {
+    return roleDashboardDocs.filter((d) => {
+      if (tableFilterCategory !== 'ALL' && d.type !== tableFilterCategory) return false;
+      if (!tableSearchTerm) return true;
+      const term = tableSearchTerm.toLowerCase();
+      return (
+        d.id.toLowerCase().includes(term) ||
+        d.party.toLowerCase().includes(term) ||
+        d.typeLabel.toLowerCase().includes(term) ||
+        d.status.toLowerCase().includes(term)
+      );
+    });
+  }, [roleDashboardDocs, tableFilterCategory, tableSearchTerm]);
+
+  // Dedicated Excel export for role-specific dashboard table
+  const handleExportDashboardTableToExcel = () => {
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const filename = `Apex_Laporan_Dashboard_${userRole}_${timestamp}.xls`;
+
+    let rowsHtml = filteredDashboardDocs
+      .map(
+        (doc, idx) => `
+        <tr>
+          <td style="text-align: center;">${idx + 1}</td>
+          <td><strong>${doc.id}</strong></td>
+          <td>${doc.typeLabel}</td>
+          <td>${doc.party}</td>
+          <td>${doc.date}</td>
+          <td style="text-align: right;">${doc.amount > 0 ? '$' + doc.amount.toLocaleString() : '-'}</td>
+          <td>${doc.status}</td>
+        </tr>
+      `
+      )
+      .join('');
+
+    const excelHtml = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
+        <style>
+          body { font-family: Calibri, sans-serif; font-size: 11pt; color: #0f172a; }
+          table { border-collapse: collapse; width: 100%; margin-top: 12px; margin-bottom: 24px; }
+          th { padding: 8px 12px; text-align: left; background-color: #0f172a; color: #ffffff; }
+          td { padding: 6px 12px; border: 1px solid #cbd5e1; }
+        </style>
+      </head>
+      <body>
+        <h2>Apex Industrial Solutions - Tabel Laporan Dashboard (${userRole})</h2>
+        <p>Wewenang Dashboard: ${currentRoleWorkspace.title} | Tanggal Unduh: ${new Date().toLocaleString()}</p>
+        <table border="1" cellpadding="6" cellspacing="0">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nomor ID Dokumen</th>
+              <th>Tipe Dokumen</th>
+              <th>Pelanggan / Pihak Terkait</th>
+              <th>Tanggal</th>
+              <th>Nilai Transaksi ($)</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([excelHtml], { type: 'application/vnd.ms-excel;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    setExportNotice(`Tabel Laporan Dashboard berhasil diexport: ${filename}`);
+    setTimeout(() => setExportNotice(null), 4000);
+  };
+
   return (
     <div className="space-y-6">
       {/* Role Workspace Banner */}
@@ -569,6 +995,68 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </span>
         </div>
       </div>
+
+      {/* Fleet Asset GPS Location Actual Map Banner */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-md p-4 border border-indigo-900/60 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded bg-amber-400 text-slate-900 flex items-center justify-center font-bold shrink-0 mt-0.5">
+            <Truck className="w-5 h-5 text-slate-900" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase">
+                Live GPS Telematics
+              </span>
+              <h3 className="text-sm font-bold text-white">
+                Lokasi Peta Aktual Armada Alat Berat (Dashboard Asset Management)
+              </h3>
+            </div>
+            <p className="text-xs text-slate-300 mt-0.5">
+              Pantau koordinat GPS aktual armada excavator, dump truck, bulldozer, crane di Morowali, Balikpapan, IKN Nusantara, Weda Bay, Surabaya, Jakarta, dan Timika.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowDashboardMap(!showDashboardMap)}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-indigo-900/80 hover:bg-indigo-800 border border-indigo-500/40 rounded shadow-xs cursor-pointer transition-colors"
+          >
+            <Compass className="w-3.5 h-3.5 text-amber-400" />
+            <span>{showDashboardMap ? 'Tutup Peta' : 'Buka Peta di Sini'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigate('assets')}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-slate-900 bg-amber-400 hover:bg-amber-300 rounded shadow-xs cursor-pointer transition-colors shrink-0"
+          >
+            <Truck className="w-3.5 h-3.5 text-slate-900" />
+            <span>Dashboard Aset Penuh</span>
+            <ArrowUpRight className="w-3.5 h-3.5 text-slate-900" />
+          </button>
+        </div>
+      </div>
+
+      {/* Embedded Live Fleet GPS Map if toggled */}
+      {showDashboardMap && (
+        <div className="bg-white border border-slate-200 rounded-md p-4 shadow-sm space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-rose-600" />
+              <h4 className="font-bold text-slate-900 text-xs">Peta Koordinat &amp; Telemetri Aktual Armada Proyek</h4>
+            </div>
+            <button
+              onClick={() => setShowDashboardMap(false)}
+              className="text-xs text-slate-500 hover:text-slate-800 font-semibold cursor-pointer"
+            >
+              Tutup Peta [✕]
+            </button>
+          </div>
+          <FleetGpsMap assets={dashboardAssets} />
+        </div>
+      )}
 
       {/* DATE RANGE FILTER & EXCEL EXPORT CONTROL BAR */}
       <div className="bg-white border border-slate-200 rounded-md p-4 shadow-2xs space-y-3">
@@ -892,6 +1380,198 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
+      {/* ========================================================================= */}
+      {/* TABEL LAPORAN RESMI SESUAI ROLE MASING-MASING DI DASHBOARD (Requirements 6 & 7) */}
+      {/* ========================================================================= */}
+      <div className="bg-white border border-slate-200 rounded-md p-4 shadow-xs space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded bg-indigo-50 border border-indigo-200 text-indigo-700">
+              <FileCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                  Tabel Laporan &amp; Dokumen Resmi ({currentRoleWorkspace.title})
+                </h3>
+                <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 uppercase">
+                  Sesuai Hak Akses Peran
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Menampilkan {filteredDashboardDocs.length} berkas resmi yang relevan dengan kewenangan operasional dashboard Anda. Klik ID dokumen untuk membuka tampilan lengkap.
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Actions for Table */}
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleExportDashboardTableToExcel}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded shadow-2xs transition-colors cursor-pointer"
+              title="Export tabel laporan peran ini ke Excel"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Export Excel</span>
+              <Download className="w-3 h-3 text-emerald-600" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded shadow-2xs transition-colors cursor-pointer"
+              title="Cetak tabel laporan ke printer atau simpan sebagai PDF"
+            >
+              <Printer className="w-3.5 h-3.5 text-slate-600" />
+              <span>Print PDF</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onNavigate('reports')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded shadow-2xs transition-colors cursor-pointer"
+              title="Buka Pusat Laporan Lengkap"
+            >
+              <span>Pusat Laporan Lengkap</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Search & Dynamic Filter Category Pills */}
+        <div className="space-y-2.5">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                value={tableSearchTerm}
+                onChange={(e) => setTableSearchTerm(e.target.value)}
+                placeholder="Cari ID dokumen, nama klien, unit alat atau status..."
+                className="w-full pl-9 pr-3 py-1.5 border border-slate-300 rounded text-xs outline-none focus:border-slate-800 font-mono"
+              />
+            </div>
+
+            <div className="text-[11px] text-slate-500 font-mono bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded flex items-center gap-1.5 shrink-0">
+              <Filter className="w-3.5 h-3.5 text-slate-400" />
+              <span>Menampilkan: <strong>{filteredDashboardDocs.length}</strong> dari <strong>{roleDashboardDocs.length}</strong> data</span>
+            </div>
+          </div>
+
+          {/* Dynamic Category Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 text-xs">
+            <span className="text-[11px] font-semibold text-slate-500 shrink-0 mr-1">
+              Filter Jenis:
+            </span>
+            {dashboardCategoryPills.map((pill) => (
+              <button
+                key={pill.id}
+                type="button"
+                onClick={() => setTableFilterCategory(pill.id)}
+                className={`px-2.5 py-1 rounded text-[11px] font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+                  tableFilterCategory === pill.id
+                    ? 'bg-slate-900 text-white shadow-2xs'
+                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                {pill.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Table Display */}
+        <div className="border border-slate-200 rounded overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 text-[11px] uppercase tracking-wider">
+                  <th className="py-2 px-3 text-center w-10">No</th>
+                  <th className="py-2 px-3">Nomor ID Dokumen (Klik ID)</th>
+                  <th className="py-2 px-3">Tipe Dokumen Resmi</th>
+                  <th className="py-2 px-3">Klien / Pihak Terkait</th>
+                  <th className="py-2 px-3">Tanggal Terbit</th>
+                  <th className="py-2 px-3 text-right">Nilai ($)</th>
+                  <th className="py-2 px-3 text-center">Status</th>
+                  <th className="py-2 px-3 text-right w-24">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {filteredDashboardDocs.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-8 text-center text-slate-400">
+                      Tidak ada dokumen resmi yang sesuai dengan filter pencarian "{tableSearchTerm}".
+                    </td>
+                  </tr>
+                ) : (
+                  filteredDashboardDocs.slice(0, 15).map((doc, idx) => (
+                    <tr key={`${doc.type}-${doc.id}-${idx}`} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-2.5 px-3 text-center font-mono text-[11px] text-slate-400">
+                        {idx + 1}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewModalDoc({ type: doc.type, data: doc.raw })}
+                          className="font-mono font-bold text-indigo-700 hover:text-indigo-900 hover:underline flex items-center gap-1.5 cursor-pointer text-left"
+                          title="Klik untuk membuka pratinjau dokumen resmi lengkap"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                          <span>{doc.id}</span>
+                        </button>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold border ${doc.badgeColor}`}>
+                          {doc.typeLabel}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 font-medium text-slate-800">
+                        {doc.party}
+                      </td>
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-slate-500 whitespace-nowrap">
+                        {doc.date}
+                      </td>
+                      <td className="py-2.5 px-3 font-mono font-semibold text-right text-slate-900">
+                        {doc.amount > 0 ? `$${doc.amount.toLocaleString()}` : '-'}
+                      </td>
+                      <td className="py-2.5 px-3 text-center">
+                        <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                          {doc.status}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewModalDoc({ type: doc.type, data: doc.raw })}
+                          className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded cursor-pointer transition-colors"
+                          title="Lihat Pratinjau Dokumen"
+                        >
+                          <Eye className="w-3 h-3 text-indigo-600" />
+                          <span>Lihat</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          {filteredDashboardDocs.length > 15 && (
+            <div className="p-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
+              <span>Menampilkan 15 dari {filteredDashboardDocs.length} berkas. Buka Pusat Laporan untuk audit lengkap.</span>
+              <button
+                type="button"
+                onClick={() => onNavigate('reports')}
+                className="font-semibold text-indigo-700 hover:text-indigo-900 cursor-pointer"
+              >
+                Lihat Seluruh {filteredDashboardDocs.length} Berkas &rarr;
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Main Grid: Role-filtered Workflow Pillars & Live Audit Feed */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Commercial Workflow Status */}
@@ -1108,6 +1788,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Interactive Document Preview Modal triggered by clicking any document ID in the dashboard table */}
+      {previewModalDoc && (
+        <DocumentPreviewModal
+          docType={previewModalDoc.type}
+          data={previewModalDoc.data}
+          onClose={() => setPreviewModalDoc(null)}
+        />
+      )}
     </div>
   );
 };

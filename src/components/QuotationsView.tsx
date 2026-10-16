@@ -7,6 +7,7 @@ import {
   Trash2,
   CheckCircle2,
   Printer,
+  Download,
   X,
   Building2,
   Calendar,
@@ -249,13 +250,71 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded transition-colors self-start sm:self-auto cursor-pointer shadow-2xs"
-        >
-          <Plus className="w-4 h-4 text-amber-400" />
-          Buat Penawaran (Quotation) Baru
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={() => {
+              const filename = `Apex_Quotations_Report_${new Date().toISOString().slice(0, 10)}.xls`;
+              const rows = quotations
+                .map(
+                  (q) => `
+                <tr>
+                  <td><strong>${q.quotationNumber}</strong></td>
+                  <td>${q.customerName}</td>
+                  <td>${q.date}</td>
+                  <td>$${((q as any).totalAmount || q.grandTotal || 0).toLocaleString()}</td>
+                  <td>${q.status}</td>
+                  <td>${q.linkedSalesOrderNumber || '-'}</td>
+                </tr>`
+                )
+                .join('');
+              const content = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+                  <head><meta charset="utf-8"/></head>
+                  <body>
+                    <h2>APEX COMMERCIAL QUOTATIONS REPORT</h2>
+                    <table border="1">
+                      <tr style="background:#0f172a; color:#fff; font-weight:bold;">
+                        <th>No. Quotation</th><th>Customer</th><th>Tanggal</th><th>Nilai Total</th><th>Status</th><th>Linked SO</th>
+                      </tr>
+                      ${rows}
+                    </table>
+                  </body>
+                </html>
+              `;
+              const blob = new Blob([content], { type: 'application/vnd.ms-excel;charset=utf-8' });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = filename;
+              link.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded shadow-xs cursor-pointer"
+            title="Download Quotations to Excel"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-700" />
+            <span>Download Excel</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-800 bg-white hover:bg-slate-50 border border-slate-300 rounded shadow-xs cursor-pointer"
+            title="Print Quotations list to PDF"
+          >
+            <Printer className="w-3.5 h-3.5 text-slate-600" />
+            <span>Print PDF</span>
+          </button>
+
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded transition-colors cursor-pointer shadow-2xs"
+          >
+            <Plus className="w-4 h-4 text-amber-400" />
+            Buat Penawaran Baru
+          </button>
+        </div>
       </div>
 
       {/* Quotation Table */}
@@ -285,7 +344,15 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                   <tr key={quote.id} className="hover:bg-slate-50/70 transition-colors">
                     {/* No Quotation & Linked SO */}
                     <td className="py-3 px-4 font-mono font-bold text-slate-900">
-                      <div>{quote.quotationNumber}</div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPreviewQuote(quote)}
+                        className="text-left font-mono font-bold text-indigo-700 hover:text-indigo-900 hover:underline cursor-pointer flex items-center gap-1"
+                        title="Klik untuk membuka view data dokumen penawaran resmi"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                        <span>{quote.quotationNumber}</span>
+                      </button>
                       <div className="text-[10px] text-slate-400 font-sans mt-0.5">
                         Rev {quote.revision} · {quote.date}
                       </div>

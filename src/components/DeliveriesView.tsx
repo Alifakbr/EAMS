@@ -79,7 +79,15 @@ export const DeliveriesView: React.FC<DeliveriesViewProps> = ({ deliveries, onRe
                 return (
                   <tr key={delivery.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3 px-4 font-mono font-bold text-slate-900">
-                      <div>{delivery.deliveryNumber}</div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPreviewDelivery(delivery)}
+                        className="text-left font-mono font-bold text-indigo-700 hover:text-indigo-900 hover:underline cursor-pointer flex items-center gap-1"
+                        title="Klik untuk membuka view data Surat Jalan resmi"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                        <span>{delivery.deliveryNumber}</span>
+                      </button>
                       <div className="text-[10px] text-slate-400 font-sans">
                         Ref: {delivery.sourceReferenceId}
                       </div>
