@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { apiRouter } from './server/routes.ts';
+import { ensureUserCredentials, securityHeaders, DEMO_MODE } from './server/auth.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,7 +12,12 @@ async function startServer() {
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
   const isProd = process.env.NODE_ENV === 'production';
 
+  ensureUserCredentials();
+  app.disable('x-powered-by');
+  if (process.env.TRUST_PROXY) app.set('trust proxy', process.env.TRUST_PROXY === 'true' ? 1 : process.env.TRUST_PROXY);
+
   // Middleware
+  app.use(securityHeaders);
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -29,6 +35,17 @@ async function startServer() {
   // Health check endpoint
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // Info publik untuk halaman login/landing (tidak berisi data sensitif).
+  app.get('/api/public-config', (_req, res) => {
+    res.json({ demoMode: DEMO_MODE });
+  });
+
+  // Endpoint API yang tidak dikenal harus 404 JSON, bukan jatuh ke index.html.
+  app.use('/api', (_req, res, next) => {
+    if (res.headersSent) return next();
+    res.status(404).json({ error: 'Endpoint tidak ditemukan' });
   });
 
   if (!isProd) {

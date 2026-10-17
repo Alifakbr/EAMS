@@ -12,6 +12,9 @@ export type UserRole =
 
 export interface UserPermissionMatrix {
   canViewDashboard: boolean;
+  canManageCustomers: boolean; // CRM / data pelanggan
+  canManageProducts: boolean; // Katalog produk & sparepart
+  canManageDeliveries: boolean; // Delivery & handover
   canManageAssets: boolean;
   canUploadLegalDocs: boolean; // STNK, BPKB, SIA
   canManageOperators: boolean; // SIO & Assignment
@@ -41,6 +44,12 @@ export interface User {
   status?: 'ACTIVE' | 'SUSPENDED' | 'INACTIVE';
   permissions?: Partial<UserPermissionMatrix>;
   lastLogin?: string;
+  /** Wajib ganti password pada login berikutnya. */
+  mustChangePassword?: boolean;
+  /** Server-only. TIDAK PERNAH dikirim ke klien (lihat publicUser()). */
+  passwordHash?: string;
+  /** Server-only. Dinaikkan saat password diganti / akun dinonaktifkan agar sesi lama gugur. */
+  tokenVersion?: number;
 }
 
 export type AssetStatus = 'AVAILABLE' | 'RENTED' | 'SOLD' | 'IN_MAINTENANCE' | 'RESERVED' | 'DISPOSED';

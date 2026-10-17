@@ -11,6 +11,13 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      # WAJIB di production: rahasia penanda tanda tangan sesi (min. 16 karakter, acak & panjang).
+      - SESSION_SECRET=${SESSION_SECRET:?isi SESSION_SECRET di file .env}
+      # Password awal akun bawaan (wajib diganti saat login pertama). Kosongkan = dibuat acak & dicetak di log.
+      - SEED_PASSWORD=${SEED_PASSWORD:-}
+      - DEMO_MODE=${DEMO_MODE:-false}
+      # Bila di belakang reverse proxy (nginx/Traefik/Cloudflare), set true agar pembatas login memakai IP asli.
+      - TRUST_PROXY=${TRUST_PROXY:-false}
     volumes:
       - eams_data:/app/data
     restart: unless-stopped

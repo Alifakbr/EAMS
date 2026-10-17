@@ -24,7 +24,9 @@ import {
 interface HeaderProps {
   currentUser?: User | null;
   activeRole: UserRole;
-  onRoleChange: (role: UserRole) => void;
+  allowedModules: string[];
+  defaultTab: string;
+  onChangePassword: () => void;
   activeTab: string;
   onTabChange: (tab: string) => void;
   onOpenQuickNew: () => void;
@@ -37,7 +39,9 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   currentUser,
   activeRole,
-  onRoleChange,
+  allowedModules,
+  defaultTab,
+  onChangePassword,
   activeTab,
   onTabChange,
   onOpenQuickNew,
@@ -175,7 +179,7 @@ export const Header: React.FC<HeaderProps> = ({
     ],
   };
 
-  const navLinks = roleNavItems[activeRole] || roleNavItems.EXECUTIVE;
+  const navLinks = (roleNavItems[activeRole] || []).filter((i) => allowedModules.includes(i.id));
 
   const roleTitles: Record<UserRole, string> = {
     EXECUTIVE: '1. Executive (Direktur)',
@@ -204,7 +208,7 @@ export const Header: React.FC<HeaderProps> = ({
                 setMobileMenuOpen(!mobileMenuOpen);
               }
             }}
-            className="lg:hidden p-1.5 text-slate-600 hover:text-slate-900 rounded border border-slate-200 cursor-pointer"
+            className={`${allowedModules.length > 1 ? 'lg:hidden' : 'hidden'} p-1.5 text-slate-600 hover:text-slate-900 rounded border border-slate-200 cursor-pointer`}
             title="Buka Menu Navigasi"
           >
             <Menu className="w-4 h-4" />
@@ -214,19 +218,7 @@ export const Header: React.FC<HeaderProps> = ({
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              const defaultTabs: Record<UserRole, string> = {
-                EXECUTIVE: 'reports',
-                ADMIN_IT: 'dashboard',
-                SALES_MARKETING: 'quotations',
-                ASSET_CONTROL: 'assets',
-                MANAGEMENT_OPERATION: 'maintenance',
-                PROCUREMENT: 'procurement',
-                FINANCE_ACCOUNTING_TAX: 'invoices',
-                AR_MANAGEMENT: 'invoices',
-                OPERATOR_USER: 'operator-status',
-                TECHNICAL_SERVICE: 'technical-service',
-              };
-              onTabChange(defaultTabs[activeRole] || 'reports');
+              onTabChange(defaultTab);
             }}
             className="flex items-center gap-2 group"
           >
@@ -306,28 +298,6 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           )}
 
-          {/* Role Switcher */}
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs text-slate-600">
-            <ShieldCheck className="w-3.5 h-3.5 text-slate-700 shrink-0" />
-            <span className="hidden xl:inline font-medium text-slate-500">Peran:</span>
-            <select
-              value={activeRole}
-              onChange={(e) => onRoleChange(e.target.value as UserRole)}
-              className="bg-transparent font-medium text-slate-800 outline-none cursor-pointer max-w-[135px] sm:max-w-none truncate text-xs"
-            >
-              <option value="EXECUTIVE">1. Executive (Direktur)</option>
-              <option value="ADMIN_IT">2. Administrator Admin (IT)</option>
-              <option value="SALES_MARKETING">3. Sales &amp; Marketing</option>
-              <option value="ASSET_CONTROL">4. Asset Control (Legalitas Alat)</option>
-              <option value="MANAGEMENT_OPERATION">5. Field Ops (Operator SIO)</option>
-              <option value="PROCUREMENT">6. Procurement</option>
-              <option value="FINANCE_ACCOUNTING_TAX">7. Finance &amp; Tax (FAT)</option>
-              <option value="AR_MANAGEMENT">8. AR Management</option>
-              <option value="OPERATOR_USER">9. Operator Lapangan (Scan Alat)</option>
-              <option value="TECHNICAL_SERVICE">10. Technical Service (Servis &amp; Barcode)</option>
-            </select>
-          </div>
-
           {/* User Profile Pill & Logout Dropdown */}
           {currentUser && (
             <div className="relative">
@@ -368,13 +338,27 @@ export const Header: React.FC<HeaderProps> = ({
                       type="button"
                       onClick={() => {
                         setShowProfileMenu(false);
-                        onTabChange('user-management');
+                        onChangePassword();
                       }}
                       className="w-full flex items-center gap-2 px-2.5 py-2 text-slate-700 hover:bg-slate-50 rounded transition-colors font-medium text-left cursor-pointer"
                     >
                       <Key className="w-4 h-4 text-amber-600" />
-                      <span>Manajemen Akun &amp; Reset Password</span>
+                      <span>Ubah Password Saya</span>
                     </button>
+
+                    {allowedModules.includes('user-management') && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowProfileMenu(false);
+                          onTabChange('user-management');
+                        }}
+                        className="w-full flex items-center gap-2 px-2.5 py-2 text-slate-700 hover:bg-slate-50 rounded transition-colors font-medium text-left cursor-pointer"
+                      >
+                        <ShieldCheck className="w-4 h-4 text-slate-600" />
+                        <span>Manajemen Pengguna &amp; Hak Akses</span>
+                      </button>
+                    )}
 
                     <button
                       type="button"

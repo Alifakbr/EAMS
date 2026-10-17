@@ -1,3 +1,4 @@
+import { exportExcelFromHtml } from '../utils/download.ts';
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   DollarSign,
@@ -449,16 +450,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </html>
     `;
 
-    const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
     const safeDate = new Date().toISOString().slice(0, 10);
-    link.href = url;
-    link.download = `Apex_Commercial_Analytics_Charts_${safeDate}.xls`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    exportExcelFromHtml(excelContent, `Apex_Commercial_Analytics_Charts_${safeDate}.xlsx`);
 
     setExportNotice('File Excel berhasil diunduh! Seluruh 4 dataset chart telah tersimpan.');
     setTimeout(() => setExportNotice(null), 4000);
@@ -954,15 +947,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </html>
     `;
 
-    const blob = new Blob([excelHtml], { type: 'application/vnd.ms-excel;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    exportExcelFromHtml(excelHtml, filename);
 
     setExportNotice(`Tabel Laporan Dashboard berhasil diexport: ${filename}`);
     setTimeout(() => setExportNotice(null), 4000);

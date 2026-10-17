@@ -1,220 +1,175 @@
-import React, { useState } from 'react';
-import { User, UserRole } from '../types/index.ts';
-import { api } from '../services/api.ts';
-import {
-  ShieldCheck,
-  Lock,
-  Mail,
-  ArrowRight,
-  AlertCircle,
-  Building2,
-  ChevronDown,
-  ChevronUp,
-  UserCheck,
-} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { api, SessionInfo } from '../services/api.ts';
+import { session } from '../services/session.ts';
+import { Lock, Mail, ArrowRight, ArrowLeft, AlertCircle, Building2, ChevronDown, ChevronUp, Eye, EyeOff, Loader2, Info, ShieldCheck, QrCode, BarChart3 } from 'lucide-react';
 
 interface LoginPageProps {
-  onLoginSuccess: (user: User) => void;
+  onLoginSuccess: (info: SessionInfo) => void;
+  onBack: () => void;
+  /** Pesan dari sistem, mis. "Sesi Anda berakhir". */
+  notice?: string | null;
 }
 
+const DEMO_PASSWORD = 'Demo@2026';
 const DEMO_ACCOUNTS = [
-  { name: 'Marcus Sterling', role: 'EXECUTIVE', email: 'marcus@apex-industrial.com', label: '1. Executive (Direktur Utama)' },
-  { name: 'Hendra Wijaya', role: 'ADMIN_IT', email: 'hendra.it@apex-industrial.com', label: '2. Administrator Admin (IT)' },
-  { name: 'Elena Rostova', role: 'SALES_MARKETING', email: 'elena@apex-industrial.com', label: '3. Sales & Marketing Support' },
-  { name: 'Bambang Pratama', role: 'ASSET_CONTROL', email: 'bambang.asset@apex-industrial.com', label: '4. Asset Control (Asset Management)' },
-  { name: 'Joko Susilo', role: 'MANAGEMENT_OPERATION', email: 'joko.ops@apex-industrial.com', label: '5. Management Operation (Field Operation)' },
-  { name: 'Dewi Lestari', role: 'PROCUREMENT', email: 'dewi.proc@apex-industrial.com', label: '6. Procurement' },
-  { name: 'Sarah Jenkins', role: 'FINANCE_ACCOUNTING_TAX', email: 'sarah@apex-industrial.com', label: '7. Accounting Finance & Tax (FAT)' },
-  { name: 'Reza Ramadhan', role: 'AR_MANAGEMENT', email: 'reza.ar@apex-industrial.com', label: '8. AR Management (Accounts Receivable)' },
-  { name: 'Agus Santoso', role: 'OPERATOR_USER', email: 'agus.operator@apex-industrial.com', label: '9. Operator / Pengguna Alat Lapangan' },
+  { role: 'Executive (Direktur)', email: 'marcus@apex-industrial.com' },
+  { role: 'Administrator IT', email: 'hendra.it@apex-industrial.com' },
+  { role: 'Sales & Marketing', email: 'elena@apex-industrial.com' },
+  { role: 'Asset Control', email: 'bambang.asset@apex-industrial.com' },
+  { role: 'Management Operation', email: 'joko.ops@apex-industrial.com' },
+  { role: 'Procurement', email: 'dewi.proc@apex-industrial.com' },
+  { role: 'Finance, Accounting & Tax', email: 'sarah@apex-industrial.com' },
+  { role: 'AR Management', email: 'reza.ar@apex-industrial.com' },
+  { role: 'Operator Lapangan', email: 'agus.operator@apex-industrial.com' },
 ];
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
-  const [email, setEmail] = useState('marcus@apex-industrial.com');
-  const [password, setPassword] = useState('••••••••');
+export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onBack, notice }) => {
+  const [email, setEmail] = useState(session.getLastEmail());
+  const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(true);
+  const [showPw, setShowPw] = useState(false);
+  const [capsOn, setCapsOn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showDemoSelector, setShowDemoSelector] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/public-config').then((r) => r.json()).then((c) => setDemoMode(!!c.demoMode)).catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) {
-      setErrorMessage('Alamat email perusahaan wajib diisi.');
+    if (!email.trim() || !password) {
+      setErrorMessage('Email dan password wajib diisi.');
       return;
     }
-
     setLoading(true);
     setErrorMessage(null);
-
     try {
-      const response = await api.login({
-        email: email.trim(),
-        password,
-      });
-
-      localStorage.setItem('apex_auth_user', JSON.stringify(response.user));
-      localStorage.setItem('apex_user_role', response.user.role);
-      localStorage.setItem('apex_user_name', response.user.name);
-      onLoginSuccess(response.user);
+      const res = await api.login({ email: email.trim(), password });
+      session.setToken(res.token, remember);
+      session.setLastEmail(email.trim());
+      onLoginSuccess({ user: res.user, modules: res.modules });
     } catch (err: any) {
-      setErrorMessage(err.message || 'Gagal masuk. Silakan periksa kembali alamat email Anda.');
+      setPassword('');
+      setErrorMessage(err.message || 'Gagal masuk. Periksa kembali email dan password Anda.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSelectDemoAccount = (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword('demo-password');
-    setShowDemoSelector(false);
-    setErrorMessage(null);
-  };
+  const field = 'w-full pl-9 pr-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none bg-white';
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-amber-500 selection:text-slate-900">
-      {/* Top Brand Bar */}
-      <div className="px-6 py-4 flex items-center justify-between border-b border-slate-800">
-        <div className="flex items-center gap-3">
-          <Building2 className="w-5 h-5 text-amber-400" />
-          <span className="text-base font-bold tracking-tight text-white">
-            Apex Industrial Solutions
-          </span>
-          <span className="text-slate-600">|</span>
-          <span className="text-xs text-slate-400 font-medium">
-            Enterprise Asset Rental Management System (EARMS)
-          </span>
+    <div className="min-h-screen bg-slate-950 text-slate-100 grid lg:grid-cols-2 selection:bg-amber-400 selection:text-slate-900">
+      {/* Panel merek (desktop) */}
+      <aside className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border-r border-slate-800">
+        <button type="button" onClick={onBack} className="flex items-center gap-3 text-left cursor-pointer w-fit">
+          <div className="w-10 h-10 rounded-lg bg-amber-400 text-slate-900 flex items-center justify-center"><Building2 className="w-5 h-5" /></div>
+          <span className="font-bold text-lg tracking-tight">Apex EAMS</span>
+        </button>
+        <div className="space-y-8 max-w-md">
+          <h1 className="text-3xl font-bold leading-tight">Satu pintu untuk seluruh operasi alat berat Anda.</h1>
+          <ul className="space-y-4 text-sm text-slate-300">
+            {[
+              [QrCode, 'Scan QR di lapangan', 'Absen operator & lapor kerusakan langsung dari HP.'],
+              [BarChart3, 'Laporan siap pakai', 'Utilisasi, piutang, dan profitabilitas dalam satu tampilan.'],
+              [ShieldCheck, 'Akses sesuai peran', 'Setiap orang hanya melihat menu yang relevan dengan tugasnya.'],
+            ].map(([Icon, t, d]: any) => (
+              <li key={t} className="flex gap-3">
+                <Icon className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                <span><strong className="block text-white">{t}</strong>{d}</span>
+              </li>
+            ))}
+          </ul>
         </div>
+        <p className="text-xs text-slate-500">&copy; {new Date().getFullYear()} Apex Industrial Solutions</p>
+      </aside>
 
-        <div className="text-[11px] text-slate-400 font-mono">
-          SECURE PORTAL · NODE API v2.4
-        </div>
-      </div>
+      {/* Form */}
+      <main className="flex items-center justify-center p-5 sm:p-10 bg-slate-100 text-slate-900">
+        <div className="w-full max-w-sm">
+          <button type="button" onClick={onBack} className="mb-6 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 cursor-pointer">
+            <ArrowLeft className="w-3.5 h-3.5" /> Kembali ke beranda
+          </button>
 
-      {/* Centered Enterprise Login Card */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white text-slate-900 rounded-xl p-8 shadow-2xl border border-slate-200">
-          <div className="text-center mb-6">
-            <div className="w-12 h-12 bg-slate-900 text-amber-400 rounded-lg flex items-center justify-center mx-auto mb-3 shadow-md">
-              <Building2 className="w-6 h-6" />
+          <h2 className="text-2xl font-bold tracking-tight">Masuk</h2>
+          <p className="text-sm text-slate-500 mt-1 mb-6">Gunakan akun perusahaan yang diberikan Administrator IT.</p>
+
+          {notice && !errorMessage && (
+            <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2" role="status">
+              <Info className="w-4 h-4 shrink-0 mt-0.5" /><span>{notice}</span>
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">
-              Masuk ke Portal EARMS
-            </h1>
-            <p className="text-xs text-slate-500 mt-1">
-              Masukkan alamat email perusahaan untuk mengakses area kerja Anda.
-            </p>
-          </div>
-
+          )}
           {errorMessage && (
-            <div className="mb-4 p-3 rounded bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-              <span>{errorMessage}</span>
+            <div className="mb-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2" role="alert">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" /><span>{errorMessage}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-            {/* Email Input */}
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Alamat Email Perusahaan (Corporate Email) *
-              </label>
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            <label className="block">
+              <span className="block text-xs font-semibold text-slate-700 mb-1">Email perusahaan</span>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                <input
-                  type="email"
-                  required
-                  placeholder="nama@apex-industrial.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded font-mono focus:border-slate-800 focus:ring-1 focus:ring-slate-800 outline-none"
-                />
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <input type="email" autoComplete="username" inputMode="email" autoFocus={!email}
+                  placeholder="nama@perusahaan.com" value={email} onChange={(e) => setEmail(e.target.value)} className={field} />
               </div>
-            </div>
+            </label>
 
-            {/* Password Input */}
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Kata Sandi (Security Password)
-              </label>
+            <label className="block">
+              <span className="block text-xs font-semibold text-slate-700 mb-1">Password</span>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded font-mono focus:border-slate-800 outline-none"
-                />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <input type={showPw ? 'text' : 'password'} autoComplete="current-password" autoFocus={!!email}
+                  value={password} onChange={(e) => setPassword(e.target.value)}
+                  onKeyUp={(e) => setCapsOn(e.getModifierState?.('CapsLock') ?? false)}
+                  className={`${field} pr-10`} />
+                <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-3 text-slate-400 hover:text-slate-700 cursor-pointer" aria-label="Tampilkan/sembunyikan password">
+                  {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
-            </div>
+              {capsOn && <span className="text-[11px] text-amber-700 mt-1 block">Caps Lock sedang aktif.</span>}
+            </label>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2 shadow-xs"
-            >
-              {loading ? (
-                <span>Memverifikasi Akun...</span>
-              ) : (
-                <>
-                  <span>Masuk ke Sistem (Sign In)</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+            <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer select-none">
+              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="rounded border-slate-300" />
+              Tetap masuk di perangkat ini
+            </label>
+
+            <button type="submit" disabled={loading}
+              className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer">
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Memverifikasi…</> : <>Masuk <ArrowRight className="w-4 h-4" /></>}
             </button>
           </form>
 
-          {/* Collapsible Fast Demo Account Selector for evaluator testing */}
-          <div className="mt-6 pt-4 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={() => setShowDemoSelector(!showDemoSelector)}
-              className="w-full text-left text-[11px] text-slate-500 hover:text-slate-800 flex items-center justify-between py-1 cursor-pointer"
-            >
-              <span className="font-medium">Opsi Akun Demo Pengujian (Testing Credentials)</span>
-              {showDemoSelector ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-            </button>
+          <p className="text-[11px] text-slate-400 mt-4">Lupa password? Hubungi Administrator IT untuk reset.</p>
 
-            {showDemoSelector && (
-              <div className="mt-2.5 p-2.5 bg-slate-50 rounded border border-slate-200 space-y-1.5 text-[11px]">
-                <span className="text-[10px] text-slate-400 block mb-1">
-                  Pilih akun untuk mengisi formulir masuk secara instan:
-                </span>
-                <div className="grid grid-cols-1 gap-1 max-h-48 overflow-y-auto">
-                  {DEMO_ACCOUNTS.map((acc) => (
-                    <button
-                      key={acc.email}
-                      type="button"
-                      onClick={() => handleSelectDemoAccount(acc.email)}
-                      className="w-full text-left p-1.5 rounded hover:bg-white border border-transparent hover:border-slate-200 transition-colors flex items-center justify-between cursor-pointer"
-                    >
-                      <div className="min-w-0">
-                        <span className="font-semibold text-slate-800 block truncate">{acc.label}</span>
-                        <span className="font-mono text-[10px] text-slate-400">{acc.email}</span>
-                      </div>
-                      <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-slate-200 text-slate-700 shrink-0">
-                        {acc.role}
-                      </span>
-                    </button>
-                  ))}
+          {demoMode && (
+            <div className="mt-6 pt-4 border-t border-slate-300">
+              <button type="button" onClick={() => setShowDemo(!showDemo)} className="w-full flex items-center justify-between text-xs text-slate-600 hover:text-slate-900 cursor-pointer">
+                <span className="font-semibold">Akun demo (mode pengujian)</span>
+                {showDemo ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+              {showDemo && (
+                <div className="mt-2 space-y-1">
+                  <p className="text-[11px] text-slate-500">Ketuk salah satu untuk mengisi formulir. Password: <code className="font-mono bg-white px-1 rounded">{DEMO_PASSWORD}</code></p>
+                  <div className="max-h-52 overflow-y-auto rounded-lg border border-slate-200 bg-white divide-y divide-slate-100">
+                    {DEMO_ACCOUNTS.map((a) => (
+                      <button key={a.email} type="button" onClick={() => { setEmail(a.email); setPassword(DEMO_PASSWORD); setErrorMessage(null); setShowDemo(false); }}
+                        className="w-full text-left px-3 py-2 hover:bg-slate-50 cursor-pointer">
+                        <span className="block text-xs font-semibold text-slate-800">{a.role}</span>
+                        <span className="block text-[10px] font-mono text-slate-400">{a.email}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
-            <span>Standar Keamanan ISO 27001</span>
-            <span>Enkripsi TLS 1.3 Terpusat</span>
-          </div>
+              )}
+            </div>
+          )}
         </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="px-6 py-3 border-t border-slate-800 text-[11px] text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <span>&copy; 2026 Apex Industrial Solutions &amp; Commercial Operations Corp. Hak Cipta Dilindungi.</span>
-        <span className="font-mono text-slate-400">Environment: Production Sandbox</span>
-      </footer>
+      </main>
     </div>
   );
 };

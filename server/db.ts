@@ -92,7 +92,10 @@ export class EamsDatabase {
         const parsed = JSON.parse(raw);
         if (parsed.assets && parsed.customers && parsed.products) {
           const fresh = this.generateSeedData();
-          parsed.users = fresh.users;
+          // JANGAN timpa akun yang sudah ada — sebelumnya setiap restart menghapus perubahan manajemen akun.
+          if (!Array.isArray(parsed.users) || parsed.users.length === 0) {
+            parsed.users = fresh.users;
+          }
           if (!parsed.operators || parsed.operators.length === 0) {
             parsed.operators = fresh.operators;
           }
@@ -170,10 +173,11 @@ export class EamsDatabase {
   }
 
   public logAudit(user: string, action: string, entity: string, entityId: string, details: string) {
+    const actor = this.state.users.find((u) => u.name === user);
     const log: AuditLog = {
       id: `LOG-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       timestamp: new Date().toISOString(),
-      userId: 'USR-01',
+      userId: actor?.id || 'SYSTEM',
       userName: user || 'System Admin',
       action,
       entity,

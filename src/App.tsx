@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { User, UserRole, Customer, Product, Asset, Quotation, SalesOrder, RentalContract, Delivery, Invoice, Payment, Vendor, PurchaseOrder, VendorBill, WorkOrder, AuditLog, SystemSettings } from './types/index.ts';
-import { api } from './services/api.ts';
+import { api, SessionInfo } from './services/api.ts';
+import { session, SESSION_EVENTS } from './services/session.ts';
+import { defaultTabFor, type ModuleId } from './shared/access.ts';
+import { LandingPage } from './components/LandingPage.tsx';
+import { Toaster, installAlertToast } from './components/Toaster.tsx';
+import { ChangePasswordModal } from './components/ChangePasswordModal.tsx';
 import { Header } from './components/Header.tsx';
 import { Sidebar } from './components/Sidebar.tsx';
 import { LoginPage } from './components/LoginPage.tsx';
@@ -23,29 +28,28 @@ import { SettingsView } from './components/SettingsView.tsx';
 import { OperatorScanStatusView } from './components/OperatorScanStatusView.tsx';
 import { TechnicalServiceView } from './components/TechnicalServiceView.tsx';
 import { UserManagementView } from './components/UserManagementView.tsx';
-import { X, ShieldAlert } from 'lucide-react';
+import { X } from 'lucide-react';
+
+type View = 'landing' | 'login' | 'app';
+
+const readHash = () => window.location.hash.replace(/^#\/?/, '');
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    try {
-      const stored = localStorage.getItem('apex_auth_user');
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  });
+  // Sesi SELALU divalidasi ke server (/auth/me). Peran & modul tidak pernah dipercaya dari localStorage.
+  const [booting, setBooting] = useState<boolean>(() => !!session.getToken());
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [modules, setModules] = useState<ModuleId[]>([]);
+  const [authNotice, setAuthNotice] = useState<string | null>(null);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [guestView, setGuestView] = useState<'landing' | 'login'>(() => (readHash() === 'masuk' ? 'login' : 'landing'));
 
-  const [activeRole, setActiveRole] = useState<UserRole>(() => {
-    const userRole = localStorage.getItem('apex_user_role') as UserRole;
-    return userRole || 'EXECUTIVE';
-  });
+  const activeRole: UserRole = currentUser?.role || 'EXECUTIVE';
+  const mustChangePassword = !!currentUser?.mustChangePassword;
+  const defaultTab = currentUser ? defaultTabFor({ ...currentUser, status: 'ACTIVE' }) : 'reports';
+  // defaultTabFor memakai modul hasil hitung klien; pakai modul dari server bila ada.
+  const homeTab = modules.includes(defaultTab as ModuleId) ? defaultTab : (modules[0] || defaultTab);
 
-  const [activeTab, setActiveTab] = useState<string>(() => {
-    const userRole = localStorage.getItem('apex_user_role') as UserRole;
-    if (userRole === 'OPERATOR_USER') return 'operator-status';
-    if (userRole === 'EXECUTIVE') return 'reports';
-    return 'dashboard';
-  });
+  const [activeTab, setActiveTab] = useState<string>('reports');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showQuickNewModal, setShowQuickNewModal] = useState(false);
 
@@ -80,61 +84,112 @@ export default function App() {
   const [preselectedInvoiceIdForPayment, setPreselectedInvoiceIdForPayment] = useState<string | undefined>();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
+  // Notifikasi non-blokir menggantikan alert()
+  useEffect(() => { installAlertToast(); }, []);
+
+  const applySession = useCallback((info: SessionInfo, goHome = false) => {
+    setCurrentUser(info.user);
+    setModules(info.modules);
+    if (goHome) {
+      const d = defaultTabFor({ ...info.user, status: 'ACTIVE' });
+      setActiveTab(info.modules.includes(d) ? d : info.modules[0] || d);
+    }
+  }, []);
+
+  const endSession = useCallback((notice?: string) => {
+    session.clear();
+    setCurrentUser(null);
+    setModules([]);
+    setShowChangePassword(false);
+    setAuthNotice(notice || null);
+    setGuestView('login');
+    if (window.location.hash !== '#/masuk') window.location.hash = '/masuk';
+  }, []);
+
+  // Pulihkan sesi saat halaman dibuka
+  useEffect(() => {
+    if (!session.getToken()) { setBooting(false); return; }
+    api.me()
+      .then((info) => {
+        applySession(info);
+        const fromHash = readHash().replace(/^app\//, '');
+        const start = info.modules.includes(fromHash as ModuleId) ? fromHash : (info.modules.includes(defaultTabFor({ ...info.user, status: 'ACTIVE' }) as ModuleId) ? defaultTabFor({ ...info.user, status: 'ACTIVE' }) : info.modules[0]);
+        setActiveTab(start || 'reports');
+      })
+      .catch(() => session.clear())
+      .finally(() => setBooting(false));
+  }, [applySession]);
+
+  // Sesi kedaluwarsa / dicabut dari server, atau wajib ganti password
+  useEffect(() => {
+    const onExpired = () => endSession('Sesi Anda telah berakhir. Silakan masuk kembali.');
+    const onPwd = () => setCurrentUser((u) => (u ? { ...u, mustChangePassword: true } : u));
+    window.addEventListener(SESSION_EVENTS.expired, onExpired);
+    window.addEventListener(SESSION_EVENTS.passwordRequired, onPwd);
+    return () => {
+      window.removeEventListener(SESSION_EVENTS.expired, onExpired);
+      window.removeEventListener(SESSION_EVENTS.passwordRequired, onPwd);
+    };
+  }, [endSession]);
+
+  // Navigasi landing <-> login lewat hash (tombol back browser berfungsi)
+  useEffect(() => {
+    const onHash = () => {
+      const h = readHash();
+      if (!currentUser) setGuestView(h === 'masuk' ? 'login' : 'landing');
+      else if (h.startsWith('app/')) {
+        const t = h.slice(4);
+        if (modules.includes(t as ModuleId)) setActiveTab(t);
+      }
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, [currentUser, modules]);
+
+  // Penjaga halaman: tab yang tidak diizinkan dialihkan ke beranda peran
+  useEffect(() => {
+    if (currentUser && modules.length && !modules.includes(activeTab as ModuleId)) {
+      setActiveTab(homeTab);
+    }
+  }, [currentUser, modules, activeTab, homeTab]);
+
+  // Sinkronkan tab ke URL (refresh tidak kembali ke awal)
+  useEffect(() => {
+    if (currentUser && modules.includes(activeTab as ModuleId)) {
+      const target = `#/app/${activeTab}`;
+      if (window.location.hash !== target) history.replaceState(null, '', target);
+    }
+  }, [currentUser, modules, activeTab]);
+
   const loadAllData = useCallback(async () => {
     setIsRefreshing(true);
+    // allSettled: peran yang tidak berhak atas suatu data (403) tidak membuat seluruh aplikasi gagal.
+    const val = (r: PromiseSettledResult<any>): any => (r.status === 'fulfilled' ? r.value : undefined);
     try {
-      const [
-        cRes,
-        pRes,
-        aRes,
-        qRes,
-        soRes,
-        rRes,
-        dRes,
-        iRes,
-        pmtRes,
-        vRes,
-        poRes,
-        vbRes,
-        woRes,
-        logRes,
-        setRes,
-        finRes,
-      ] = await Promise.all([
-        api.getCustomers(),
-        api.getProducts(),
-        api.getAssets(),
-        api.getQuotations(),
-        api.getSalesOrders(),
-        api.getRentals(),
-        api.getDeliveries(),
-        api.getInvoices(),
-        api.getPayments(),
-        api.getVendors(),
-        api.getPurchaseOrders(),
-        api.getVendorBills(),
-        api.getWorkOrders(),
-        api.getAuditLogs(),
-        api.getSettings(),
-        api.getFinanceDashboard(),
+      const r = await Promise.allSettled([
+        api.getCustomers(), api.getProducts(), api.getAssets(), api.getQuotations(), api.getSalesOrders(),
+        api.getRentals(), api.getDeliveries(), api.getInvoices(), api.getPayments(), api.getVendors(),
+        api.getPurchaseOrders(), api.getVendorBills(), api.getWorkOrders(), api.getAuditLogs(),
+        api.getSettings(), api.getFinanceDashboard(),
       ]);
-
-      setCustomers(cRes.data);
-      setProducts(pRes.data);
-      setAssets(aRes.data);
-      setQuotations(qRes.data);
-      setSalesOrders(soRes.data);
-      setRentals(rRes.data);
-      setDeliveries(dRes.data);
-      setInvoices(iRes.data);
-      setPayments(pmtRes.data);
-      setVendors(vRes.data);
-      setPurchaseOrders(poRes.data);
-      setVendorBills(vbRes.data);
-      setWorkOrders(woRes.data);
-      setAuditLogs(logRes.data);
-      setSettings(setRes);
-      if (finRes?.metrics) setFinanceMetrics(finRes.metrics);
+      setCustomers(val(r[0])?.data ?? []);
+      setProducts(val(r[1])?.data ?? []);
+      setAssets(val(r[2])?.data ?? []);
+      setQuotations(val(r[3])?.data ?? []);
+      setSalesOrders(val(r[4])?.data ?? []);
+      setRentals(val(r[5])?.data ?? []);
+      setDeliveries(val(r[6])?.data ?? []);
+      setInvoices(val(r[7])?.data ?? []);
+      setPayments(val(r[8])?.data ?? []);
+      setVendors(val(r[9])?.data ?? []);
+      setPurchaseOrders(val(r[10])?.data ?? []);
+      setVendorBills(val(r[11])?.data ?? []);
+      setWorkOrders(val(r[12])?.data ?? []);
+      setAuditLogs(val(r[13])?.data ?? []);
+      const st = val(r[14]);
+      if (st) setSettings(st as SystemSettings);
+      const fin: any = val(r[15]);
+      if (fin?.metrics) setFinanceMetrics(fin.metrics);
     } catch (err) {
       console.error('Failed to load application data:', err);
     } finally {
@@ -143,76 +198,20 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (currentUser) {
-      loadAllData();
-    }
-  }, [loadAllData, currentUser]);
+    if (currentUser && !mustChangePassword) loadAllData();
+  }, [loadAllData, currentUser, mustChangePassword]);
 
-  const handleLoginSuccess = (user: User) => {
-    setCurrentUser(user);
-    setActiveRole(user.role);
-    localStorage.setItem('apex_auth_user', JSON.stringify(user));
-    localStorage.setItem('apex_user_role', user.role);
-    const defaultTabs: Record<UserRole, string> = {
-      EXECUTIVE: 'reports',
-      ADMIN_IT: 'dashboard',
-      SALES_MARKETING: 'quotations',
-      ASSET_CONTROL: 'assets',
-      MANAGEMENT_OPERATION: 'maintenance',
-      PROCUREMENT: 'procurement',
-      FINANCE_ACCOUNTING_TAX: 'invoices',
-      AR_MANAGEMENT: 'invoices',
-      OPERATOR_USER: 'operator-status',
-      TECHNICAL_SERVICE: 'technical-service',
-    };
-    setActiveTab(defaultTabs[user.role] || 'reports');
-    loadAllData();
+  const handleLoginSuccess = (info: SessionInfo) => {
+    setAuthNotice(null);
+    applySession(info, true);
+    window.location.hash = '/app';
   };
 
   const handleLogout = async () => {
-    try {
-      await api.logout();
-    } catch {
-      // ignore
-    }
-    localStorage.removeItem('apex_auth_user');
-    localStorage.removeItem('apex_user_role');
-    localStorage.removeItem('apex_user_name');
-    setCurrentUser(null);
-  };
-
-  const handleRoleChange = (role: UserRole) => {
-    setActiveRole(role);
-    localStorage.setItem('apex_user_role', role);
-    if (currentUser) {
-      const updatedUser = { ...currentUser, role };
-      setCurrentUser(updatedUser);
-      localStorage.setItem('apex_auth_user', JSON.stringify(updatedUser));
-    }
-    const defaultTabs: Record<UserRole, string> = {
-      EXECUTIVE: 'reports',
-      ADMIN_IT: 'dashboard',
-      SALES_MARKETING: 'quotations',
-      ASSET_CONTROL: 'assets',
-      MANAGEMENT_OPERATION: 'maintenance',
-      PROCUREMENT: 'procurement',
-      FINANCE_ACCOUNTING_TAX: 'invoices',
-      AR_MANAGEMENT: 'invoices',
-      OPERATOR_USER: 'operator-status',
-      TECHNICAL_SERVICE: 'technical-service',
-    };
-    // Strict Role Redirection
-    if (activeTab === 'dashboard' && role !== 'EXECUTIVE' && role !== 'ADMIN_IT') {
-      setActiveTab(defaultTabs[role] || 'reports');
-    } else if (role === 'OPERATOR_USER') {
-      setActiveTab('operator-status');
-    } else if (role === 'TECHNICAL_SERVICE' && (activeTab === 'invoices' || activeTab === 'payments' || activeTab === 'procurement' || activeTab === 'sales' || activeTab === 'quotations')) {
-      setActiveTab('technical-service');
-    } else if (role === 'EXECUTIVE' && (activeTab === 'settings' || activeTab === 'api-explorer' || activeTab === 'test-runner' || activeTab === 'user-management')) {
-      setActiveTab('reports');
-    }
-    let name = currentUser?.name || 'Admin User';
-    localStorage.setItem('apex_user_name', name);
+    try { await api.logout(); } catch { /* abaikan */ }
+    endSession();
+    window.location.hash = '/';
+    setGuestView('landing');
   };
 
   const handleNavigateToPayment = (invoiceId: string) => {
@@ -220,9 +219,37 @@ export default function App() {
     setActiveTab('payments');
   };
 
-  // If not logged in, display the dedicated Login Page
+  if (booting) {
+    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-sm">Memuat…</div>;
+  }
+
+  // Belum login: landing page atau halaman login
   if (!currentUser) {
-    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <>
+        {guestView === 'login' ? (
+          <LoginPage
+            onLoginSuccess={handleLoginSuccess}
+            onBack={() => { setAuthNotice(null); setGuestView('landing'); window.location.hash = '/'; }}
+            notice={authNotice}
+          />
+        ) : (
+          <LandingPage onLogin={() => { setGuestView('login'); window.location.hash = '/masuk'; }} />
+        )}
+        <Toaster />
+      </>
+    );
+  }
+
+  // Wajib ganti password sebelum memakai aplikasi
+  if (mustChangePassword) {
+    return (
+      <>
+        <div className="min-h-screen bg-slate-950" />
+        <ChangePasswordModal forced onLogout={handleLogout} onChanged={(info) => applySession(info, true)} />
+        <Toaster />
+      </>
+    );
   }
 
   const openOrdersCount = salesOrders.filter((s) => s.status !== 'COMPLETED' && s.status !== 'CANCELLED').length;
@@ -236,7 +263,9 @@ export default function App() {
       <Header
         currentUser={currentUser}
         activeRole={activeRole}
-        onRoleChange={handleRoleChange}
+        allowedModules={modules}
+        defaultTab={homeTab}
+        onChangePassword={() => setShowChangePassword(true)}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onOpenQuickNew={() => setShowQuickNewModal(true)}
@@ -248,9 +277,10 @@ export default function App() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Responsive Sidebar filtered by role */}
-        <Sidebar
+        {modules.length > 1 && <Sidebar
           currentTab={activeTab}
           userRole={activeRole}
+          allowedModules={modules}
           onSelectTab={(tab) => {
             setActiveTab(tab);
             setPreselectedInvoiceIdForPayment(undefined);
@@ -263,53 +293,26 @@ export default function App() {
           }}
           isOpenOnMobile={isMobileSidebarOpen}
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
-        />
+        />}
 
         {/* Main Content Area */}
         <main className="flex-1 p-3 sm:p-6 overflow-y-auto max-w-7xl w-full mx-auto">
           {activeTab === 'dashboard' && (
-            activeRole !== 'EXECUTIVE' && activeRole !== 'ADMIN_IT' ? (
-              <div className="bg-white border border-slate-200 rounded-md p-8 text-center space-y-3">
-                <div className="text-amber-800 font-bold text-sm">Akses Terbatas: Dashboard Operasional Khusus Direktur (Executive) &amp; IT</div>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">
-                  Sesuai kebijakan tata kelola sistem enterprise, dashboard operasional utama hanya ditampilkan untuk peran Direktur dan Administrator IT. Silakan gunakan ruang kerja operasional Anda.
-                </p>
-                <button
-                  onClick={() => {
-                    const defaultTabs: Record<string, string> = {
-                      SALES_MARKETING: 'quotations',
-                      ASSET_CONTROL: 'assets',
-                      MANAGEMENT_OPERATION: 'maintenance',
-                      PROCUREMENT: 'procurement',
-                      FINANCE_ACCOUNTING_TAX: 'invoices',
-                      AR_MANAGEMENT: 'invoices',
-                      OPERATOR_USER: 'operator-status',
-                    };
-                    setActiveTab(defaultTabs[activeRole] || 'reports');
-                  }}
-                  className="px-4 py-2 bg-slate-900 text-white rounded text-xs font-semibold hover:bg-slate-800 cursor-pointer"
-                >
-                  Buka Ruang Kerja Operasional
-                </button>
-              </div>
-            ) : (
-              <DashboardView
-                metrics={financeMetrics}
-                auditLogs={auditLogs}
-                userRole={activeRole}
-                onNavigate={setActiveTab}
-                onOpenQuickNew={(type) => {
-                  if (type === 'quotation') setActiveTab('quotations');
-                  else if (type === 'salesOrder') setActiveTab('sales');
-                  else if (type === 'rental') setActiveTab('rentals');
-                  else if (type === 'invoice') setActiveTab('invoices');
-                  else if (type === 'payment') setActiveTab('payments');
-                  else setShowQuickNewModal(true);
-                }}
-              />
-            )
+            <DashboardView
+              metrics={financeMetrics}
+              auditLogs={auditLogs}
+              userRole={activeRole}
+              onNavigate={setActiveTab}
+              onOpenQuickNew={(type) => {
+                if (type === 'quotation') setActiveTab('quotations');
+                else if (type === 'salesOrder') setActiveTab('sales');
+                else if (type === 'rental') setActiveTab('rentals');
+                else if (type === 'invoice') setActiveTab('invoices');
+                else if (type === 'payment') setActiveTab('payments');
+                else setShowQuickNewModal(true);
+              }}
+            />
           )}
-
           {activeTab === 'customers' && (
             <CustomersView customers={customers} onRefresh={loadAllData} />
           )}
@@ -361,48 +364,22 @@ export default function App() {
           )}
 
           {activeTab === 'invoices' && (
-            (activeRole === 'EXECUTIVE' || activeRole === 'ADMIN_IT' || activeRole === 'FINANCE_ACCOUNTING_TAX' || activeRole === 'AR_MANAGEMENT') ? (
-              <InvoicesView
-                invoices={invoices}
-                customers={customers}
-                onRefresh={loadAllData}
-                onNavigateToPayment={handleNavigateToPayment}
-              />
-            ) : (
-              <div className="bg-white border border-rose-200 rounded-md p-8 text-center space-y-3">
-                <div className="text-rose-700 font-bold text-sm flex items-center justify-center gap-2">
-                  <ShieldAlert className="w-5 h-5" />
-                  Akses Ditolak: Data Tagihan &amp; Piutang (AR) Terproteksi Ketat
-                </div>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">
-                  Sesuai kebijakan keamanan EARMS, peran <strong>{activeRole}</strong> tidak memiliki otorisasi untuk melihat, membuat, mengedit, atau menghapus data penagihan piutang (AR).
-                </p>
-              </div>
-            )
+            <InvoicesView
+              invoices={invoices}
+              customers={customers}
+              onRefresh={loadAllData}
+              onNavigateToPayment={handleNavigateToPayment}
+            />
           )}
-
           {activeTab === 'payments' && (
-            (activeRole === 'EXECUTIVE' || activeRole === 'ADMIN_IT' || activeRole === 'FINANCE_ACCOUNTING_TAX' || activeRole === 'AR_MANAGEMENT') ? (
-              <PaymentsView
-                payments={payments}
-                customers={customers}
-                invoices={invoices}
-                onRefresh={loadAllData}
-                preselectedInvoiceId={preselectedInvoiceIdForPayment}
-              />
-            ) : (
-              <div className="bg-white border border-rose-200 rounded-md p-8 text-center space-y-3">
-                <div className="text-rose-700 font-bold text-sm flex items-center justify-center gap-2">
-                  <ShieldAlert className="w-5 h-5" />
-                  Akses Ditolak: Modul Penerimaan Pembayaran Terproteksi
-                </div>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">
-                  Peran <strong>{activeRole}</strong> tidak memiliki hak otorisasi untuk memproses pembayaran piutang pelanggan.
-                </p>
-              </div>
-            )
+            <PaymentsView
+              payments={payments}
+              customers={customers}
+              invoices={invoices}
+              onRefresh={loadAllData}
+              preselectedInvoiceId={preselectedInvoiceIdForPayment}
+            />
           )}
-
           {activeTab === 'procurement' && (
             <ProcurementView
               vendors={vendors}
@@ -436,67 +413,11 @@ export default function App() {
             <ReportsView userRole={activeRole} onNavigate={setActiveTab} />
           )}
 
-          {activeTab === 'api-explorer' && (
-            activeRole === 'EXECUTIVE' ? (
-              <div className="bg-white border border-slate-200 rounded-md p-8 text-center space-y-3">
-                <div className="text-amber-800 font-bold text-sm">Akses Khusus Administrator Admin (IT)</div>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">
-                  Fitur REST API Explorer &amp; Swagger merupakan instrumen teknis IT. Peran Direktur diutamakan mengakses Laporan Eksekutif Keuangan &amp; Operasional.
-                </p>
-                <button
-                  onClick={() => setActiveTab('reports')}
-                  className="px-4 py-2 bg-slate-900 text-white rounded text-xs font-semibold hover:bg-slate-800 cursor-pointer"
-                >
-                  Buka Laporan Eksekutif (PDF / Excel)
-                </button>
-              </div>
-            ) : (
-              <ApiExplorerView />
-            )
-          )}
-
-          {activeTab === 'test-runner' && (
-            activeRole === 'EXECUTIVE' ? (
-              <div className="bg-white border border-slate-200 rounded-md p-8 text-center space-y-3">
-                <div className="text-amber-800 font-bold text-sm">Akses Khusus Administrator Admin (IT)</div>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">
-                  Fitur Automated Test Suite disediakan untuk pengujian sistem oleh Administrator IT.
-                </p>
-                <button
-                  onClick={() => setActiveTab('reports')}
-                  className="px-4 py-2 bg-slate-900 text-white rounded text-xs font-semibold hover:bg-slate-800 cursor-pointer"
-                >
-                  Buka Laporan Eksekutif
-                </button>
-              </div>
-            ) : (
-              <TestRunnerView />
-            )
-          )}
-
+          {activeTab === 'api-explorer' && <ApiExplorerView />}
+          {activeTab === 'test-runner' && <TestRunnerView />}
           {activeTab === 'settings' && settings && (
-            activeRole === 'EXECUTIVE' ? (
-              <div className="bg-white border border-slate-200 rounded-md p-8 text-center space-y-3">
-                <div className="text-amber-800 font-bold text-sm">Akses Khusus Administrator Admin (IT)</div>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">
-                  Konfigurasi prefix sistem dan log audit tingkat rendah dikelola oleh Administrator IT.
-                </p>
-                <button
-                  onClick={() => setActiveTab('reports')}
-                  className="px-4 py-2 bg-slate-900 text-white rounded text-xs font-semibold hover:bg-slate-800 cursor-pointer"
-                >
-                  Buka Laporan Eksekutif
-                </button>
-              </div>
-            ) : (
-              <SettingsView
-                settings={settings}
-                auditLogs={auditLogs}
-                onRefresh={loadAllData}
-              />
-            )
+            <SettingsView settings={settings} auditLogs={auditLogs} onRefresh={loadAllData} />
           )}
-
           {activeTab === 'operator-status' && (
             <OperatorScanStatusView
               assets={assets}
@@ -584,6 +505,13 @@ export default function App() {
           </div>
         </div>
       )}
+      {showChangePassword && (
+        <ChangePasswordModal
+          onClose={() => setShowChangePassword(false)}
+          onChanged={(info) => { applySession(info); setShowChangePassword(false); alert('Password berhasil diganti.'); }}
+        />
+      )}
+      <Toaster />
     </div>
   );
 }

@@ -27,6 +27,7 @@ interface SidebarProps {
   currentTab: string;
   onSelectTab: (tab: string) => void;
   userRole?: UserRole;
+  allowedModules: string[];
   counts?: {
     openOrders?: number;
     activeRentals?: number;
@@ -41,111 +42,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentTab,
   onSelectTab,
   userRole = 'EXECUTIVE',
+  allowedModules,
   counts,
   isOpenOnMobile = false,
   onCloseMobile,
 }) => {
-  // Define permitted tabs for each of the 8 enterprise roles
-  const rolePermissions: Record<UserRole, string[]> = {
-    // 1. Executive: Semua fitur komersial & operasional, utamakan laporan eksekutif, KECUALI fitur admin IT
-    EXECUTIVE: [
-      'reports',
-      'dashboard',
-      'customers',
-      'quotations',
-      'sales',
-      'rentals',
-      'deliveries',
-      'invoices',
-      'payments',
-      'assets',
-      'products',
-      'procurement',
-      'maintenance',
-    ],
-    // 2. Administrator Admin (IT): Semua fitur role tanpa terkecuali
-    ADMIN_IT: [
-      'user-management',
-      'dashboard',
-      'customers',
-      'quotations',
-      'sales',
-      'deliveries',
-      'rentals',
-      'invoices',
-      'payments',
-      'reports',
-      'assets',
-      'products',
-      'procurement',
-      'maintenance',
-      'operator-status',
-      'technical-service',
-      'api-explorer',
-      'test-runner',
-      'settings',
-    ],
-    // 3. Sales & Marketing: Mengolah data customer project, client CRM, quotation, sales order
-    SALES_MARKETING: [
-      'quotations',
-      'sales',
-      'customers',
-      'deliveries',
-      'products',
-      'assets',
-      'reports',
-    ],
-    // 4. Asset Control: Delivery, registrasi aset, penomoran & dokumen legalitas alat berat (STNK, BPKB, SIA)
-    ASSET_CONTROL: [
-      'assets',
-      'deliveries',
-      'products',
-      'maintenance',
-      'reports',
-    ],
-    // 5. Management Operation: Mengatur operator & dokumen kualifikasi (SIO) alat berat dari data aset
-    MANAGEMENT_OPERATION: [
-      'maintenance',
-      'assets',
-      'deliveries',
-      'rentals',
-      'reports',
-    ],
-    // 6. Procurement: Pembelanjaan aset, sparepart, dan lainnya keperluan kantor (Menu PO tersendiri & tidak bercampur)
-    PROCUREMENT: [
-      'procurement',
-      'products',
-      'reports',
-    ],
-    // 7. Accounting Finance & Tax (FAT): Recording transaksi, data akun, perhitungan pajak, dan invoicing
-    FINANCE_ACCOUNTING_TAX: [
-      'invoices',
-      'payments',
-      'customers',
-      'reports',
-    ],
-    // 8. AR Management: Tracing tagihan piutang dan aging monitoring
-    AR_MANAGEMENT: [
-      'invoices',
-      'reports',
-      'payments',
-      'customers',
-    ],
-    // 9. Operator / Pengguna Alat Lapangan: Hanya fitur scan barcode dan submit status alat kerja/rusak
-    OPERATOR_USER: [
-      'operator-status',
-    ],
-    // 10. Technical Service: Dashboard repair request lapangan, pengerjaan servis (scan start/complete), penggantian sparepart/jasa
-    TECHNICAL_SERVICE: [
-      'technical-service',
-      'maintenance',
-      'assets',
-      'products',
-      'reports',
-    ],
-  };
-
-  const allowedTabs = rolePermissions[userRole] || rolePermissions.EXECUTIVE;
+  // Menu yang tampil = modul efektif dari server (peran + hak akses khusus). Ini hanya UX; server tetap yang memaksa.
+  const allowedTabs = allowedModules;
 
   const allSections = [
     {

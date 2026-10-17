@@ -1,3 +1,4 @@
+import { exportExcelFromHtml } from '../utils/download.ts';
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../services/api.ts';
 import {
@@ -225,7 +226,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ userRole = 'EXECUTIVE'
         soRes,
         renRes,
         delRes,
-      ] = await Promise.all([
+      ] = (await Promise.allSettled([
         api.getFinanceDashboard(),
         api.getAccountsReceivableReport(),
         api.getAssetProfitabilityReport(),
@@ -239,21 +240,23 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ userRole = 'EXECUTIVE'
         api.getSalesOrders(),
         api.getRentals(),
         api.getDeliveries(),
-      ]);
+      ])).map((r) => (r.status === 'fulfilled' ? (r.value as any) : null));
+      // Data yang tidak boleh diakses peran ini (403) dianggap kosong, bukan membuat seluruh laporan gagal.
+      const empty = { data: [] as any[] };
 
       setFinanceData(fin);
       setArData(ar);
-      setAssetProfitData(ap.assetProfitability || []);
+      setAssetProfitData(ap?.assetProfitability || []);
       setSalesReportData(sales);
-      setAssetsList(assetsRes.data || []);
-      setOperatorsList(opsRes.data || []);
-      setPurchaseOrders(poRes.data || []);
-      setCustomersList(custRes.data || []);
-      setInvoicesList(invRes.data || []);
-      setQuotationsList(quoRes.data || []);
-      setSalesOrdersList(soRes.data || []);
-      setRentalsList(renRes.data || []);
-      setDeliveriesList(delRes.data || []);
+      setAssetsList((assetsRes || empty).data || []);
+      setOperatorsList((opsRes || empty).data || []);
+      setPurchaseOrders((poRes || empty).data || []);
+      setCustomersList((custRes || empty).data || []);
+      setInvoicesList((invRes || empty).data || []);
+      setQuotationsList((quoRes || empty).data || []);
+      setSalesOrdersList((soRes || empty).data || []);
+      setRentalsList((renRes || empty).data || []);
+      setDeliveriesList((delRes || empty).data || []);
     } catch (err: any) {
       console.error('Error loading report datasets:', err);
     } finally {
@@ -838,15 +841,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ userRole = 'EXECUTIVE'
       </html>
     `;
 
-    const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    exportExcelFromHtml(excelTemplate, filename);
 
     setExportNotice(`Laporan Excel berhasil diunduh: ${filename}`);
     setTimeout(() => setExportNotice(null), 4000);

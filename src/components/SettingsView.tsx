@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SystemSettings, AuditLog } from '../types/index.ts';
 import { api } from '../services/api.ts';
+import { saveBlob } from '../utils/download.ts';
 import {
   Settings,
   ShieldCheck,
@@ -26,6 +27,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [formData, setFormData] = useState<SystemSettings>({ ...settings });
   const [saving, setSaving] = useState(false);
   const [logFilter, setLogFilter] = useState('');
+  const [backingUp, setBackingUp] = useState(false);
+
+  const handleDownloadBackup = async () => {
+    setBackingUp(true);
+    try {
+      const { blob, filename } = await api.downloadBackup();
+      saveBlob(blob, filename || `apex_eams_backup_${new Date().toISOString().slice(0, 10)}.json`);
+    } catch (err: any) {
+      alert(`Gagal mengunduh backup: ${err.message}`);
+    } finally {
+      setBackingUp(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,14 +88,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <a
-            href="/api/v1/system/backup"
-            download
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-slate-300 text-slate-700 rounded hover:bg-slate-50"
+          <button
+            type="button"
+            onClick={handleDownloadBackup}
+            disabled={backingUp}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-slate-300 text-slate-700 rounded hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
-            Download Backup (.json)
-          </a>
+            {backingUp ? 'Menyiapkan...' : 'Download Backup (.json)'}
+          </button>
           <button
             onClick={handleResetDemo}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded hover:bg-rose-100"

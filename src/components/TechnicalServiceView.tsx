@@ -1,3 +1,4 @@
+import { BarcodeScanner } from './BarcodeScanner.tsx';
 import React, { useState, useEffect } from 'react';
 import { WorkOrder, Asset, Product, WorkOrderSparePartUsed } from '../types/index.ts';
 import { api } from '../services/api.ts';
@@ -471,26 +472,15 @@ export const TechnicalServiceView: React.FC<TechnicalServiceViewProps> = ({
               </button>
             </div>
 
-            {/* Simulated camera viewfinder */}
+            {/* Scanner kamera asli (QR / Barcode) */}
             {isCameraActive && (
-              <div className="bg-slate-950 rounded-lg p-6 text-center text-white space-y-3 border-2 border-dashed border-indigo-500">
-                <div className="max-w-xs mx-auto aspect-square border-2 border-emerald-400 rounded-lg flex flex-col items-center justify-center bg-slate-900/60 relative">
-                  <div className="absolute inset-x-0 h-0.5 bg-emerald-400 animate-pulse top-1/2"></div>
-                  <QrCode className="w-16 h-16 text-slate-500" />
-                  <span className="text-[10px] text-emerald-400 font-mono mt-2">Arahkan ke Barcode Alat Berat</span>
-                </div>
-                <div className="flex flex-wrap justify-center gap-1.5 pt-2">
-                  {assets.slice(0, 5).map((a) => (
-                    <button
-                      key={a.id}
-                      onClick={() => handleBarcodeSearch(a.assetTag)}
-                      className="px-2 py-1 bg-slate-800 hover:bg-indigo-600 text-[11px] font-mono rounded text-slate-200 cursor-pointer"
-                    >
-                      Scan {a.assetTag}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <BarcodeScanner
+                onClose={() => setIsCameraActive(false)}
+                onDetected={(code) => {
+                  setManualInput(code);
+                  handleBarcodeSearch(code);
+                }}
+              />
             )}
 
             {/* Barcode input row */}

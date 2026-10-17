@@ -1,3 +1,5 @@
+import { exportExcelFromHtml } from '../utils/download.ts';
+import { BarcodeScanner } from './BarcodeScanner.tsx';
 import React, { useState, useEffect } from 'react';
 import { Asset, OperatorAttendanceLog } from '../types/index.ts';
 import { api } from '../services/api.ts';
@@ -360,29 +362,16 @@ export const OperatorScanStatusView: React.FC<OperatorScanStatusViewProps> = ({
           </button>
         </div>
 
-        {/* Viewfinder simulation */}
+        {/* Scanner kamera asli (QR / Barcode) */}
         {isScanningActive && (
-          <div className="bg-slate-950 rounded-lg p-6 text-center text-white space-y-3 border-2 border-dashed border-indigo-500 relative">
-            <div className="max-w-xs mx-auto aspect-square border-2 border-emerald-400 rounded-lg relative flex flex-col items-center justify-center bg-slate-900/60">
-              <div className="absolute inset-x-0 h-0.5 bg-emerald-400 animate-pulse top-1/2"></div>
-              <QrCode className="w-16 h-16 text-slate-500" />
-              <span className="text-[11px] text-emerald-400 font-mono mt-3">Arahkan kamera ke Barcode / QR Mesin</span>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
-              {assets.slice(0, 5).map((a) => (
-                <button
-                  key={a.id}
-                  onClick={() => {
-                    lookupAsset(a.assetTag);
-                    setIsScanningActive(false);
-                  }}
-                  className="px-2.5 py-1 rounded bg-slate-800 hover:bg-indigo-600 text-[11px] font-mono text-slate-200 cursor-pointer"
-                >
-                  Scan [{a.assetTag}] {a.name.slice(0, 15)}...
-                </button>
-              ))}
-            </div>
-          </div>
+          <BarcodeScanner
+            onClose={() => setIsScanningActive(false)}
+            onDetected={(code) => {
+              setManualInput(code);
+              lookupAsset(code);
+              setIsScanningActive(false);
+            }}
+          />
         )}
 
         {/* Input Barcode Manual & Dropdown */}
@@ -797,13 +786,7 @@ export const OperatorScanStatusView: React.FC<OperatorScanStatusViewProps> = ({
               </body>
             </html>
           `;
-          const blob = new Blob([content], { type: 'application/vnd.ms-excel;charset=utf-8' });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = filename;
-          link.click();
-          URL.revokeObjectURL(url);
+          exportExcelFromHtml(content, filename);
         };
 
         return (

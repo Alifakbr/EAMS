@@ -1,3 +1,4 @@
+import { exportCsv } from '../utils/download.ts';
 import React, { useState, useMemo } from 'react';
 import { Asset, AssetStatus } from '../types/index.ts';
 import {
@@ -240,11 +241,11 @@ export const FleetGpsMap: React.FC<FleetGpsMapProps> = ({
 
     const rows = filteredAssets.map((a) => [
       a.assetTag,
-      `"${a.name}"`,
-      `"${a.category}"`,
+      `${a.name}`,
+      `${a.category}`,
       a.status,
-      `"${a.siteInfo?.name || a.warehouseLocation}"`,
-      `"${a.siteInfo?.city || ''}, ${a.siteInfo?.province || ''}"`,
+      `${a.siteInfo?.name || a.warehouseLocation}`,
+      `${a.siteInfo?.city || ''}, ${a.siteInfo?.province || ''}`,
       a.gpsLocation?.latitude?.toFixed(6) || '',
       a.gpsLocation?.longitude?.toFixed(6) || '',
       a.legalDocs?.hourMeter || 0,
@@ -254,15 +255,7 @@ export const FleetGpsMap: React.FC<FleetGpsMapProps> = ({
       a.gpsLocation?.lastGpsPing || new Date().toISOString(),
     ]);
 
-    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `EARMS_Fleet_GPS_Locations_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportCsv(`EARMS_Fleet_GPS_Locations_${new Date().toISOString().slice(0, 10)}.csv`, headers, rows);
   };
 
   return (

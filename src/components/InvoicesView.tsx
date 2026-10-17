@@ -1,3 +1,4 @@
+import { exportExcelFromHtml } from '../utils/download.ts';
 import React, { useState } from 'react';
 import { Invoice, InvoiceStatus, Customer } from '../types/index.ts';
 import { api } from '../services/api.ts';
@@ -150,13 +151,7 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                   </body>
                 </html>
               `;
-              const blob = new Blob([content], { type: 'application/vnd.ms-excel;charset=utf-8' });
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = filename;
-              link.click();
-              URL.revokeObjectURL(url);
+              exportExcelFromHtml(content, filename);
             }}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded shadow-xs cursor-pointer"
             title="Download Invoices to Excel"

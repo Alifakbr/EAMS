@@ -16,25 +16,63 @@ import {
   SystemSettings,
   User,
 } from '../types/index.ts';
+import { session, SESSION_EVENTS } from './session.ts';
+import type { ModuleId } from '../shared/access.ts';
 
 const BASE = '/api/v1';
 
+export class ApiError extends Error {
+  status: number;
+  code?: string;
+  constructor(message: string, status: number, code?: string) {
+    super(message);
+    this.status = status;
+    this.code = code;
+  }
+}
+
+export const authHeaders = (): Record<string, string> => {
+  const token = session.getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+async function handleError(res: Response, isLogin: boolean): Promise<never> {
+  const body = await res.json().catch(() => ({ error: res.statusText }));
+  if (res.status === 401 && !isLogin) {
+    session.clear();
+    window.dispatchEvent(new Event(SESSION_EVENTS.expired));
+  }
+  if (res.status === 403 && body.code === 'PASSWORD_CHANGE_REQUIRED') {
+    window.dispatchEvent(new Event(SESSION_EVENTS.passwordRequired));
+  }
+  throw new ApiError(body.error || `HTTP ${res.status}: ${res.statusText}`, res.status, body.code);
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
+    ...options,
     headers: {
       'Content-Type': 'application/json',
-      'x-user-name': localStorage.getItem('apex_user_name') || 'Admin User',
+      ...authHeaders(),
       ...(options?.headers || {}),
     },
-    ...options,
   });
-
-  if (!res.ok) {
-    const errorBody = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(errorBody.error || `HTTP ${res.status}: ${res.statusText}`);
-  }
-
+  if (!res.ok) return handleError(res, path === '/auth/login');
   return res.json();
+}
+
+/** Unduh file dari endpoint API yang butuh login (tag <a href> tidak bisa mengirim token). */
+export async function fetchBlob(path: string): Promise<{ blob: Blob; filename?: string }> {
+  const res = await fetch(`${BASE}${path}`, { headers: authHeaders() });
+  if (!res.ok) return handleError(res, false);
+  const cd = res.headers.get('Content-Disposition') || '';
+  const m = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(cd);
+  return { blob: await res.blob(), filename: m ? decodeURIComponent(m[1]) : undefined };
+}
+
+export interface SessionInfo {
+  user: User;
+  modules: ModuleId[];
 }
 
 export const api = {
@@ -173,7 +211,8 @@ export const api = {
 
   // Auth & IT User Management
   getAuthUsers: () => request<{ data: any[]; total: number }>('/auth/users'),
-  createUser: (data: Partial<User>) => request<User>('/auth/users', { method: 'POST', body: JSON.stringify(data) }),
+  createUser: (data: Partial<User> & { customPassword?: string }) =>
+    request<User & { temporaryPassword?: string }>('/auth/users', { method: 'POST', body: JSON.stringify(data) }),
   updateUser: (id: string, data: Partial<User>) => request<User>(`/auth/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   resetUserPassword: (id: string, body?: { customPassword?: string; forcePasswordChange?: boolean }) =>
     request<{ message: string; temporaryPassword: string; resetAt?: string; userEmail?: string }>(
@@ -181,12 +220,19 @@ export const api = {
       { method: 'POST', body: JSON.stringify(body || {}) }
     ),
   deleteUser: (id: string) => request<{ message: string }>(`/auth/users/${id}`, { method: 'DELETE' }),
-  login: (credentials: { email: string; password?: string; role?: string }) =>
-    request<{ message: string; user: any; token: string }>('/auth/login', {
+  login: (credentials: { email: string; password: string }) =>
+    request<SessionInfo & { message: string; token: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     }),
+  me: () => request<SessionInfo>('/auth/me'),
+  changePassword: (data: { currentPassword: string; newPassword: string }) =>
+    request<SessionInfo & { message: string; token: string }>('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   logout: () => request<{ message: string }>('/auth/logout', { method: 'POST' }),
+  downloadBackup: () => fetchBlob('/system/backup'),
 
   // Notifications
   getNotifications: () => request<{ data: any[]; total: number; unreadCount: number }>('/notifications'),

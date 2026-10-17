@@ -1,6 +1,8 @@
+import { exportCsv } from '../utils/download.ts';
 import React, { useState, useEffect } from 'react';
 import { User, UserRole, UserPermissionMatrix } from '../types/index.ts';
 import { api } from '../services/api.ts';
+import { ALL_ROLES, permissionsFromRole, validatePasswordStrength, PASSWORD_POLICY_TEXT } from '../shared/access.ts';
 import {
   Users,
   UserPlus,
@@ -34,178 +36,10 @@ interface UserManagementViewProps {
   onRefresh?: () => void;
 }
 
-const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, UserPermissionMatrix> = {
-  EXECUTIVE: {
-    canViewDashboard: true,
-    canManageAssets: true,
-    canUploadLegalDocs: true,
-    canManageOperators: true,
-    canScanAndSubmitStatus: true,
-    canManageMaintenance: true,
-    canAccessTechnicalService: true,
-    canManageQuotations: true,
-    canManageSalesRentals: true,
-    canManageInvoices: true,
-    canManagePayments: true,
-    canManageProcurement: true,
-    canManageUsers: false,
-    canAccessApiAndAudit: false,
-    canExportReports: true,
-  },
-  ADMIN_IT: {
-    canViewDashboard: true,
-    canManageAssets: true,
-    canUploadLegalDocs: true,
-    canManageOperators: true,
-    canScanAndSubmitStatus: true,
-    canManageMaintenance: true,
-    canAccessTechnicalService: true,
-    canManageQuotations: true,
-    canManageSalesRentals: true,
-    canManageInvoices: true,
-    canManagePayments: true,
-    canManageProcurement: true,
-    canManageUsers: true,
-    canAccessApiAndAudit: true,
-    canExportReports: true,
-  },
-  SALES_MARKETING: {
-    canViewDashboard: false,
-    canManageAssets: false,
-    canUploadLegalDocs: false,
-    canManageOperators: false,
-    canScanAndSubmitStatus: false,
-    canManageMaintenance: false,
-    canAccessTechnicalService: false,
-    canManageQuotations: true,
-    canManageSalesRentals: true,
-    canManageInvoices: false,
-    canManagePayments: false,
-    canManageProcurement: false,
-    canManageUsers: false,
-    canAccessApiAndAudit: false,
-    canExportReports: true,
-  },
-  ASSET_CONTROL: {
-    canViewDashboard: false,
-    canManageAssets: true,
-    canUploadLegalDocs: true,
-    canManageOperators: false,
-    canScanAndSubmitStatus: true,
-    canManageMaintenance: true,
-    canAccessTechnicalService: false,
-    canManageQuotations: false,
-    canManageSalesRentals: false,
-    canManageInvoices: false,
-    canManagePayments: false,
-    canManageProcurement: false,
-    canManageUsers: false,
-    canAccessApiAndAudit: false,
-    canExportReports: true,
-  },
-  MANAGEMENT_OPERATION: {
-    canViewDashboard: false,
-    canManageAssets: true,
-    canUploadLegalDocs: false,
-    canManageOperators: true,
-    canScanAndSubmitStatus: true,
-    canManageMaintenance: true,
-    canAccessTechnicalService: false,
-    canManageQuotations: false,
-    canManageSalesRentals: false,
-    canManageInvoices: false,
-    canManagePayments: false,
-    canManageProcurement: false,
-    canManageUsers: false,
-    canAccessApiAndAudit: false,
-    canExportReports: true,
-  },
-  PROCUREMENT: {
-    canViewDashboard: false,
-    canManageAssets: false,
-    canUploadLegalDocs: false,
-    canManageOperators: false,
-    canScanAndSubmitStatus: false,
-    canManageMaintenance: false,
-    canAccessTechnicalService: false,
-    canManageQuotations: false,
-    canManageSalesRentals: false,
-    canManageInvoices: false,
-    canManagePayments: false,
-    canManageProcurement: true,
-    canManageUsers: false,
-    canAccessApiAndAudit: false,
-    canExportReports: true,
-  },
-  FINANCE_ACCOUNTING_TAX: {
-    canViewDashboard: false,
-    canManageAssets: false,
-    canUploadLegalDocs: false,
-    canManageOperators: false,
-    canScanAndSubmitStatus: false,
-    canManageMaintenance: false,
-    canAccessTechnicalService: false,
-    canManageQuotations: false,
-    canManageSalesRentals: false,
-    canManageInvoices: true,
-    canManagePayments: true,
-    canManageProcurement: false,
-    canManageUsers: false,
-    canAccessApiAndAudit: false,
-    canExportReports: true,
-  },
-  AR_MANAGEMENT: {
-    canViewDashboard: false,
-    canManageAssets: false,
-    canUploadLegalDocs: false,
-    canManageOperators: false,
-    canScanAndSubmitStatus: false,
-    canManageMaintenance: false,
-    canAccessTechnicalService: false,
-    canManageQuotations: false,
-    canManageSalesRentals: false,
-    canManageInvoices: true,
-    canManagePayments: true,
-    canManageProcurement: false,
-    canManageUsers: false,
-    canAccessApiAndAudit: false,
-    canExportReports: true,
-  },
-  OPERATOR_USER: {
-    canViewDashboard: false,
-    canManageAssets: false,
-    canUploadLegalDocs: false,
-    canManageOperators: false,
-    canScanAndSubmitStatus: true,
-    canManageMaintenance: false,
-    canAccessTechnicalService: false,
-    canManageQuotations: false,
-    canManageSalesRentals: false,
-    canManageInvoices: false,
-    canManagePayments: false,
-    canManageProcurement: false,
-    canManageUsers: false,
-    canAccessApiAndAudit: false,
-    canExportReports: false,
-  },
-  TECHNICAL_SERVICE: {
-    canViewDashboard: false,
-    canManageAssets: true,
-    canUploadLegalDocs: false,
-    canManageOperators: false,
-    canScanAndSubmitStatus: true,
-    canManageMaintenance: true,
-    canAccessTechnicalService: true,
-    canManageQuotations: false,
-    canManageSalesRentals: false,
-    canManageInvoices: false,
-    canManagePayments: false,
-    canManageProcurement: false,
-    canManageUsers: false,
-    canAccessApiAndAudit: false,
-    canExportReports: true,
-  },
-};
+// Diturunkan dari modul ACL bersama (src/shared/access.ts) agar UI & server selalu konsisten.
+const DEFAULT_ROLE_PERMISSIONS = Object.fromEntries(
+  ALL_ROLES.map((r) => [r, permissionsFromRole(r)])
+) as Record<UserRole, UserPermissionMatrix>;
 
 const ROLE_OPTIONS: { role: UserRole; label: string; department: string }[] = [
   { role: 'EXECUTIVE', label: '1. Executive (Direktur Utama)', department: 'Direksi & Eksekutif' },
@@ -301,7 +135,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
     }
 
     try {
-      await api.createUser({
+      const created = await api.createUser({
         name: formName,
         email: formEmail,
         role: formRole,
@@ -313,8 +147,18 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
         permissions: DEFAULT_ROLE_PERMISSIONS[formRole],
       });
 
-      alert(`Pengguna ${formName} berhasil didaftarkan oleh Administrator IT!`);
       setShowCreateModal(false);
+      // Tampilkan password sementara SEKALI (server tidak menyimpannya dalam bentuk terbaca).
+      if (created.temporaryPassword) {
+        setResettingUser(created as User);
+        setResetSuccessData({
+          temporaryPassword: created.temporaryPassword,
+          userEmail: created.email,
+          userName: created.name,
+          resetAt: new Date().toLocaleTimeString('id-ID'),
+        });
+        setPasswordCopied(false);
+      }
       setFormName('');
       setFormEmail('');
       setFormBadge('');
@@ -339,6 +183,10 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
   const handleExecuteResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!resettingUser) return;
+    if (customPasswordInput.trim()) {
+      const weak = validatePasswordStrength(customPasswordInput.trim());
+      if (weak) { alert(weak); return; }
+    }
     try {
       const res = await api.resetUserPassword(resettingUser.id, {
         customPassword: customPasswordInput.trim() || undefined,
@@ -360,7 +208,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
   const handleCopyCredentials = () => {
     if (!resetSuccessData) return;
     const text = `KREDENSIAL LOGIN EARMS\nNama: ${resetSuccessData.userName}\nEmail: ${resetSuccessData.userEmail}\nPassword Baru: ${resetSuccessData.temporaryPassword}\nStatus: Aktif\nCatatan: Harap segera mengganti password setelah berhasil masuk ke sistem.`;
-    navigator.clipboard.writeText(text);
+    navigator.clipboard?.writeText(text).catch(() => alert('Salin otomatis gagal. Salin manual dari layar.'));
     setPasswordCopied(true);
     setTimeout(() => setPasswordCopied(false), 3000);
   };
@@ -408,29 +256,24 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
     const headers = ['ID', 'Nama', 'Email', 'Role', 'Departemen', 'Cabang/Site', 'No Badge', 'Status', 'No Telepon'];
     const rows = filteredUsers.map((u) => [
       u.id,
-      `"${u.name}"`,
+      `${u.name}`,
       u.email,
       u.role,
-      `"${u.department}"`,
-      `"${u.assignedBranch || 'Jakarta HQ'}"`,
+      `${u.department}`,
+      `${u.assignedBranch || 'Jakarta HQ'}`,
       u.employeeBadge || '',
       u.status || 'ACTIVE',
       u.phone || '',
     ]);
 
-    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `EARMS_Enterprise_Users_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportCsv(`EARMS_Enterprise_Users_${new Date().toISOString().slice(0, 10)}.csv`, headers, rows);
   };
 
   const permissionLabels: { key: keyof UserPermissionMatrix; label: string; desc: string; category: string }[] = [
     { key: 'canViewDashboard', label: 'Lihat Dashboard & Metrik Finansial', desc: 'Akses ringkasan performa dan grafik', category: 'Dasbor' },
+    { key: 'canManageCustomers', label: 'Kelola Data Customer (CRM)', desc: 'Tambah & ubah data pelanggan dan proyek', category: 'Komersial' },
+    { key: 'canManageProducts', label: 'Kelola Katalog Produk & Sparepart', desc: 'Tambah & ubah produk, harga, dan stok', category: 'Aset' },
+    { key: 'canManageDeliveries', label: 'Delivery & Serah Terima Alat', desc: 'Buat surat jalan dan konfirmasi serah terima', category: 'Operasional' },
     { key: 'canManageAssets', label: 'Registrasi & Kelola Aset Alat Berat', desc: 'Input aset baru, cetak barcode aset', category: 'Aset' },
     { key: 'canUploadLegalDocs', label: 'Upload Dokumen Legalitas (STNK, BPKB, SIA)', desc: 'Unggah file izin dan lacak masa berlaku', category: 'Aset & Legal' },
     { key: 'canManageOperators', label: 'Kelola Operator & Dokumen SIO', desc: 'Registrasi operator, upload SIO, dan penugasan alat', category: 'Operasional' },
@@ -1253,7 +1096,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                     className="w-full p-2 border border-slate-300 rounded font-mono text-xs focus:border-slate-800 outline-none"
                   />
                   <span className="text-[10px] text-slate-400 mt-0.5 block">
-                    Minimal 6 karakter jika diisi, atau biarkan kosong untuk random string (cth: ApexPass#4819).
+                    {PASSWORD_POLICY_TEXT} Atau biarkan kosong agar sistem membuat password acak yang aman.
                   </span>
                 </div>
 

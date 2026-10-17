@@ -33,11 +33,16 @@ RUN npm install --omit=dev
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/server ./server
 COPY --from=builder /app/src/types ./src/types
+COPY --from=builder /app/src/shared ./src/shared
 COPY --from=builder /app/server.ts ./server.ts
 
 # Ensure data directory exists
 RUN mkdir -p /app/data
 
 EXPOSE 3000
+
+# Jalankan sebagai user non-root
+RUN chown -R node:node /app
+USER node
 
 CMD ["npx", "tsx", "server.ts"]

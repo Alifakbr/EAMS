@@ -1,3 +1,5 @@
+import { authHeaders } from '../services/api.ts';
+import { exportJson } from '../utils/download.ts';
 import React, { useState } from 'react';
 import { Terminal, Send, CheckCircle2, Copy, Download, Code2, Globe } from 'lucide-react';
 import { openApiSpec } from '../../server/openapi.ts';
@@ -68,7 +70,7 @@ export const ApiExplorerView: React.FC = () => {
         method: selectedMethod.toUpperCase(),
         headers: {
           'Content-Type': 'application/json',
-          'x-user-name': 'REST API Sandbox Explorer',
+          ...authHeaders(),
         },
       };
 
@@ -98,15 +100,7 @@ export const ApiExplorerView: React.FC = () => {
     }
   };
 
-  const handleDownloadSpec = () => {
-    const blob = new Blob([JSON.stringify(openApiSpec, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'apex_eams_openapi_v1.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const handleDownloadSpec = () => exportJson('apex_eams_openapi_v1.json', openApiSpec);
 
   return (
     <div className="space-y-4">

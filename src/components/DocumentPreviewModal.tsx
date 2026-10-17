@@ -1,3 +1,4 @@
+import { exportExcelFromHtml } from '../utils/download.ts';
 import React from 'react';
 import {
   Printer,
@@ -152,15 +153,7 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
       </body>
       </html>
     `;
-    const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
+    exportExcelFromHtml(html, filename);};
 
   const items = data.items || [];
 
