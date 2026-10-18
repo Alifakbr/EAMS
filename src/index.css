@@ -373,3 +373,23 @@
     page-break-before: always;
   }
 }
+
+/* Keep Leaflet map panes below the application header/navbar and modal layers. */
+.leaflet-container { z-index: 0; isolation: isolate; }
+.leaflet-pane, .leaflet-top, .leaflet-bottom { z-index: 5 !important; }
+.leaflet-control { z-index: 6 !important; }
+
+
+/* Fleet GPS print: preserve tile imagery and give the map a predictable landscape canvas. */
+@media print {
+  @page fleetmap { size: A4 landscape; margin: 8mm; }
+  .fleet-gps-map.fleet-print-mode { page: fleetmap; }
+  html, body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  .fleet-gps-map { width: 100% !important; max-width: none !important; overflow: visible !important; break-inside: avoid !important; page-break-inside: avoid !important; border: 1px solid #94a3b8 !important; box-shadow: none !important; }
+  .fleet-gps-map .leaflet-container { width: 100% !important; height: 150mm !important; min-height: 150mm !important; max-height: 150mm !important; background: #e5e7eb !important; overflow: hidden !important; }
+  .fleet-gps-map .leaflet-tile-pane, .fleet-gps-map .leaflet-tile, .fleet-gps-map .leaflet-overlay-pane, .fleet-gps-map .leaflet-marker-pane { visibility: visible !important; opacity: 1 !important; }
+  .fleet-gps-map .leaflet-tile { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  .fleet-gps-map .no-print, .fleet-gps-map button { display: none !important; }
+  .fleet-gps-map h2, .fleet-gps-map p, .fleet-gps-map span { print-color-adjust: exact !important; -webkit-print-color-adjust: exact !important; }
+  .leaflet-control-container { display: none !important; }
+}

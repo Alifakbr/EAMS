@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Asset, AssetStatus, Customer, HeavyEquipmentDocs } from '../types/index.ts';
+import { Asset, AssetStatus, Customer, HeavyEquipmentDocs, HeavyEquipmentComplianceDocument } from '../types/index.ts';
 import { api } from '../services/api.ts';
 import { formatRupiahAmount } from '../shared/currency.tsx';
 import { FleetGpsMap } from './FleetGpsMap.tsx';
@@ -322,6 +322,39 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, customers, onRef
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleSiaFilesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const tooLarge = files.find((file) => file.size > 2 * 1024 * 1024);
+    if (tooLarge) {
+      alert(`File ${tooLarge.name} exceeds the 2 MB per-file limit. Please compress it and upload again.`);
+      e.target.value = '';
+      return;
+    }
+    const existingBytes = (docsModalData.siaDocuments || []).reduce((sum, doc) => sum + Math.floor((doc.fileUrl || '').length * 0.75), 0);
+    if (existingBytes + files.reduce((sum, file) => sum + file.size, 0) > 4 * 1024 * 1024) {
+      alert('SIA attachments are limited to 4 MB total per asset to keep database/API payloads within safe limits.');
+      e.target.value = '';
+      return;
+    }
+    Promise.all(files.map((file) => new Promise<HeavyEquipmentComplianceDocument>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error(`Failed to read ${file.name}`));
+      reader.onload = () => resolve({
+        id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `SIA-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        number: docsModalData.siaNumber || file.name,
+        expiryDate: docsModalData.siaExpiry || '',
+        issuer: docsModalData.siaIssuer || '',
+        fileName: file.name,
+        fileUrl: String(reader.result || ''),
+      });
+      reader.readAsDataURL(file);
+    }))).then((newDocs) => {
+      setDocsModalData((current) => ({ ...current, siaDocuments: [...(current.siaDocuments || []), ...newDocs] }));
+    }).catch((error) => alert(error.message || 'Unable to read one or more SIA files.'));
+    e.target.value = '';
   };
 
   const getStatusBadge = (status: AssetStatus) => {
@@ -736,7 +769,42 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, customers, onRef
                       </span>
                     )}
                   </div>
-                  <span className="text-[10px] text-slate-400">File is securely stored on the centralized ERP server</span>
+                  <span className="text-[10px] text-slate-400">File is stored in the EAMS database file payload; keep each upload below 2 MB.</span>
+                </div>
+                <div className="border-t border-indigo-100 pt-3 space-y-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                      <p className="text-xs font-bold text-indigo-950">Multiple SIA Certificates / Attachments</p>
+                      <p className="text-[11px] text-slate-500">Set the certificate number and expiry date for each file. Reminders are generated within 30 days of expiry.</p>
+                    </div>
+                    <label className="inline-flex shrink-0 items-center justify-center gap-2 rounded border border-indigo-300 bg-white px-3 py-2 text-xs font-semibold text-indigo-800 hover:bg-indigo-50 cursor-pointer">
+                      <Upload className="h-3.5 w-3.5" /> Add multiple files
+                      <input type="file" multiple accept="image/*,application/pdf" onChange={handleSiaFilesUpload} className="hidden" />
+                    </label>
+                  </div>
+                  {(docsModalData.siaDocuments || []).length > 0 ? (
+                    <div className="space-y-2">
+                      {(docsModalData.siaDocuments || []).map((doc, index) => (
+                        <div key={doc.id || `${doc.number}-${index}`} className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end rounded border border-indigo-100 bg-white p-2">
+                          <div className="md:col-span-4 min-w-0">
+                            <label className="block text-[10px] font-semibold text-slate-500 mb-1">Certificate number</label>
+                            <input value={doc.number} onChange={(event) => setDocsModalData((current) => ({ ...current, siaDocuments: (current.siaDocuments || []).map((item, i) => i === index ? { ...item, number: event.target.value } : item) }))} className="w-full min-w-0 rounded border border-slate-300 p-2 text-xs" />
+                          </div>
+                          <div className="md:col-span-3">
+                            <label className="block text-[10px] font-semibold text-slate-500 mb-1">Expiry date</label>
+                            <input type="date" value={doc.expiryDate || ''} onChange={(event) => setDocsModalData((current) => ({ ...current, siaDocuments: (current.siaDocuments || []).map((item, i) => i === index ? { ...item, expiryDate: event.target.value } : item) }))} className="w-full min-w-0 rounded border border-slate-300 p-2 text-xs" />
+                          </div>
+                          <div className="md:col-span-3 min-w-0">
+                            <span className="block text-[10px] font-semibold text-slate-500 mb-1">File</span>
+                            {doc.fileUrl ? <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="block truncate text-xs text-indigo-700 underline">{doc.fileName || 'Open document'}</a> : <span className="text-xs text-slate-500">{doc.fileName || 'No file attached'}</span>}
+                          </div>
+                          <div className="md:col-span-2">
+                            <button type="button" onClick={() => setDocsModalData((current) => ({ ...current, siaDocuments: (current.siaDocuments || []).filter((_, i) => i !== index) }))} className="w-full rounded border border-rose-200 px-2 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50">Remove</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : <p className="text-xs text-slate-400">No additional SIA files uploaded yet.</p>}
                 </div>
               </div>
 
@@ -805,6 +873,10 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, customers, onRef
                       placeholder="BPKB-A-8829104"
                       className="w-full p-2 border border-slate-300 rounded font-mono bg-white"
                     />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">BPKB Document Expiry (if applicable)</label>
+                    <input type="date" value={docsModalData.bpkbExpiry || ''} onChange={(e) => setDocsModalData({ ...docsModalData, bpkbExpiry: e.target.value })} className="w-full p-2 border border-slate-300 rounded font-mono bg-white" />
                   </div>
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">Issuing Authority / Police Department</label>

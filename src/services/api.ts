@@ -260,6 +260,11 @@ export const api = {
     }),
   logout: () => request<{ message: string }>('/auth/logout', { method: 'POST' }),
   downloadBackup: () => fetchBlob('/system/backup'),
+  restoreBackup: (data: unknown) => request<{ message: string }>('/system/restore', { method: 'POST', body: JSON.stringify(data) }),
+  getDataTables: () => request<{ data: { key: string; count: number }[] }>('/system/data-tables'),
+  exportTables: (tables: string[]) => fetchBlob(`/system/export-tables?tables=${encodeURIComponent(tables.join(','))}`),
+  importTables: (data: unknown) => request<{ message: string; importedTables: string[] }>('/system/import-tables', { method: 'POST', body: JSON.stringify(data) }),
+  clearBusinessData: () => request<{ message: string }>('/system/clear-business-data', { method: 'POST' }),
 
   // Notifications
   getNotifications: () => request<{ data: any[]; total: number; unreadCount: number }>('/notifications'),

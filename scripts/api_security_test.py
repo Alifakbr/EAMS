@@ -85,6 +85,16 @@ for g in gets:
 bk=call('GET','/system/backup',AT)
 check('backup ok & no hashes', bk.status_code==200 and 'passwordHash' not in bk.text and 'scrypt$' not in bk.text)
 
+# --- selective migration and destructive reset safety
+check('data table list allowed for IT', call('GET','/system/data-tables',AT).status_code==200)
+check('data table list denied to executive', call('GET','/system/data-tables',toks['EXECUTIVE']).status_code==403)
+ex=call('GET','/system/export-tables?tables=assets,users',AT)
+check('selective export returns EAMS package', ex.status_code==200 and ex.json().get('format')=='EAMS_TABLE_EXPORT')
+check('selective export excludes password hashes', ex.status_code==200 and 'passwordHash' not in ex.text and 'scrypt$' not in ex.text)
+check('invalid table export rejected', call('GET','/system/export-tables?tables=unknown',AT).status_code==400)
+check('selective import denied to executive', call('POST','/system/import-tables',toks['EXECUTIVE'],{'tables':{'assets':[]}}).status_code==403)
+check('clear business data denied to executive', call('POST','/system/clear-business-data',toks['EXECUTIVE']).status_code==403)
+
 # --- user admin flows
 r=call('POST','/auth/users',AT,{'name':'Tester Baru','email':'tester@apex-industrial.com','role':'SALES_MARKETING','permissions':{'canManageUsers':True}})
 check('create user 201', r.status_code==201, r.text)

@@ -304,3 +304,7 @@ Pada macOS/Linux, gunakan `python3 -m pip install requests` dan `python3 scripts
 - [Panduan Pengguna](USER_GUIDE.md)
 - [Keamanan dan Hak Akses](SECURITY_AND_ACCESS.md)
 - [Backup dan Restore](BACKUP_RESTORE.md)
+
+## Pembaruan Oktober 2026
+
+Untuk detail revisi alur penjualan, rental, notifikasi SIA, branding, kategori jabatan, import backup, dan perbaikan responsivitas, lihat [Revisi EAMS Oktober 2026](REVISI_EAMS_2026-10.md). Pengingat penting: database versi ini disimpan dalam JSON di `data/eams_db.json`; jangan menganggapnya PostgreSQL. Simpan file `.env` dan data runtime sebagai konfigurasi/volume terpisah, bukan bagian source code yang dibagikan.

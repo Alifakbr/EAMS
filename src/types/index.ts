@@ -67,7 +67,17 @@ export interface AssetDisposition {
   customerId?: string;
   customerName?: string;
   invoiceId?: string;
+  sourceSalesOrderId?: string;
   notes?: string;
+}
+
+export interface HeavyEquipmentComplianceDocument {
+  id: string;
+  number: string;
+  expiryDate: string;
+  issuer?: string;
+  fileName?: string;
+  fileUrl?: string;
 }
 
 export interface HeavyEquipmentDocs {
@@ -78,12 +88,14 @@ export interface HeavyEquipmentDocs {
   bpkbNumber?: string;
   bpkbFileUrl?: string;
   bpkbFileName?: string;
+  bpkbExpiry?: string;
   bpkbIssuer?: string;
   siaNumber?: string; // Surat Ijin Alat (Kemenaker / Disnaker)
   siaExpiry?: string;
   siaFileUrl?: string;
   siaFileName?: string;
   siaIssuer?: string;
+  siaDocuments?: HeavyEquipmentComplianceDocument[];
   chassisNumber?: string; // Nomor Rangka
   engineNumber?: string; // Nomor Mesin
   plateNumber?: string; // Nomor Polisi Plat Kuning/Hitam
@@ -261,7 +273,8 @@ export interface Customer {
   createdAt: string;
 }
 
-export type QuotationStatus = 'DRAFT' | 'PENDING_APPROVAL' | 'APPROVED' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED' | 'CONVERTED';
+export type QuotationStatus = 'DRAFT' | 'PENDING_APPROVAL' | 'APPROVED' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED' | 'CONVERTED' | 'CANCELLED';
+export type CommercialTransactionType = 'SALE' | 'RENTAL';
 export type RentalRateModel = 'REGULAR' | 'LUMPSUM';
 
 export interface QuotationItem {
@@ -298,6 +311,7 @@ export interface Quotation {
   date: string;
   validUntil: string;
   salespersonName: string;
+  transactionType?: CommercialTransactionType;
   status: QuotationStatus;
   items: QuotationItem[];
   subtotal: number;
@@ -307,6 +321,7 @@ export interface Quotation {
   demobilizationTotal?: number;
   grandTotal: number;
   notes?: string;
+  remarks?: string;
   termsAndConditions: string;
   approvedBy?: string;
   approvalDate?: string;
@@ -327,6 +342,7 @@ export interface SalesOrder {
   orderNumber: string; // e.g. SO-2026-0105
   quotationId?: string;
   quotationReference?: string; // Nomor Quotation rujukan e.g. QT-2026-0042
+  transactionType?: CommercialTransactionType;
   customerId: string;
   customerName: string;
   customerPoReference: string;
@@ -347,6 +363,8 @@ export interface SalesOrder {
   cancellationReason?: string;
   deliveryOrderId?: string;
   invoiceId?: string;
+  rentalContractId?: string;
+  remarks?: string;
 }
 
 export type RentalStatus = 'QUOTATION' | 'PENDING_APPROVAL' | 'RESERVED' | 'ACTIVE' | 'OVERDUE' | 'RETURNED' | 'INSPECTED' | 'SETTLED' | 'CANCELLED';
@@ -372,6 +390,8 @@ export interface RentalItem {
 export interface RentalContract {
   id: string;
   contractNumber: string; // e.g. RC-2026-0019
+  salesOrderId?: string;
+  deliveryId?: string;
   customerId: string;
   customerName: string;
   customerContact: string;
@@ -380,6 +400,8 @@ export interface RentalContract {
   startDate: string;
   expectedReturnDate: string;
   actualReturnDate?: string;
+  mobilizationDate?: string;
+  demobilizationDate?: string;
   securityDeposit: number;
   deliveryFee: number;
   pickupFee: number;
@@ -624,6 +646,9 @@ export interface SystemSettings {
   paymentPrefix: string;
   deliveryPrefix: string;
   strictAssetLocking: boolean;
+  logoDataUrl?: string;
+  faviconDataUrl?: string;
+  jobPositionCategories?: string[];
 }
 
 export interface AppNotification {

@@ -49,3 +49,16 @@ Sesudahnya periksa `http://localhost:3000/api/health` dan validasi data dari UI.
 ## Reset Data Demo
 
 Endpoint reset hanya untuk lingkungan uji dan tetap memerlukan akses Settings. Di production endpoint ditolak kecuali `ALLOW_DEMO_RESET=true`; jangan aktifkan untuk penggunaan normal. Reset mengganti data bisnis dengan seed tetapi mempertahankan akun pengguna. Detail konfigurasi ada di [Panduan Lengkap](PANDUAN_LENGKAP.md#8-backup-dan-restore).
+
+## Import dari UI Settings
+
+Versi revisi menyediakan tombol **Import Backup (.json)** di menu Settings. Pilih file backup EAMS, tinjau konfirmasi, lalu jalankan restore. Backend mempertahankan user/password saat ini dan memulihkan koleksi bisnis dari backup. UI membatasi file import sampai 8 MB; batas payload API tetap mengikuti konfigurasi Express (`10mb`), sehingga file besar dapat ditolak oleh server dan harus dipulihkan melalui prosedur file database/volume pada instance uji.
+
+**Catatan:** jangan menggunakan backup dari versi skema yang tidak kompatibel pada produksi tanpa menguji restore pada salinan database terlebih dahulu.
+
+
+## Selective table export/import
+
+The IT-only endpoints `GET /system/data-tables`, `GET /system/export-tables?tables=assets,customers`, and `POST /system/import-tables` support migration of selected collections. Export format: `{ "format": "EAMS_TABLE_EXPORT", "version": 1, "tables": { "assets": [] } }`. Only keys returned by `/system/data-tables` are accepted. The `users` export contains public metadata and never exports password hashes; importing user metadata only updates existing accounts and preserves their stored credentials. Import replaces each selected non-user collection, so create a full backup before importing.
+
+`POST /system/clear-business-data` clears operational records but preserves users and system settings. It is restricted to IT Administrator and blocked in production unless `ALLOW_DEMO_RESET=true`. This safeguard exists for isolated test environments only.

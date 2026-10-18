@@ -1,6 +1,6 @@
 import { exportExcelFromHtml } from '../utils/download.ts';
 import React, { useState } from 'react';
-import { Quotation, Customer, Product, Asset, UserRole, RentalRateModel } from '../types/index.ts';
+import { Quotation, Customer, Product, Asset, UserRole, RentalRateModel, CommercialTransactionType } from '../types/index.ts';
 import { api } from '../services/api.ts';
 import { formatRupiahAmount } from '../shared/currency.tsx';
 import {
@@ -60,8 +60,10 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
   onRefresh,
   onNavigateToOrder,
 }) => {
+  const availableAssets = assets.filter((asset) => asset.status === 'AVAILABLE');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedPreviewQuote, setSelectedPreviewQuote] = useState<Quotation | null>(null);
+  const [transactionType, setTransactionType] = useState<CommercialTransactionType>('RENTAL');
 
   // Form State
   const [selectedCustomerId, setSelectedCustomerId] = useState(customers[0]?.id || '');
@@ -76,10 +78,10 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
     {
       productId: products[0]?.id || 'PRD-101',
       productName: products[0]?.name || 'Excavator Komatsu PC200-8',
-      equipmentNumber: assets[0]?.assetTag || 'AST-10024',
-      equipmentType: 'Hydraulic Excavator 20-Ton',
+      equipmentNumber: availableAssets[0]?.assetTag || '',
+      equipmentType: availableAssets[0] ? `${availableAssets[0].category} ${availableAssets[0].model}` : 'Heavy Equipment',
       rateModel: 'REGULAR',
-      rentalRate: 4500,
+      rentalRate: availableAssets[0]?.monthlyRentalRate || 0,
       quantity: 1,
       mobilizationFee: 0,
       demobilizationFee: 0,
@@ -87,21 +89,21 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
       demobilizationDate: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
       discountPercent: 0,
       taxRatePercent: 11,
-      assignedAssetId: assets[0]?.id,
+      assignedAssetId: availableAssets[0]?.id,
     },
   ]);
 
   const handleAddItem = () => {
-    const nextAsset = assets[items.length % assets.length] || assets[0];
+    const nextAsset = availableAssets[items.length % Math.max(availableAssets.length, 1)] || availableAssets[0];
     setItems([
       ...items,
       {
         productId: products[0]?.id || `PRD-${Date.now()}`,
         productName: nextAsset ? nextAsset.name : 'Heavy Equipment Unit',
-        equipmentNumber: nextAsset ? nextAsset.assetTag : `AST-${10025 + items.length}`,
+        equipmentNumber: nextAsset?.assetTag || '',
         equipmentType: nextAsset ? `${nextAsset.category} - ${nextAsset.model}` : 'Heavy Machinery',
         rateModel: 'REGULAR',
-        rentalRate: nextAsset ? nextAsset.monthlyRentalRate : 4000,
+        rentalRate: nextAsset ? (transactionType === 'SALE' ? (nextAsset.sellPrice || nextAsset.purchaseCost) : nextAsset.monthlyRentalRate) : 0,
         quantity: 1,
         mobilizationFee: 750,
         demobilizationFee: 750,
@@ -130,12 +132,29 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
       if (matched) {
         updated[index].equipmentType = `${matched.category} ${matched.model}`;
         updated[index].productName = matched.name;
-        updated[index].rentalRate = matched.monthlyRentalRate;
+        updated[index].rentalRate = transactionType === 'SALE'
+          ? (matched.sellPrice || matched.purchaseCost)
+          : matched.monthlyRentalRate;
         updated[index].assignedAssetId = matched.id;
       }
     }
 
     setItems(updated);
+  };
+
+  const handleTransactionTypeChange = (value: CommercialTransactionType) => {
+    setTransactionType(value);
+    setItems((current) => current.map((item) => {
+      const asset = availableAssets.find((candidate) => candidate.id === item.assignedAssetId);
+      return {
+        ...item,
+        quantity: value === 'SALE' ? 1 : item.quantity,
+        rentalRate: asset
+          ? (value === 'SALE' ? (asset.sellPrice || asset.purchaseCost) : asset.monthlyRentalRate)
+          : item.rentalRate,
+        demobilizationFee: value === 'SALE' ? 0 : item.demobilizationFee,
+      };
+    }));
   };
 
   // Calculations
@@ -181,9 +200,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
 
       await api.createQuotation({
         customerId: selectedCustomerId,
+        transactionType,
         items: payloadItems,
         validUntil,
         notes,
+        remarks: notes,
         termsAndConditions: terms,
       });
 
@@ -223,7 +244,7 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
     try {
       const order = await api.convertToOrder(quote.id, {
         customerPoReference: poRef,
-        shippingFee: quote.mobilizationTotal || 0,
+        shippingFee: 0,
       });
       alert(
         `Quotation ${quote.quotationNumber} was successfully converted to Sales Order ${order.orderNumber}! The sales order and quotation are now linked, equipment has been allocated, and mobilization can be scheduled.`

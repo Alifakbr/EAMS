@@ -199,7 +199,7 @@ export const ACL: Rule[] = [
   // Administrasi IT
   { methods: ALLM, path: /^\/auth\/users(\/.*)?$/, access: ['user-management'] },
   { methods: GET, path: /^\/system\/run-tests$/, access: ['test-runner'] },
-  { methods: ALLM, path: /^\/system\/(backup|restore|reset-demo)$/, access: ['settings'] },
+  { methods: ALLM, path: /^\/system\/(backup|restore|reset-demo|data-tables|export-tables|import-tables|clear-business-data)$/, access: ['settings'] },
   { methods: GET, path: /^\/openapi\.json$/, access: ['api-explorer'] },
   { methods: GET, path: /^\/audit-logs$/, access: ['dashboard', 'settings', 'user-management'] },
   { methods: ['PATCH'], path: /^\/settings$/, access: ['settings'] },
@@ -225,6 +225,7 @@ export const ACL: Rule[] = [
 
   // Quotations & Sales
   { methods: ['POST'], path: /^\/quotations\/[^/]+\/convert-to-order$/, access: ['quotations', 'sales'] },
+  { methods: ['POST'], path: /^\/sales-orders\/[^/]+\/book-rental$/, access: ['assets'] },
   { methods: GET, path: /^\/quotations$/, access: ['quotations', 'sales', 'dashboard'], roles: ['MANAGER'] },
   { methods: WRITE, path: /^\/quotations(\/.*)?$/, access: ['quotations'] },
   { methods: GET, path: /^\/sales-orders$/, access: ['sales', 'quotations', 'deliveries', 'invoices', 'dashboard'], roles: ['MANAGER'] },

@@ -149,6 +149,10 @@ apiRouter.post('/manager/approvals/:type/:id/:decision', (req: Request, res: Res
             asset.currentCustomerName = null;
           }
         });
+        if (!approved && item.quotationId) {
+          const quotation = db.getQuotations().find((row) => row.id === item.quotationId);
+          if (quotation) quotation.status = 'CANCELLED';
+        }
         return item;
       }
       if (type === 'rental') {
@@ -156,11 +160,11 @@ apiRouter.post('/manager/approvals/:type/:id/:decision', (req: Request, res: Res
         if (!item) throw new Error('Rental contract not found.');
         currentStatus = item.status;
         if (currentStatus !== 'PENDING_APPROVAL') throw new Error('Rental contract is no longer awaiting approval.');
-        item.status = approved ? 'ACTIVE' : 'CANCELLED';
+        item.status = approved ? 'RESERVED' : 'CANCELLED';
         item.items.forEach((line) => {
           const asset = db.getAssets().find((row) => row.id === line.assetId);
           if (!asset) return;
-          if (approved && asset.status === 'RESERVED') asset.status = 'RENTED';
+          if (approved && asset.status !== 'RESERVED') throw new Error(`Asset ${asset.assetTag} is no longer reserved for this contract.`);
           if (!approved && asset.activeRentalContractId === item.id) {
             asset.status = 'AVAILABLE';
             asset.currentCustomerId = null;
@@ -495,6 +499,7 @@ const visibleNotifications = (req: Request) => {
 };
 
 apiRouter.get('/notifications', (req: Request, res: Response) => {
+  syncComplianceExpiryNotifications();
   const all = visibleNotifications(req);
   const unreadCount = all.filter((n) => !n.isRead).length;
   res.json({
@@ -772,7 +777,54 @@ apiRouter.patch('/products/:id', (req: Request, res: Response) => {
 // ==========================================
 // 3. ASSET REGISTRY (COMPANY & COMMERCIAL)
 // ==========================================
+const syncComplianceExpiryNotifications = (): void => {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const notifications = db.getNotifications();
+  let changed = false;
+  const queue: Array<{id:string; label:string; number:string; expiryDate:string; assetId:string; assetTag:string; assetName:string; category:'LEGAL'|'OPERATOR'}> = [];
+  for (const asset of db.getAssets()) {
+    const docs = asset.legalDocs;
+    if (!docs) continue;
+    const add = (id: string, label: string, number: string | undefined, expiryDate: string | undefined) => {
+      if (expiryDate) queue.push({ id, label, number: number || label, expiryDate, assetId: asset.id, assetTag: asset.assetTag, assetName: asset.name, category: 'LEGAL' });
+    };
+    add(`stnk-${asset.id}`, 'STNK', docs.stnkNumber, docs.stnkExpiry);
+    add(`bpkb-${asset.id}`, 'BPKB', docs.bpkbNumber, (docs as any).bpkbExpiry);
+    add(`inspection-${asset.id}`, 'K3 inspection', undefined, docs.nextInspectionDue);
+    (docs.siaDocuments || []).forEach((doc) => add(`sia-${asset.id}-${doc.id}`, 'SIA', doc.number, doc.expiryDate));
+    if (docs.siaExpiry && !(docs.siaDocuments || []).some((doc) => doc.expiryDate === docs.siaExpiry)) add(`sia-legacy-${asset.id}`, 'SIA', docs.siaNumber, docs.siaExpiry);
+  }
+  for (const operator of db.getOperators()) {
+    if (operator.sioExpiry) queue.push({ id: `sio-${operator.id}`, label: 'SIO', number: operator.sioNumber, expiryDate: operator.sioExpiry, assetId: operator.id, assetTag: operator.badgeNumber, assetName: operator.name, category: 'OPERATOR' });
+  }
+  for (const doc of queue) {
+    const expiry = new Date(`${doc.expiryDate}T00:00:00`);
+    if (Number.isNaN(expiry.getTime())) continue;
+    const days = Math.ceil((expiry.getTime() - today.getTime()) / 86400000);
+    if (days > 30) continue;
+    const notificationId = `NTF-COMPLIANCE-EXPIRY-${doc.id}`.replace(/[^a-zA-Z0-9_-]/g, '-');
+    const severity = days < 0 || days <= 7 ? 'CRITICAL' : 'WARNING';
+    const title = days < 0 ? `${doc.label} expired: ${doc.assetTag}` : `${doc.label} expiry approaching: ${doc.assetTag}`;
+    const message = days < 0
+      ? `${doc.label} ${doc.number} for ${doc.assetName} expired ${Math.abs(days)} day(s) ago (${doc.expiryDate}). Renew before operation/dispatch.`
+      : `${doc.label} ${doc.number} for ${doc.assetName} expires in ${days} day(s) on ${doc.expiryDate}. Start renewal now.`;
+    const existing = notifications.find((item) => item.id === notificationId);
+    if (existing) {
+      if (existing.message !== message || existing.severity !== severity || existing.title !== title) {
+        existing.title = title; existing.message = message; existing.severity = severity; existing.timestamp = new Date().toISOString();
+        if (severity === 'CRITICAL') existing.isRead = false;
+        changed = true;
+      }
+    } else {
+      db.addNotification({ id: notificationId, timestamp: new Date().toISOString(), sourceDepartment: 'Compliance Monitor', sourceUserName: 'EAMS Compliance Monitor', title, message, category: 'LEGAL', severity, targetRoles: doc.category === 'OPERATOR' ? ['MANAGEMENT_OPERATION', 'MANAGER', 'EXECUTIVE'] : ['ASSET_CONTROL', 'MANAGER', 'EXECUTIVE'], relatedEntity: doc.category === 'OPERATOR' ? 'OPERATOR' : 'ASSET', relatedEntityId: doc.assetId, targetTab: doc.category === 'OPERATOR' ? 'maintenance' : 'assets', isRead: false });
+      changed = true;
+    }
+  }
+  if (changed) db.save();
+};
+
 apiRouter.get('/assets', (req: Request, res: Response) => {
+  syncComplianceExpiryNotifications();
   const { status, category, search } = req.query;
   let assets = db.getAssets();
 
@@ -1207,7 +1259,8 @@ apiRouter.get('/quotations', (req: Request, res: Response) => {
 
 apiRouter.post('/quotations', (req: Request, res: Response) => {
   try {
-    const { customerId, items, validUntil, termsAndConditions, notes, salespersonName } = req.body;
+    const { customerId, items, validUntil, termsAndConditions, notes, remarks, salespersonName } = req.body;
+    const transactionType = req.body.transactionType === 'SALE' ? 'SALE' : 'RENTAL';
     const customer = db.getCustomers().find((c) => c.id === customerId);
     if (!customer) return res.status(404).json({ error: 'Customer not found' });
     if (!items || !items.length) return res.status(400).json({ error: 'Quotation must have at least one line item' });
@@ -1218,6 +1271,7 @@ apiRouter.post('/quotations', (req: Request, res: Response) => {
       let discountTotalCents = 0;
       let mobTotalCents = 0;
       let demobTotalCents = 0;
+      const reservedAssetIds = new Set<string>();
 
       const quotationItems: QuotationItem[] = items.map((rawItem: any, index: number) => {
         const prod = db.getProducts().find((p) => p.id === rawItem.productId);
@@ -1237,6 +1291,15 @@ apiRouter.post('/quotations', (req: Request, res: Response) => {
         demobTotalCents += toCents(demobFee);
 
         const asset = rawItem.assignedAssetId ? db.getAssets().find(a => a.id === rawItem.assignedAssetId) : undefined;
+        if (rawItem.assignedAssetId && !asset) throw new Error('Selected asset was not found.');
+        if (asset) {
+          if (asset.status !== 'AVAILABLE') throw new Error(`Asset ${asset.assetTag} is not available for quotation.`);
+          if (reservedAssetIds.has(asset.id)) throw new Error(`Asset ${asset.assetTag} is selected more than once.`);
+          reservedAssetIds.add(asset.id);
+        }
+        if (transactionType === 'SALE' && (!asset || qty !== 1)) {
+          throw new Error('Sale quotations require one available serialized asset per line.');
+        }
 
         return {
           id: `QTI-${Date.now()}-${index}`,
@@ -1275,6 +1338,7 @@ apiRouter.post('/quotations', (req: Request, res: Response) => {
         date: new Date().toISOString().split('T')[0],
         validUntil: validUntil || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
         salespersonName: salespersonName || 'Commercial Sales Rep',
+        transactionType,
         status: 'PENDING_APPROVAL',
         items: quotationItems,
         subtotal: fromCents(subtotalCents),
@@ -1284,6 +1348,7 @@ apiRouter.post('/quotations', (req: Request, res: Response) => {
         demobilizationTotal: fromCents(demobTotalCents),
         grandTotal: fromCents(grandTotalCents),
         notes: notes || '',
+        remarks: typeof remarks === 'string' ? remarks : (notes || ''),
         termsAndConditions: termsAndConditions || 'Standard commercial terms Net 30 days. Valid for 30 calendar days.',
       };
 
@@ -1360,6 +1425,9 @@ apiRouter.post('/quotations/:id/accept', (req: Request, res: Response) => {
 apiRouter.post('/quotations/:id/convert-to-order', (req: Request, res: Response) => {
   const quote = db.getQuotations().find((q) => q.id === req.params.id);
   if (!quote) return res.status(404).json({ error: 'Quotation not found' });
+  if (quote.status !== 'APPROVED' && quote.status !== 'ACCEPTED') {
+    return res.status(409).json({ error: 'Quotation must be approved and accepted before conversion to a Sales Order.' });
+  }
 
   try {
     const order = db.transaction(() => {
@@ -1376,7 +1444,7 @@ apiRouter.post('/quotations/:id/convert-to-order', (req: Request, res: Response)
       quote.items.forEach((item) => {
         if (item.assignedAssetId) {
           const asset = db.getAssets().find((a) => a.id === item.assignedAssetId);
-          if (asset && asset.status !== 'AVAILABLE' && asset.status !== 'RESERVED') {
+          if (asset && asset.status !== 'AVAILABLE') {
             throw new Error(`Asset ${asset.assetTag} (${asset.name}) is currently ${asset.status} and cannot be allocated.`);
           }
           if (asset) {
@@ -1393,6 +1461,7 @@ apiRouter.post('/quotations/:id/convert-to-order', (req: Request, res: Response)
         orderNumber,
         quotationId: quote.id,
         quotationReference: quote.quotationNumber, // Direct integration: Quotation number linked to Sales Order
+        transactionType: quote.transactionType || 'RENTAL',
         customerId: customer.id,
         customerName: customer.name,
         customerPoReference: req.body.customerPoReference || `PO-${customer.customerCode}-${Date.now().toString().slice(-4)}`,
@@ -1414,6 +1483,7 @@ apiRouter.post('/quotations/:id/convert-to-order', (req: Request, res: Response)
         grandTotal: quote.grandTotal + (Number(req.body.shippingFee) || 0),
         invoicedAmount: 0,
         paidAmount: 0,
+        remarks: quote.remarks || quote.notes || '',
       };
 
       quote.status = 'CONVERTED';
@@ -1458,7 +1528,7 @@ apiRouter.get('/sales-orders', (req: Request, res: Response) => {
 
 apiRouter.post('/sales-orders', (req: Request, res: Response) => {
   try {
-    const { customerId, items, customerPoReference, targetDeliveryDate, shippingFee } = req.body;
+    const { customerId, items, customerPoReference, targetDeliveryDate, shippingFee, remarks } = req.body;
     const customer = db.getCustomers().find((c) => c.id === customerId);
     if (!customer) return res.status(404).json({ error: 'Customer not found' });
     if (!items || !items.length) return res.status(400).json({ error: 'Order must contain items' });
@@ -1526,6 +1596,7 @@ apiRouter.post('/sales-orders', (req: Request, res: Response) => {
         customerId: customer.id,
         customerName: customer.name,
         customerPoReference: customerPoReference || `PO-${Date.now().toString().slice(-5)}`,
+        transactionType: 'SALE',
         orderDate: new Date().toISOString().split('T')[0],
         targetDeliveryDate: targetDeliveryDate || new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
         deliveryAddress: customer.deliveryAddress,
@@ -1538,6 +1609,7 @@ apiRouter.post('/sales-orders', (req: Request, res: Response) => {
         grandTotal: fromCents(grandTotalCents),
         invoicedAmount: 0,
         paidAmount: 0,
+        remarks: typeof remarks === 'string' ? remarks : '',
       };
 
       db.getSalesOrders().unshift(order);
@@ -1562,6 +1634,13 @@ apiRouter.post('/sales-orders/:id/cancel', (req: Request, res: Response) => {
   if (order.status === 'COMPLETED' || order.status === 'DELIVERED') {
     return res.status(400).json({ error: 'Cannot cancel an already completed or delivered order' });
   }
+  if (order.rentalContractId) {
+    return res.status(409).json({ error: 'Cancel or settle the linked rental contract before cancelling this Sales Order.' });
+  }
+  const linkedInvoices = db.getInvoices().filter((invoice) => invoice.relatedSourceType === 'SALES_ORDER' && invoice.relatedSourceId === order.id);
+  if (linkedInvoices.some((invoice) => invoice.paidAmount > 0 || ['ISSUED', 'PARTIALLY_PAID', 'PAID'].includes(invoice.status))) {
+    return res.status(409).json({ error: 'A Sales Order with an issued or paid invoice cannot be cancelled. Resolve the invoice first.' });
+  }
 
   try {
     db.transaction(() => {
@@ -1579,6 +1658,11 @@ apiRouter.post('/sales-orders/:id/cancel', (req: Request, res: Response) => {
 
       order.status = 'CANCELLED';
       order.cancellationReason = reason;
+      if (order.quotationId) {
+        const quotation = db.getQuotations().find((item) => item.id === order.quotationId);
+        if (quotation) quotation.status = 'CANCELLED';
+      }
+      linkedInvoices.forEach((invoice) => { invoice.status = 'CANCELLED'; });
       db.logAudit(actorName(req), 'SALES_ORDER_CANCELLED', 'SALES_ORDER', order.id, `Cancelled ${order.orderNumber}. Reason: ${reason}`);
     });
 
@@ -1587,6 +1671,135 @@ apiRouter.post('/sales-orders/:id/cancel', (req: Request, res: Response) => {
     res.status(400).json({ error: err.message });
   }
 });
+
+apiRouter.post('/sales-orders/:id/book-rental', (req: Request, res: Response) => {
+  const order = db.getSalesOrders().find((item) => item.id === req.params.id);
+  if (!order) return res.status(404).json({ error: 'Sales Order not found.' });
+  if (order.transactionType !== 'RENTAL') return res.status(409).json({ error: 'Only rental Sales Orders can be booked as rental contracts.' });
+  if (order.status !== 'CONFIRMED' && order.status !== 'ALLOCATED') {
+    return res.status(409).json({ error: 'Sales Order must be approved before Asset Control can book the rental.' });
+  }
+  if (order.rentalContractId) return res.status(409).json({ error: 'This Sales Order already has a rental contract.' });
+
+  const customer = db.getCustomers().find((item) => item.id === order.customerId);
+  if (!customer) return res.status(404).json({ error: 'Customer not found for Sales Order.' });
+  const orderAssetLines = order.items.filter((item) => item.allocatedAssetTag);
+  if (!orderAssetLines.length) return res.status(409).json({ error: 'The Sales Order has no assigned serialized equipment.' });
+
+  try {
+    const contract = db.transaction(() => {
+      const contractNumber = `${db.getSettings().rentalPrefix}${String(db.getRentals().length + 1).padStart(3, '0')}`;
+      const rateType = (req.body?.rateType || 'MONTHLY') as 'DAILY' | 'WEEKLY' | 'MONTHLY';
+      const durationUnits = Math.max(1, Number(req.body?.durationUnits) || 1);
+      const startDate = order.items.find((item) => item.mobilizationDate)?.mobilizationDate || order.targetDeliveryDate;
+      const expectedReturnDate = order.items.find((item) => item.demobilizationDate)?.demobilizationDate || (() => {
+        const date = new Date(startDate);
+        if (rateType === 'DAILY') date.setDate(date.getDate() + durationUnits);
+        else if (rateType === 'WEEKLY') date.setDate(date.getDate() + durationUnits * 7);
+        else date.setMonth(date.getMonth() + durationUnits);
+        return date.toISOString().split('T')[0];
+      })();
+      let subtotalCents = 0;
+      const rentalItems: RentalItem[] = orderAssetLines.map((line) => {
+        const asset = db.getAssets().find((item) => item.assetTag === line.allocatedAssetTag || item.id === line.allocatedAssetTag);
+        if (!asset || asset.status !== 'RESERVED' || asset.currentCustomerId !== customer.id) {
+          throw new Error(`Asset ${line.allocatedAssetTag} is no longer reserved for this customer.`);
+        }
+        const unitRate = Number(line.rentalRate || line.unitPrice) || 0;
+        const lineSubtotalCents = toCents(unitRate) * durationUnits;
+        subtotalCents += lineSubtotalCents;
+        asset.activeRentalContractId = contractNumber;
+        return {
+          assetId: asset.id,
+          assetTag: asset.assetTag,
+          assetName: asset.name,
+          serialNumber: asset.serialNumber,
+          rateType,
+          unitRate,
+          durationUnits,
+          startDate,
+          expectedReturnDate,
+          lineSubtotal: fromCents(lineSubtotalCents),
+        };
+      });
+      const taxCents = Math.round(subtotalCents * (db.getSettings().defaultTaxRatePercent / 100));
+      const deliveryFee = order.mobilizationTotal || order.shippingFee || 0;
+      const pickupFee = order.demobilizationTotal || 0;
+      const contract: RentalContract = {
+        id: contractNumber,
+        contractNumber,
+        salesOrderId: order.id,
+        customerId: customer.id,
+        customerName: customer.name,
+        customerContact: customer.contacts[0]?.phone || '',
+        status: 'PENDING_APPROVAL',
+        items: rentalItems,
+        startDate,
+        expectedReturnDate,
+        securityDeposit: Number(req.body?.securityDeposit) || 0,
+        deliveryFee,
+        pickupFee,
+        subtotal: fromCents(subtotalCents),
+        taxAmount: fromCents(taxCents),
+        grandTotal: fromCents(subtotalCents + taxCents + toCents(deliveryFee) + toCents(pickupFee)),
+        depositStatus: 'HELD',
+        lateReturnFee: 0,
+        damageTotal: 0,
+        notes: order.remarks || `Booked from Sales Order ${order.orderNumber}.`,
+      };
+      order.rentalContractId = contract.id;
+      order.status = 'ALLOCATED';
+      db.getRentals().unshift(contract);
+      db.logAudit(actorName(req), 'RENTAL_BOOKED_FROM_SO', 'RENTAL_CONTRACT', contract.id, `Booked ${contract.contractNumber} from Sales Order ${order.orderNumber}.`);
+      db.addNotification({
+        id: `NTF-RENTAL-BOOK-${contract.id}`,
+        timestamp: new Date().toISOString(),
+        sourceDepartment: 'Asset Control',
+        sourceUserName: actorName(req),
+        title: `Rental booking awaiting approval: ${contract.contractNumber}`,
+        message: `Rental contract ${contract.contractNumber} was booked from Sales Order ${order.orderNumber} and awaits Manager approval before mobilization.`,
+        category: 'OPERATIONAL',
+        severity: 'INFO',
+        targetRoles: ['MANAGER', 'ASSET_CONTROL', 'MANAGEMENT_OPERATION'],
+        relatedEntity: 'RENTAL_CONTRACT',
+        relatedEntityId: contract.id,
+        targetTab: 'manager-approvals',
+        isRead: false,
+      });
+      return contract;
+    });
+    res.status(201).json(contract);
+  } catch (err: any) {
+    orderAssetLines.forEach((line) => {
+      const conflict = db.getAssets().find((asset) => (asset.assetTag === line.allocatedAssetTag || asset.id === line.allocatedAssetTag) && asset.status === 'RENTED');
+      if (conflict) notifyRentalAllocationConflict(conflict, actorName(req));
+    });
+    res.status(409).json({ error: err.message });
+  }
+});
+
+const notifyRentalAllocationConflict = (asset: Asset, actor: string): void => {
+  const dayKey = new Date().toISOString().slice(0, 10);
+  const id = `NTF-RENTAL-CONFLICT-${asset.id}-${dayKey}`;
+  if (db.getNotifications().some((item) => item.id === id)) return;
+  db.addNotification({
+    id,
+    timestamp: new Date().toISOString(),
+    sourceDepartment: 'Asset Control',
+    sourceUserName: actor,
+    title: `Rental booking blocked: ${asset.assetTag} is on rental`,
+    message: `A new rental allocation was attempted for ${asset.assetTag} (${asset.name}), which is currently ${asset.status}. Complete demobilization, physical return, and return inspection for the active rental contract before reallocating this equipment.`,
+    category: 'OPERATIONAL',
+    severity: 'WARNING',
+    targetRoles: ['ASSET_CONTROL', 'SALES_MARKETING', 'MANAGEMENT_OPERATION', 'MANAGER'],
+    relatedEntity: 'ASSET',
+    relatedEntityId: asset.id,
+    targetTab: 'rentals',
+    isRead: false,
+  });
+  db.logAudit(actor, 'RENTAL_ALLOCATION_BLOCKED', 'ASSET', asset.id, `Rental allocation blocked because ${asset.assetTag} is ${asset.status}; return/demobilization is required first.`);
+  db.save();
+};
 
 // ==========================================
 // 6. RENTAL & LEASING MANAGEMENT
@@ -1692,7 +1905,13 @@ apiRouter.post('/rentals', (req: Request, res: Response) => {
 
     res.status(201).json(newContract);
   } catch (err: any) {
-    res.status(400).json({ error: err.message });
+    const requested = Array.isArray(req.body?.assetIds) ? req.body.assetIds : [];
+    requested.forEach((assetId: string) => {
+      const conflict = db.getAssets().find((asset) => (asset.id === assetId || asset.assetTag === assetId) && asset.status === 'RENTED');
+      if (conflict) notifyRentalAllocationConflict(conflict, actorName(req));
+    });
+    const message = err.message || 'Rental booking failed.';
+    res.status(message.includes('currently RENTED') ? 409 : 400).json({ error: message });
   }
 });
 
@@ -1839,6 +2058,14 @@ apiRouter.post('/deliveries', (req: Request, res: Response) => {
       if (order.status === 'PENDING' || order.status === 'CANCELLED') {
         return res.status(409).json({ error: 'The sales order must be approved by a Manager before creating a delivery.' });
       }
+      if (order.transactionType !== 'RENTAL') {
+        const unpaidAsset = order.items.find((line) => {
+          if (!line.allocatedAssetTag) return false;
+          const asset = db.getAssets().find((row) => row.assetTag === line.allocatedAssetTag || row.id === line.allocatedAssetTag);
+          return !asset || asset.status !== 'SOLD' || asset.disposition?.sourceSalesOrderId !== order.id;
+        });
+        if (unpaidAsset) return res.status(409).json({ error: 'Equipment can only be mobilized after its Sales Order invoice is fully paid.' });
+      }
       customerId = order.customerId;
       customerName = order.customerName;
       deliveryAddress = order.deliveryAddress;
@@ -1853,8 +2080,8 @@ apiRouter.post('/deliveries', (req: Request, res: Response) => {
     } else if (sourceType === 'RENTAL_CONTRACT') {
       const rental = db.getRentals().find((r) => r.id === sourceReferenceId);
       if (!rental) return res.status(404).json({ error: 'Source Rental Contract not found' });
-      if (rental.status !== 'ACTIVE') {
-        return res.status(409).json({ error: 'The rental contract must be approved by a Manager before creating a delivery.' });
+      if (rental.status !== 'RESERVED') {
+        return res.status(409).json({ error: 'The rental contract must be booked and approved before creating a mobilization delivery.' });
       }
       customerId = rental.customerId;
       customerName = rental.customerName;
@@ -1890,6 +2117,10 @@ apiRouter.post('/deliveries', (req: Request, res: Response) => {
     };
 
     db.getDeliveries().unshift(newDelivery);
+    if (sourceType === 'RENTAL_CONTRACT') {
+      const rental = db.getRentals().find((item) => item.id === sourceReferenceId);
+      if (rental) rental.deliveryId = newDelivery.id;
+    }
     db.logAudit(actorName(req), 'DELIVERY_DISPATCHED', 'DELIVERY', newDelivery.id, `Dispatched delivery ${newDelivery.deliveryNumber} for ${customerName}`);
     res.status(201).json(newDelivery);
   } catch (err: any) {
@@ -1901,6 +2132,15 @@ apiRouter.post('/deliveries/:id/confirm', (req: Request, res: Response) => {
   const { digitalSignature, acceptedBy, conditionNotes } = req.body;
   const delivery = db.getDeliveries().find((d) => d.id === req.params.id);
   if (!delivery) return res.status(404).json({ error: 'Delivery order not found' });
+  if (delivery.status !== 'IN_TRANSIT' && delivery.status !== 'PICKED' && delivery.status !== 'DELIVERED') {
+    return res.status(409).json({ error: 'Delivery must be approved and in transit before customer handover.' });
+  }
+  const rentalForDelivery = delivery.sourceType === 'RENTAL_CONTRACT'
+    ? db.getRentals().find((rental) => rental.id === delivery.sourceReferenceId)
+    : undefined;
+  if (delivery.sourceType === 'RENTAL_CONTRACT' && rentalForDelivery?.status !== 'RESERVED') {
+    return res.status(409).json({ error: 'Rental contract must be approved and reserved before handover.' });
+  }
 
   try {
     db.transaction(() => {
@@ -1910,7 +2150,7 @@ apiRouter.post('/deliveries/:id/confirm', (req: Request, res: Response) => {
       delivery.acceptedBy = acceptedBy || delivery.recipientName;
       if (conditionNotes) delivery.conditionNotes = conditionNotes;
 
-      // If this was a sales order delivery, transition serialized assets to SOLD
+      // Sales assets were marked SOLD after payment; delivery only records physical handover.
       if (delivery.sourceType === 'SALES_ORDER') {
         const order = db.getSalesOrders().find((o) => o.id === delivery.sourceReferenceId);
         if (order) {
@@ -1919,14 +2159,23 @@ apiRouter.post('/deliveries/:id/confirm', (req: Request, res: Response) => {
             if (item.assetTag) {
               const asset = db.getAssets().find((a) => a.assetTag === item.assetTag || a.id === item.assetTag);
               if (asset) {
-                asset.status = 'SOLD';
-                asset.currentBookValue = 0;
                 asset.currentCustomerId = delivery.customerId;
                 asset.currentCustomerName = delivery.customerName;
-                asset.notes = `Sold and ownership transferred via Delivery ${delivery.deliveryNumber} on ${new Date().toISOString().split('T')[0]}`;
+                asset.notes = `${asset.notes || ''} Mobilized via Delivery ${delivery.deliveryNumber} on ${new Date().toISOString().split('T')[0]}.`.trim();
               }
             }
           });
+        }
+      } else if (rentalForDelivery) {
+        rentalForDelivery.status = 'ACTIVE';
+        rentalForDelivery.mobilizationDate = new Date().toISOString().split('T')[0];
+        rentalForDelivery.items.forEach((rentalItem) => {
+          const asset = db.getAssets().find((item) => item.id === rentalItem.assetId || item.assetTag === rentalItem.assetTag);
+          if (asset) asset.status = 'RENTED';
+        });
+        if (rentalForDelivery.salesOrderId) {
+          const order = db.getSalesOrders().find((item) => item.id === rentalForDelivery.salesOrderId);
+          if (order) order.status = 'DELIVERED';
         }
       }
 
@@ -1964,6 +2213,7 @@ apiRouter.post('/invoices', (req: Request, res: Response) => {
       if (!order || order.status === 'PENDING' || order.status === 'CANCELLED') {
         return res.status(409).json({ error: 'The sales order must be approved by a Manager before creating an invoice.' });
       }
+      if (order.invoiceId) return res.status(409).json({ error: 'An invoice is already linked to this Sales Order.' });
     }
     if (relatedSourceType === 'RENTAL_CONTRACT') {
       const rental = db.getRentals().find((row) => row.id === relatedSourceId);
@@ -2037,6 +2287,13 @@ apiRouter.post('/invoices', (req: Request, res: Response) => {
       };
 
       db.getInvoices().unshift(invoice);
+      if (relatedSourceType === 'SALES_ORDER' && relatedSourceId) {
+        const order = db.getSalesOrders().find((row) => row.id === relatedSourceId);
+        if (order) {
+          order.invoiceId = invoice.id;
+          order.invoicedAmount = invoice.grandTotal;
+        }
+      }
       db.logAudit(actorName(req), 'INVOICE_CREATED', 'INVOICE', invoice.id, `Created draft invoice ${invoice.invoiceNumber} for ${customer.name}`);
       return invoice;
     });
@@ -2144,6 +2401,63 @@ apiRouter.post('/invoices/:id/credit-notes', (req: Request, res: Response) => {
 // ==========================================
 // 9. PAYMENT MANAGEMENT & ALLOCATIONS
 // ==========================================
+const finalizePaidAssetSale = (invoice: Invoice, actor: string) => {
+  if (invoice.status !== 'PAID' || invoice.relatedSourceType !== 'SALES_ORDER' || !invoice.relatedSourceId) return;
+  const order = db.getSalesOrders().find((item) => item.id === invoice.relatedSourceId);
+  if (!order || order.transactionType === 'RENTAL') return;
+
+  let markedSold = 0;
+  for (const line of order.items) {
+    if (!line.allocatedAssetTag) continue;
+    const asset = db.getAssets().find((item) => item.assetTag === line.allocatedAssetTag || item.id === line.allocatedAssetTag);
+    if (!asset || asset.disposition?.sourceSalesOrderId === order.id) continue;
+    if (asset.status !== 'RESERVED') continue;
+    const invoiceItem = invoice.items.find((item) => item.assetTag === asset.assetTag);
+    if (!invoiceItem) continue;
+
+    const bookValue = calculateAssetBookValue(asset);
+    const proceeds = invoiceItem.subtotal;
+    asset.status = 'SOLD';
+    asset.currentBookValue = bookValue;
+    asset.disposition = {
+      type: 'SALE',
+      date: new Date().toISOString().split('T')[0],
+      proceeds,
+      bookValueAtDisposition: bookValue,
+      gainLoss: fromCents(toCents(proceeds) - toCents(bookValue)),
+      customerId: invoice.customerId,
+      customerName: invoice.customerName,
+      invoiceId: invoice.id,
+      sourceSalesOrderId: order.id,
+      notes: `Sold through Sales Order ${order.orderNumber}.` ,
+    };
+    asset.currentCustomerId = invoice.customerId;
+    asset.currentCustomerName = invoice.customerName;
+    markedSold += 1;
+    db.logAudit(actor, 'ASSET_SOLD_AFTER_PAYMENT', 'ASSET', asset.id, `Asset ${asset.assetTag} marked SOLD after invoice ${invoice.invoiceNumber} was fully paid.`);
+  }
+
+  if (markedSold > 0) {
+    order.status = 'ALLOCATED';
+    order.paidAmount = invoice.paidAmount;
+    db.addNotification({
+      id: `NTF-ASSET-PAID-${invoice.id}`,
+      timestamp: new Date().toISOString(),
+      sourceDepartment: 'Finance & FAT',
+      sourceUserName: actor,
+      title: `Paid equipment order ready to mobilize: ${order.orderNumber}`,
+      message: `${markedSold} asset(s) were marked SOLD after invoice ${invoice.invoiceNumber} was paid. Asset Control can proceed with mobilization.`,
+      category: 'FINANCIAL',
+      severity: 'SUCCESS',
+      targetRoles: ['ASSET_CONTROL', 'SALES_MARKETING', 'EXECUTIVE'],
+      relatedEntity: 'SALES_ORDER',
+      relatedEntityId: order.id,
+      targetTab: 'deliveries',
+      isRead: false,
+    });
+  }
+};
+
 apiRouter.get('/payments', (req: Request, res: Response) => {
   const payments = db.getPayments();
   res.json({ data: payments, total: payments.length });
@@ -2182,6 +2496,7 @@ apiRouter.post('/payments', (req: Request, res: Response) => {
               } else {
                 inv.status = 'PARTIALLY_PAID';
               }
+              finalizePaidAssetSale(inv, actorName(req));
 
               allocatedCentsTotal += appliedCents;
               validAllocations.push({
@@ -2254,6 +2569,7 @@ apiRouter.post('/payments/:id/allocate', (req: Request, res: Response) => {
           inv.outstandingBalance = fromCents(toCents(inv.outstandingBalance) - applyCents);
           if (inv.outstandingBalance <= 0) inv.status = 'PAID';
           else inv.status = 'PARTIALLY_PAID';
+          finalizePaidAssetSale(inv, actorName(req));
 
           unallocCents -= applyCents;
           payment.allocations.push({
@@ -3306,6 +3622,99 @@ apiRouter.post('/system/reset-demo', (req: Request, res: Response) => {
   resetState.users = keptUsers;
   db.save();
   res.json({ message: 'Database reset to clean factory demo state', state: { ...resetState, users: resetState.users.map(publicUser) } });
+});
+
+
+const ADMIN_DATA_TABLES = [
+  'users', 'assets', 'products', 'customers', 'quotations', 'salesOrders', 'rentals', 'deliveries',
+  'invoices', 'payments', 'vendors', 'purchaseOrders', 'vendorBills', 'workOrders',
+  'operators', 'statusLogs', 'attendanceLogs', 'notifications', 'drafts', 'auditLogs',
+] as const;
+type AdminDataTable = typeof ADMIN_DATA_TABLES[number];
+const requireItAdmin = (req: Request, res: Response): boolean => {
+  const user = actorUser(req);
+  if (!user || user.role !== 'ADMIN_IT') {
+    res.status(403).json({ error: 'This operation is restricted to IT Administrator.' });
+    return false;
+  }
+  return true;
+};
+
+apiRouter.get('/system/data-tables', (req: Request, res: Response) => {
+  if (!requireItAdmin(req, res)) return;
+  const state = db.getState();
+  res.json({ data: ADMIN_DATA_TABLES.map((key) => ({ key, count: Array.isArray(state[key]) ? state[key].length : 0 })) });
+});
+
+apiRouter.get('/system/export-tables', (req: Request, res: Response) => {
+  if (!requireItAdmin(req, res)) return;
+  const requested = String(req.query.tables || '').split(',').filter(Boolean);
+  if (!requested.length || requested.some((key) => !ADMIN_DATA_TABLES.includes(key as AdminDataTable))) {
+    return res.status(400).json({ error: 'Choose one or more valid table names to export.' });
+  }
+  const state = db.getState();
+  const tables: Record<string, unknown[]> = {};
+  requested.forEach((key) => { tables[key] = key === 'users' ? state.users.map(publicUser) : [...(state[key as AdminDataTable] as unknown[])]; });
+  db.logAudit(actorName(req), 'SELECTIVE_DATA_EXPORT', 'SYSTEM', 'EXPORT', `Exported tables: ${requested.join(', ')}`);
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="eams_tables_${new Date().toISOString().slice(0, 10)}.json"`);
+  res.send(JSON.stringify({ format: 'EAMS_TABLE_EXPORT', version: 1, exportedAt: new Date().toISOString(), tables }, null, 2));
+});
+
+apiRouter.post('/system/import-tables', (req: Request, res: Response) => {
+  if (!requireItAdmin(req, res)) return;
+  const payload = req.body;
+  const tables = payload?.tables && typeof payload.tables === 'object' ? payload.tables : null;
+  if (!tables || Array.isArray(tables)) return res.status(400).json({ error: 'Expected an EAMS table export object with a tables property.' });
+  const keys = Object.keys(tables);
+  if (!keys.length || keys.some((key) => !ADMIN_DATA_TABLES.includes(key as AdminDataTable))) {
+    return res.status(400).json({ error: 'Import contains an unknown or empty table selection.' });
+  }
+  if (keys.some((key) => !Array.isArray(tables[key]))) return res.status(400).json({ error: 'Every imported table must be a JSON array.' });
+  try {
+    db.transaction(() => {
+      const state = db.getState();
+      keys.forEach((key) => {
+        if (key === 'users') {
+          const importedUsers = tables.users as Array<Record<string, unknown>>;
+          for (const incoming of importedUsers) {
+            const existing = state.users.find((user) => user.id === incoming.id || user.email.toLowerCase() === String(incoming.email || '').toLowerCase());
+            if (existing) {
+              const passwordHash = (existing as any).passwordHash;
+              const password = (existing as any).password;
+              Object.assign(existing, incoming);
+              if (passwordHash !== undefined) (existing as any).passwordHash = passwordHash;
+              if (password !== undefined) (existing as any).password = password;
+            }
+          }
+        } else { (state as any)[key] = tables[key]; }
+      });
+      db.logAudit(actorName(req), 'SELECTIVE_DATA_IMPORT', 'SYSTEM', 'IMPORT', `Imported tables: ${keys.join(', ')}`);
+    });
+    res.json({ message: 'Selected table data imported. User credentials and system settings were not changed.', importedTables: keys });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message || 'Import failed.' });
+  }
+});
+
+apiRouter.post('/system/clear-business-data', (req: Request, res: Response) => {
+  if (!requireItAdmin(req, res)) return;
+  if (IS_PROD && process.env.ALLOW_DEMO_RESET !== 'true') {
+    return res.status(403).json({ error: 'Data clearing is disabled in production. Set ALLOW_DEMO_RESET=true only for a controlled test environment.' });
+  }
+  const state = db.getState();
+  const preserveUsers = state.users;
+  const preserveSettings = state.settings;
+  db.transaction(() => {
+    state.assets = []; state.products = []; state.customers = []; state.quotations = []; state.salesOrders = [];
+    state.rentals = []; state.deliveries = []; state.invoices = []; state.payments = []; state.vendors = [];
+    state.purchaseOrders = []; state.vendorBills = []; state.workOrders = []; state.operators = [];
+    state.statusLogs = []; state.attendanceLogs = []; state.notifications = []; state.drafts = [];
+    state.users = preserveUsers; state.settings = preserveSettings;
+    state.auditLogs = [];
+    db.logAudit(actorName(req), 'BUSINESS_DATA_CLEARED', 'SYSTEM', 'CLEAR', 'Cleared operational data while preserving user credentials and system settings');
+  });
+  res.json({ message: 'Operational/business data cleared. User accounts, password credentials, and system settings were preserved.' });
 });
 
 apiRouter.get('/system/backup', (req: Request, res: Response) => {

@@ -16,6 +16,16 @@ export const openApiSpec = {
     },
   ],
   paths: {
+    '/system/data-tables': {
+      get: { summary: 'List IT migration collections and record counts', responses: { 200: { description: 'Allowed collections and counts' }, 403: { description: 'IT Administrator only' } } },
+    },
+    '/system/export-tables': {
+      get: { summary: 'Export selected EAMS collections', parameters: [{ name: 'tables', in: 'query', required: true, schema: { type: 'string' }, description: 'Comma-separated collection keys from /system/data-tables' }], responses: { 200: { description: 'EAMS_TABLE_EXPORT JSON package' }, 400: { description: 'Invalid collection selection' }, 403: { description: 'IT Administrator only' } } },
+    },
+    '/system/import-tables': { post: { summary: 'Import selected EAMS collections while preserving password credentials', description: 'Accepts an EAMS_TABLE_EXPORT JSON object with a tables object. Requires IT Administrator.', responses: { 200: { description: 'Selected collections imported' }, 400: { description: 'Invalid package' }, 403: { description: 'IT Administrator only' } } } },
+    '/system/clear-business-data': {
+      post: { summary: 'Clear operational records while preserving users and settings; test environment only', responses: { 200: { description: 'Operational records cleared' }, 403: { description: 'Not IT Administrator or production reset disabled' } } },
+    },
     '/customers': {
       get: {
         summary: 'List customers',
@@ -84,6 +94,33 @@ export const openApiSpec = {
       post: {
         summary: 'Create asset tag',
         responses: { 201: { description: 'Asset registered' } },
+      },
+    },
+    '/assets/{id}/documents': {
+      post: {
+        summary: 'Update asset compliance documents, including multiple SIA attachments',
+        description: 'SIA documents may be supplied as an array of records containing id, number, expiryDate, issuer, fileName, and fileUrl. Expiry notifications are generated when asset or notification endpoints are read.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { siaDocuments: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, number: { type: 'string' }, expiryDate: { type: 'string', format: 'date' }, issuer: { type: 'string' }, fileName: { type: 'string' }, fileUrl: { type: 'string' } } } } } } } } },
+        responses: { 200: { description: 'Compliance documents updated' }, 404: { description: 'Asset not found' } },
+      },
+    },
+    '/notifications': {
+      get: { summary: 'List role-filtered notifications and synchronize compliance reminders', responses: { 200: { description: 'Notification list and unread count' } } },
+    },
+    '/settings': {
+      get: { summary: 'Read system configuration, branding, and job-position categories', responses: { 200: { description: 'System settings' } } },
+      patch: { summary: 'Update recognized system configuration fields', responses: { 200: { description: 'Settings updated' } } },
+    },
+    '/system/backup': {
+      get: { summary: 'Download JSON business-data backup without password hashes', responses: { 200: { description: 'JSON backup file' } } },
+    },
+    '/system/restore': {
+      post: {
+        summary: 'Restore business data from a compatible JSON backup',
+        description: 'Requires Settings permission. User accounts and passwords are preserved. The payload must contain assets, customers, and products arrays.',
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['assets', 'customers', 'products'], properties: { assets: { type: 'array', items: { type: 'object' } }, customers: { type: 'array', items: { type: 'object' } }, products: { type: 'array', items: { type: 'object' } } } } } } },
+        responses: { 200: { description: 'Business data restored' }, 400: { description: 'Invalid backup structure' } },
       },
     },
     '/quotations': {

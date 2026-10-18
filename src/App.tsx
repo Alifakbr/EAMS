@@ -89,6 +89,18 @@ export default function App() {
   // Notifikasi non-blokir menggantikan alert()
   useEffect(() => { installAlertToast(); }, []);
 
+  useEffect(() => {
+    if (!settings) return;
+    let link = document.querySelector<HTMLLinkElement>('link[rel~="icon"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    if (settings.faviconDataUrl) link.href = settings.faviconDataUrl;
+    else link.href = '/favicon.ico';
+  }, [settings?.faviconDataUrl]);
+
   const applySession = useCallback((info: SessionInfo, goHome = false) => {
     setCurrentUser(info.user);
     setModules(info.modules);
@@ -275,6 +287,7 @@ export default function App() {
         isRefreshing={isRefreshing}
         onRefresh={loadAllData}
         onToggleMobileSidebar={() => setIsMobileSidebarOpen((prev) => !prev)}
+        logoDataUrl={settings?.logoDataUrl}
       />
 
       <div className="flex-1 flex min-h-0 min-w-0 overflow-hidden">

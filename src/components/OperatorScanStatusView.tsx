@@ -342,8 +342,8 @@ export const OperatorScanStatusView: React.FC<OperatorScanStatusViewProps> = ({
       </div>
 
       {/* Barcode Scanner Box (Always available on top) */}
-      <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-xs space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+      <div className="relative z-0 bg-white rounded-lg border border-slate-200 p-3 sm:p-5 shadow-xs space-y-4 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2">
             <Camera className="w-5 h-5 text-indigo-600" />
             <h2 className="text-sm font-bold text-slate-900">Scan Equipment Barcode at Project Site</h2>
@@ -409,7 +409,7 @@ export const OperatorScanStatusView: React.FC<OperatorScanStatusViewProps> = ({
             <select
               value={selectedBarcode}
               onChange={(e) => lookupAsset(e.target.value)}
-              className="py-2 px-2.5 text-xs border border-slate-300 rounded bg-slate-50 font-medium text-slate-700 outline-none cursor-pointer"
+              className="w-full min-w-0 flex-1 py-2 px-2.5 text-xs border border-slate-300 rounded bg-slate-50 font-medium text-slate-700 outline-none cursor-pointer"
             >
               {assets.map((a) => (
                 <option key={a.id} value={a.assetTag}>
@@ -493,7 +493,7 @@ export const OperatorScanStatusView: React.FC<OperatorScanStatusViewProps> = ({
 
       {/* TAB 1: ABSENSI DATANG & PULANG ALAT BERAT */}
       {activeActionTab === 'ATTENDANCE' && activeAsset && (
-        <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-xs space-y-4">
+        <div className="relative z-0 bg-white rounded-lg border border-slate-200 p-3 sm:p-5 shadow-xs space-y-4 min-w-0">
           <div className="pb-3 border-b border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <UserCheck className="w-5 h-5 text-emerald-600" />

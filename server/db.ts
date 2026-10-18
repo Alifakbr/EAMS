@@ -112,6 +112,7 @@ export class EamsDatabase {
       try {
         const raw = fs.readFileSync(DATA_FILE, 'utf-8');
         const parsed = JSON.parse(raw);
+        if (parsed?.settings && !Array.isArray(parsed.settings.jobPositionCategories)) parsed.settings.jobPositionCategories = ['Executive Leadership', 'IT & Infrastructure Division', 'Sales & Client CRM', 'Asset Management & Legal Docs', 'Field Operations & SIO', 'Procurement Department', 'Finance, Accounting & Tax', 'AR & Collection Unit', 'Heavy Equipment & Field Operations', 'Technical Service & Field Repair', 'Management'];
         if (!Array.isArray(parsed?.assets) || !Array.isArray(parsed?.customers) ||
           !Array.isArray(parsed?.products) || !parsed?.settings || typeof parsed.settings !== 'object') {
           throw new Error('The database file does not contain the required EAMS collections.');
@@ -289,6 +290,7 @@ export class EamsDatabase {
       paymentPrefix: 'PMT-2026-',
       deliveryPrefix: 'DO-2026-',
       strictAssetLocking: true,
+      jobPositionCategories: ['Executive Leadership', 'IT & Infrastructure Division', 'Sales & Client CRM', 'Asset Management & Legal Docs', 'Field Operations & SIO', 'Procurement Department', 'Finance, Accounting & Tax', 'AR & Collection Unit', 'Heavy Equipment & Field Operations', 'Technical Service & Field Repair', 'Management'],
     };
 
     const users: User[] = [

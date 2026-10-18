@@ -34,6 +34,7 @@ interface HeaderProps {
   isRefreshing?: boolean;
   onRefresh?: () => void;
   onToggleMobileSidebar?: () => void;
+  logoDataUrl?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -49,6 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
   isRefreshing,
   onRefresh,
   onToggleMobileSidebar,
+  logoDataUrl,
 }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -222,15 +224,17 @@ export const Header: React.FC<HeaderProps> = ({
             }}
             className="flex items-center gap-2 group"
           >
-            <div className="w-8 h-8 rounded bg-slate-900 text-amber-400 font-black text-sm flex items-center justify-center font-mono shadow-xs">
-              APX
-            </div>
+            {logoDataUrl ? (
+              <img src={logoDataUrl} alt="Company logo" className="w-8 h-8 rounded object-contain bg-white border border-slate-200" />
+            ) : (
+              <div className="w-8 h-8 rounded bg-slate-900 text-amber-400 font-black text-sm flex items-center justify-center font-mono shadow-xs">APX</div>
+            )}
             <div className="leading-tight max-[420px]:hidden">
               <span className="text-sm font-bold tracking-tight text-slate-900 block group-hover:text-amber-700 transition-colors">
-                Apex EAMS Commercial
+                EAMS Commercial
               </span>
               <span className="text-[10px] text-slate-400 font-medium block">
-                Enterprise Heavy Equipment Lifecycle
+                Enterprise Asset Management
               </span>
             </div>
           </a>

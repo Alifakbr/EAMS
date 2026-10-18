@@ -134,6 +134,13 @@ const MapViewportController: React.FC<{
   const [zoom, setZoom] = useState(map.getZoom());
   const coordinateAssets = useMemo(() => assets.filter(isValidGpsLocation), [assets]);
   useMapEvents({ zoomend: () => setZoom(map.getZoom()) });
+  useEffect(() => {
+    const beforePrint = () => { map.invalidateSize({ animate: false }); map.eachLayer((layer: any) => { if (typeof layer.redraw === 'function') layer.redraw(); }); };
+    const afterPrint = () => map.invalidateSize({ animate: false });
+    window.addEventListener('beforeprint', beforePrint);
+    window.addEventListener('afterprint', afterPrint);
+    return () => { window.removeEventListener('beforeprint', beforePrint); window.removeEventListener('afterprint', afterPrint); };
+  }, [map]);
 
   useEffect(() => {
     if (coordinateAssets.length === 0) {
@@ -150,7 +157,7 @@ const MapViewportController: React.FC<{
   }, [coordinateAssets, map, siteFilter]);
 
   return (
-    <div className="absolute top-4 right-4 z-[1000] flex items-center gap-1 bg-slate-900/90 backdrop-blur-md p-1 rounded-lg border border-slate-700 text-white shadow-lg">
+    <div className="absolute top-4 right-4 z-[20] flex items-center gap-1 bg-slate-900/90 backdrop-blur-md p-1 rounded-lg border border-slate-700 text-white shadow-lg">
       <button type="button" onClick={() => map.zoomIn()} className="px-2 py-1 hover:bg-slate-800 rounded font-bold text-xs" title="Zoom in">+</button>
       <span className="text-[10px] font-mono px-1 text-slate-300">{zoom}x</span>
       <button type="button" onClick={() => map.zoomOut()} className="px-2 py-1 hover:bg-slate-800 rounded font-bold text-xs" title="Zoom out">-</button>
@@ -188,6 +195,7 @@ export const FleetGpsMap: React.FC<FleetGpsMapProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [showTopoView, setShowTopoView] = useState(false);
+  const [printMode, setPrintMode] = useState(false);
 
   // Map projection resolver for assets
   const mappedAssets = useMemo(() => {
@@ -289,7 +297,7 @@ export const FleetGpsMap: React.FC<FleetGpsMapProps> = ({
   };
 
   return (
-    <div data-print-area className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden space-y-0">
+    <div data-print-area className={`fleet-gps-map bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden space-y-0 ${printMode ? 'fleet-print-mode' : ''}`}>
       {/* Top Map Header & Telematics Toolbar */}
       <div className="p-4 bg-slate-900 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-3 border-b border-slate-800">
         <div>
@@ -324,7 +332,17 @@ export const FleetGpsMap: React.FC<FleetGpsMapProps> = ({
 
           <button
             type="button"
-            onClick={() => window.print()}
+            onClick={() => {
+              setPrintMode(true);
+              const printWhenTilesReady = (deadline: number) => {
+                const tiles = Array.from(document.querySelectorAll('.fleet-gps-map .leaflet-tile')) as HTMLImageElement[];
+                const pending = tiles.some((tile) => !tile.complete);
+                if (pending && Date.now() < deadline) { window.setTimeout(() => printWhenTilesReady(deadline), 250); return; }
+                window.dispatchEvent(new Event('resize'));
+                window.print();
+              };
+              window.setTimeout(() => printWhenTilesReady(Date.now() + 3500), 500);
+            }}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 cursor-pointer shadow-xs transition-colors"
             title="Print the fleet location map or save it as a PDF"
           >
@@ -398,7 +416,7 @@ export const FleetGpsMap: React.FC<FleetGpsMapProps> = ({
       {/* Main Map View Area & Sidebar Telematics */}
       <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[460px] bg-slate-950 relative">
         <div className="lg:col-span-8 relative min-h-[460px] overflow-hidden">
-          <div className="absolute top-4 left-4 z-[1000] flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-700/80 text-white text-[11px] shadow-lg">
+          <div className="absolute top-4 left-4 z-[20] flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-700/80 text-white text-[11px] shadow-lg">
             <Radio className="w-3.5 h-3.5 text-emerald-400" />
             <span className="font-semibold">Fleet GPS Positions</span>
             <span className="text-slate-400">· WGS84</span>
@@ -409,7 +427,7 @@ export const FleetGpsMap: React.FC<FleetGpsMapProps> = ({
             minZoom={3}
             maxZoom={19}
             scrollWheelZoom
-            className="h-[460px] w-full bg-slate-950"
+            className="h-[460px] w-full bg-slate-950 relative z-0"
           >
             <TileLayer
               key={showTopoView ? 'topo' : 'streets'}
@@ -468,7 +486,7 @@ export const FleetGpsMap: React.FC<FleetGpsMapProps> = ({
             })}
           </MapContainer>
           {filteredAssets.filter(isValidGpsLocation).length === 0 && (
-            <div className="absolute inset-x-4 bottom-4 z-[1000] mx-auto max-w-lg rounded-lg border border-amber-300 bg-amber-50/95 px-4 py-3 text-center text-xs text-amber-900 shadow-lg">
+            <div className="absolute inset-x-4 bottom-4 z-[20] mx-auto max-w-lg rounded-lg border border-amber-300 bg-amber-50/95 px-4 py-3 text-center text-xs text-amber-900 shadow-lg">
               No valid GPS coordinates match this filter. The map shows site locations, not equipment positions.
             </div>
           )}

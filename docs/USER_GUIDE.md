@@ -106,3 +106,49 @@ Admin dengan akses User Management dapat membuat atau mengubah akun sesuai kebij
 - Untuk error teknis, sertakan waktu kejadian, URL halaman, tindakan terakhir, dan pesan error kepada administrator. Jangan mengirim password, token, `.env`, atau file database melalui tiket umum.
 
 Lihat [Keamanan dan Hak Akses](SECURITY_AND_ACCESS.md) dan [Backup dan Restore](BACKUP_RESTORE.md) untuk prosedur admin.
+
+## Revisi Oktober 2026 — Pengaturan IT dan Compliance
+
+### Import database dari backup
+
+1. Masuk sebagai user yang memiliki akses Settings.
+2. Buka **Settings & Audit Log** dan klik **Download Backup (.json)** sebelum melakukan perubahan.
+3. Pilih **Import Backup (.json)**, lalu pilih file backup EAMS yang valid.
+4. Konfirmasi import. Data bisnis akan diganti dengan data dari backup; akun dan password yang ada tidak ditimpa.
+5. Setelah halaman dimuat ulang, periksa aset, customer, quotation, Sales Order, rental, invoice, dan notifikasi.
+
+### Logo dan favicon
+
+Pada **Application Branding**, unggah gambar logo dan favicon (maksimum 1 MB per gambar), lalu pilih **Save Configuration**. Logo akan tampil di header aplikasi dan favicon pada tab browser. Hapus gambar untuk kembali ke logo/icon default.
+
+### Kategori jabatan
+
+Pada **Job-position / Department Categories**, tambahkan atau hapus kategori, kemudian simpan konfigurasi. Form user management menggunakan kategori ini sebagai saran; field tetap menerima teks bebas untuk jabatan khusus.
+
+### Dokumen SIA lebih dari satu
+
+Pada Equipment Registration & Documents, buka dokumen aset. Gunakan **Add multiple files** untuk melampirkan beberapa file SIA. Periksa nomor dan expiry date setiap file sebelum menyimpan. Notifikasi akan dibuat ketika tanggal kedaluwarsa berada dalam rentang 30 hari, atau ketika sertifikat sudah kedaluwarsa.
+
+### Rental unit yang masih aktif
+
+Jika unit berstatus `RENTED`, EAMS menolak booking baru dan mengirim notifikasi konflik. Lakukan demobilisasi, pengembalian fisik, dan return inspection pada kontrak aktif terlebih dahulu. Jangan mengubah status aset secara manual untuk melewati kontrol tersebut.
+
+
+## IT: Selective Data Migration and Simulation Reset
+
+1. Open **Settings / IT System Configuration** as an IT Administrator.
+2. Use **IT Data Migration — Table Export / Import** to select one or more collections. Supported collections include users (public account metadata only), assets, customers, products, quotations, sales orders, rentals, deliveries, invoices, payments, vendors, purchase orders, vendor bills, work orders, operators, attendance/status logs, notifications, drafts and audit logs.
+3. Export downloads an `EAMS_TABLE_EXPORT` JSON package. Import replaces only included non-user collections. For `users`, matching accounts are updated by ID/email while their existing password credentials are preserved; unmatched imported accounts are not created. Always back up first and test migrations on a non-production instance.
+4. **Hapus seluruh data operasional** is a destructive test-only operation. It clears operational transactions, assets, compliance records, operators, notifications and drafts while preserving user accounts/password credentials and system settings. It is blocked in production unless `ALLOW_DEMO_RESET=true`; do not enable this on production.
+
+## Compliance expiry reminders
+
+The compliance monitor checks SIA (including multiple SIA records and attachments), STNK, BPKB where an expiry date is configured, equipment inspection due dates and operator SIO. Notifications are generated when the expiry date is within 30 days, escalated to critical when expired or within 7 days, and are synchronized when the Assets or Notifications API is read. Upload each SIA as its own record with its number, issuer, expiry date and attachment.
+
+## GPS fleet map print
+
+Use **Print Map (PDF)** from the GPS Fleet Map panel and choose A4 landscape. Enable **Background graphics** in the browser print dialog so OpenStreetMap tiles and marker colors are preserved. Wait until the base map tiles are loaded before printing; external tile availability depends on network access.
+
+## GRC Access Control
+
+Open **User Management (IT) → GRC Access Control** to review the role permission matrix and access-review checklist. This is a review/reporting tab; it does not itself change permissions. Apply role changes in User Management and validate endpoint enforcement after changes.

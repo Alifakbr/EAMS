@@ -24,7 +24,7 @@ export const ROLE_MODULES: Record<UserRole, ModuleId[]> = {
   EXECUTIVE: ['reports', 'dashboard', 'customers', 'quotations', 'sales', 'rentals', 'deliveries', 'invoices', 'payments', 'assets', 'products', 'procurement', 'maintenance'],
   ADMIN_IT: [...ALL_MODULES],
   SALES_MARKETING: ['quotations', 'sales', 'customers', 'deliveries', 'products', 'assets', 'reports'],
-  ASSET_CONTROL: ['assets', 'deliveries', 'products', 'maintenance', 'reports'],
+  ASSET_CONTROL: ['assets', 'deliveries', 'rentals', 'products', 'maintenance', 'reports'],
   MANAGEMENT_OPERATION: ['maintenance', 'assets', 'deliveries', 'rentals', 'reports'],
   PROCUREMENT: ['procurement', 'products', 'reports'],
   FINANCE_ACCOUNTING_TAX: ['invoices', 'payments', 'customers', 'reports'],

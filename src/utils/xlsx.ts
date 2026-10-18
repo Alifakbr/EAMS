@@ -74,7 +74,7 @@ function colName(i: number): string {
 
 const normalize = (c: Cell): { v: string | number | null; bold: boolean } => {
   if (c !== null && typeof c === 'object') return { v: c.v ?? null, bold: !!c.bold };
-  return { v: c ?? null, bold: false };
+  return { v: typeof c === 'string' || typeof c === 'number' ? c : null, bold: false };
 };
 
 export function buildXlsx(rows: Cell[][], sheetName = 'Report'): Uint8Array {

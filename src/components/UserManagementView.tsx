@@ -66,10 +66,12 @@ const BRANCH_OPTIONS = [
 
 export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentUser, onRefresh }) => {
   const [users, setUsers] = useState<User[]>([]);
+  const [jobPositionCategories, setJobPositionCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [branchFilter, setBranchFilter] = useState<string>('ALL');
+  const [activeAccessTab, setActiveAccessTab] = useState<'users' | 'grc'>('users');
 
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -112,6 +114,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
 
   useEffect(() => {
     loadUsers();
+    api.getSettings().then((settings) => setJobPositionCategories(settings.jobPositionCategories || [])).catch(() => setJobPositionCategories([]));
   }, []);
 
   // Filtered users
@@ -293,6 +296,23 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3 mb-4">
+        <button type="button" onClick={() => setActiveAccessTab('users')} className={`rounded px-3 py-2 text-xs font-semibold ${activeAccessTab === 'users' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-300 text-slate-700'}`}>User Management</button>
+        <button type="button" onClick={() => setActiveAccessTab('grc')} className={`rounded px-3 py-2 text-xs font-semibold ${activeAccessTab === 'grc' ? 'bg-indigo-700 text-white' : 'bg-white border border-slate-300 text-slate-700'}`}><ShieldCheck className="inline h-3.5 w-3.5 mr-1" />GRC Access Control</button>
+      </div>
+      {activeAccessTab === 'grc' ? (
+        <section className="space-y-4">
+          <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-4"><h2 className="text-sm font-bold text-indigo-950">Governance, Risk & Compliance — Access Control</h2><p className="mt-1 text-xs text-indigo-900">Ringkasan akses berbasis role dari ACL aplikasi. Gunakan matriks ini untuk review akses berkala; pembatasan endpoint tetap ditegakkan di server.</p></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="rounded border p-3"><div className="text-xs text-slate-500">Role terdefinisi</div><div className="text-2xl font-bold">{ALL_ROLES.length}</div></div>
+            <div className="rounded border p-3"><div className="text-xs text-slate-500">User aktif terdaftar</div><div className="text-2xl font-bold">{users.filter((user) => user.status === 'ACTIVE').length}</div></div>
+            <div className="rounded border p-3"><div className="text-xs text-slate-500">Akun dengan custom permission</div><div className="text-2xl font-bold">{users.filter((user) => Boolean(user.permissions)).length}</div></div>
+          </div>
+          <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white"><table className="min-w-full text-xs"><thead className="bg-slate-50"><tr><th className="p-3 text-left">Role</th><th className="p-3 text-left">Modules granted</th><th className="p-3 text-left">Permission controls</th></tr></thead><tbody>{ALL_ROLES.map((role) => { const matrix = permissionsFromRole(role); const modules = Object.entries(matrix).filter(([, enabled]) => Boolean(enabled)).map(([key]) => key.replace(/^can/, '').replace(/([A-Z])/g, ' $1').trim()); return <tr key={role} className="border-t border-slate-100 align-top"><td className="p-3 font-semibold whitespace-nowrap">{role.replaceAll('_', ' ')}</td><td className="p-3 min-w-64">{modules.length ? modules.join(', ') : 'No direct permissions'}</td><td className="p-3">{Object.entries(matrix).filter(([, enabled]) => Boolean(enabled)).length} granted / {Object.keys(matrix).length} controls</td></tr>; })}</tbody></table></div>
+          <div className="rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"><strong>Review checklist:</strong> verify least privilege, remove inactive users, review custom permission grants, check privileged ADMIN_IT accounts, and retain audit logs for access changes. This view is an access review/report; it does not automatically change role assignments.</div>
+        </section>
+      ) : (
+      <>
       {/* Header Bar */}
       <div className="bg-white p-4 rounded-md border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
@@ -629,13 +649,15 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Department</label>
+                <label className="block font-semibold text-slate-700 mb-1">Job Position / Department</label>
                 <input
                   type="text"
+                  list="eams-job-position-categories"
                   value={formDepartment}
                   onChange={(e) => setFormDepartment(e.target.value)}
                   className="w-full p-2 border border-slate-300 rounded focus:border-slate-800 outline-none"
                 />
+                <datalist id="eams-job-position-categories">{jobPositionCategories.map((category) => <option key={category} value={category} />)}</datalist>
               </div>
 
               <div className="p-3 bg-amber-50 rounded border border-amber-200 text-amber-800 text-[11px]">
@@ -919,13 +941,15 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Department</label>
+                <label className="block font-semibold text-slate-700 mb-1">Job Position / Department</label>
                 <input
                   type="text"
+                  list="eams-job-position-categories-edit"
                   value={editingUser.department}
                   onChange={(e) => setEditingUser({ ...editingUser, department: e.target.value })}
                   className="w-full p-2 border border-slate-300 rounded focus:border-slate-800 outline-none"
                 />
+                <datalist id="eams-job-position-categories-edit">{jobPositionCategories.map((category) => <option key={category} value={category} />)}</datalist>
               </div>
 
               <div>
@@ -1137,6 +1161,9 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
           </div>
         </div>
       )}
+      </>
+      )}
+
     </div>
   );
 };
