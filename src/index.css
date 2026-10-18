@@ -1,0 +1,375 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    color: #0f172a;
+    background-color: #f8fafc;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+}
+
+@layer utilities {
+  .font-sans {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+}
+
+.font-mono-numbers {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+    width: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+    font-size: 14px;
+  }
+
+  main {
+    min-width: 0;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  main > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  main table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+
+  main input:not([type='checkbox']):not([type='radio']):not([type='file']),
+  main select,
+  main textarea {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  main button {
+    touch-action: manipulation;
+  }
+
+  main .overflow-x-auto {
+    max-width: 100%;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 420px) {
+  main .grid-cols-2,
+  main .grid-cols-3,
+  main .grid-cols-4,
+  main .grid-cols-5,
+  main .grid-cols-6 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  main h1,
+  main h2 {
+    overflow-wrap: anywhere;
+  }
+}
+
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
+@media print {
+  body.printing-scoped-content #root * {
+    visibility: hidden !important;
+  }
+
+  body.printing-scoped-content #root .print-scope,
+  body.printing-scoped-content #root .print-scope * {
+    visibility: visible !important;
+  }
+
+  body.printing-scoped-content .print-scope {
+    position: absolute !important;
+    inset: 0 0 auto 0 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 190mm !important;
+    max-width: 100% !important;
+    height: max-content !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 0 !important;
+    backdrop-filter: none !important;
+    background-image: none !important;
+    filter: none !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  body.printing-scoped-content .print-scope > * {
+    box-sizing: border-box !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  body.printing-scoped-content .print-scope,
+  body.printing-scoped-content .print-scope * {
+    text-shadow: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    transform: none !important;
+    backdrop-filter: none !important;
+    background-image: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  body.printing-scoped-content .print-scope .overflow-auto,
+  body.printing-scoped-content .print-scope .overflow-hidden,
+  body.printing-scoped-content .print-scope .overflow-y-auto,
+  body.printing-scoped-content .print-scope .overflow-x-auto,
+  body.printing-scoped-content .print-scope [class*="max-h-"] {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  body.printing-scoped-content .print-scope button,
+  body.printing-scoped-content .print-scope select,
+  body.printing-scoped-content .print-scope input,
+  body.printing-scoped-content .print-scope .no-print {
+    display: none !important;
+  }
+
+  body {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 10pt;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  body.printing-flow-content #root {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body.printing-flow-content #root *:not(.print-scope-flow):not(.print-scope-flow *):not(.print-scope-container) {
+    display: none !important;
+  }
+
+  body.printing-flow-content #root .print-scope-container {
+    display: contents !important;
+  }
+
+  body.printing-flow-content #root .print-scope-flow {
+    position: relative !important;
+    inset: auto !important;
+    width: 190mm !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0 auto !important;
+  }
+
+  body.printing-scoped-content .print-scope * {
+    border-radius: 0 !important;
+  }
+  table {
+    display: table !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    border-collapse: collapse !important;
+    width: 100% !important;
+    page-break-inside: auto;
+  }
+  .print-scope h1,
+  .print-scope h2,
+  .print-scope h3,
+  .print-scope h4 {
+    break-after: avoid-page;
+    page-break-after: avoid;
+  }
+  .print-scope thead {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .official-documents-table {
+    table-layout: fixed !important;
+    font-size: 7pt !important;
+  }
+  .official-documents-table th,
+  .official-documents-table td {
+    overflow-wrap: anywhere !important;
+    padding: 1.5mm 1mm !important;
+    vertical-align: top !important;
+  }
+  .official-documents-table th:nth-child(1) { width: 17%; }
+  .official-documents-table th:nth-child(2) { width: 17%; }
+  .official-documents-table th:nth-child(3) { width: 20%; }
+  .official-documents-table th:nth-child(4) { width: 12%; }
+  .official-documents-table th:nth-child(5) { width: 14%; }
+  .official-documents-table th:nth-child(6) { width: 10%; }
+  .official-documents-table th:nth-child(7) { width: 10%; }
+
+  .reports-print-area {
+    font-size: 8pt !important;
+    line-height: 1.35 !important;
+  }
+
+  .reports-print-letterhead > .flex {
+    display: block !important;
+  }
+
+  .reports-print-letterhead > .flex > div {
+    width: 100% !important;
+    text-align: left !important;
+  }
+
+  .reports-print-letterhead h1 {
+    font-size: 16pt !important;
+    line-height: 1.2 !important;
+  }
+
+  .reports-print-letterhead {
+    margin-bottom: 3mm !important;
+  }
+
+  .report-print-title {
+    display: block !important;
+    margin: 0 0 4mm !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  .report-print-title h2 {
+    margin: 0 !important;
+    font-size: 12pt !important;
+    font-weight: 700 !important;
+  }
+
+  .official-documents-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 2mm !important;
+  }
+
+  .official-documents-summary-grid > * {
+    min-width: 0 !important;
+    padding: 2.5mm !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .official-documents-summary-grid > * > :nth-child(2) {
+    font-size: 11pt !important;
+    line-height: 1.2 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .reports-print-area table {
+    table-layout: fixed !important;
+    font-size: 7pt !important;
+  }
+
+  .reports-print-area th,
+  .reports-print-area td {
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+    padding: 1.5mm 1mm !important;
+    vertical-align: top !important;
+  }
+
+  .reports-print-area .truncate {
+    max-width: none !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+  }
+
+  .official-documents-table th:nth-child(1) { width: 16%; }
+  .official-documents-table th:nth-child(2) { width: 17%; }
+  .official-documents-table th:nth-child(3) { width: 25%; }
+  .official-documents-table th:nth-child(4) { width: 13%; }
+  .official-documents-table th:nth-child(5) { width: 17%; }
+  .official-documents-table th:nth-child(6) { width: 12%; }
+  .official-documents-table th:last-child,
+  .official-documents-table td:last-child {
+    display: none !important;
+  }
+
+  .official-documents-table td:first-child button {
+    display: inline !important;
+    padding: 0 !important;
+    color: #0f172a !important;
+    border: 0 !important;
+    background: transparent !important;
+    text-align: left !important;
+    font: inherit !important;
+  }
+
+  .official-documents-table td:first-child button svg {
+    display: none !important;
+  }
+
+  .reports-print-area .overflow-x-auto,
+  .reports-print-area .overflow-hidden {
+    overflow: visible !important;
+  }
+
+  .reports-print-area .rounded-md,
+  .reports-print-area .rounded {
+    border-radius: 0 !important;
+  }
+
+  .reports-print-area tr {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+  thead {
+    display: table-header-group;
+  }
+  tfoot {
+    display: table-footer-group;
+  }
+  .print-page-break {
+    page-break-before: always;
+  }
+}

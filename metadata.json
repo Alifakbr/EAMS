@@ -1,0 +1,6 @@
+{
+  "name": "Apex EAMS & Commercial Operations",
+  "description": "Enterprise Asset Management System with Asset Sales, Equipment Rental, Billing, Invoicing, and Commercial Finance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
