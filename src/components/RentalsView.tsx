@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { RentalContract, Customer, Asset, AssetCondition } from '../types/index.ts';
 import { api } from '../services/api.ts';
+<<<<<<< HEAD
 import { formatRupiahAmount } from '../shared/currency.tsx';
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 import {
   CalendarDays,
   Plus,
@@ -69,7 +72,11 @@ export const RentalsView: React.FC<RentalsViewProps> = ({
     }
 
     try {
+<<<<<<< HEAD
       const contract = await api.createRental({
+=======
+      await api.createRental({
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         customerId,
         assetIds: selectedAssetIds,
         rateType,
@@ -80,7 +87,10 @@ export const RentalsView: React.FC<RentalsViewProps> = ({
         notes,
       });
 
+<<<<<<< HEAD
       alert(`Contract ${contract.contractNumber} submitted and is awaiting Manager approval.`);
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       setShowCreateModal(false);
       setSelectedAssetIds([]);
       onRefresh();
@@ -139,7 +149,11 @@ export const RentalsView: React.FC<RentalsViewProps> = ({
           assetTag: i.assetTag,
         })),
         additionalCharges: contract.deliveryFee + contract.pickupFee,
+<<<<<<< HEAD
         terms: `Rental contract billing Net 30. Security deposit held separately: ${formatRupiahAmount(contract.securityDeposit)}`,
+=======
+        terms: `Rental contract billing Net 30. Security deposit held separately: $${contract.securityDeposit.toFixed(2)}`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       });
       alert(`Rental Invoice ${inv.invoiceNumber} drafted successfully!`);
       onRefresh();
@@ -214,14 +228,22 @@ export const RentalsView: React.FC<RentalsViewProps> = ({
                     </td>
                     <td className="py-3 px-4 text-right font-mono-numbers">
                       <div className="font-medium text-slate-800">
+<<<<<<< HEAD
                         {formatRupiahAmount(contract.securityDeposit)}
+=======
+                        ${contract.securityDeposit.toLocaleString()}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </div>
                       <div className="text-[10px] text-slate-400">
                         {contract.depositStatus}
                       </div>
                     </td>
                     <td className="py-3 px-4 text-right font-mono-numbers font-bold text-slate-900">
+<<<<<<< HEAD
                       {formatRupiahAmount(contract.grandTotal)}
+=======
+                      ${contract.grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </td>
                     <td className="py-3 px-4 text-center">
                       <span
@@ -344,7 +366,11 @@ export const RentalsView: React.FC<RentalsViewProps> = ({
                             <span>{asset.name}</span>
                           </div>
                           <div className="font-mono font-medium text-slate-600">
+<<<<<<< HEAD
                             {formatRupiahAmount(asset.monthlyRentalRate)}/mo · {formatRupiahAmount(asset.dailyRentalRate)}/day
+=======
+                            ${asset.monthlyRentalRate}/mo · ${asset.dailyRentalRate}/day
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           </div>
                         </div>
                       );
@@ -393,7 +419,11 @@ export const RentalsView: React.FC<RentalsViewProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
+<<<<<<< HEAD
                   <label className="block text-slate-600 font-semibold mb-1">Security Deposit (IDR)</label>
+=======
+                  <label className="block text-slate-600 font-semibold mb-1">Security Deposit ($)</label>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="number"
                     value={securityDeposit}
@@ -402,7 +432,11 @@ export const RentalsView: React.FC<RentalsViewProps> = ({
                   />
                 </div>
                 <div>
+<<<<<<< HEAD
                   <label className="block text-slate-600 font-semibold mb-1">Mobilization Fee (IDR)</label>
+=======
+                  <label className="block text-slate-600 font-semibold mb-1">Mobilization Fee ($)</label>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="number"
                     value={deliveryFee}
@@ -467,7 +501,11 @@ export const RentalsView: React.FC<RentalsViewProps> = ({
             </div>
 
             <div>
+<<<<<<< HEAD
               <label className="block text-slate-600 font-semibold mb-1">Additional Fee (IDR)</label>
+=======
+              <label className="block text-slate-600 font-semibold mb-1">Additional Fee ($)</label>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               <input
                 type="number"
                 value={extensionAmount}
@@ -502,7 +540,11 @@ export const RentalsView: React.FC<RentalsViewProps> = ({
               Process Return &amp; Condition Inspection: {returningContract.contractNumber}
             </h3>
             <p className="text-slate-600">
+<<<<<<< HEAD
               Inspect assets for damages or wear before closing contract and settling the {formatRupiahAmount(returningContract.securityDeposit)} security deposit.
+=======
+              Inspect assets for damages or wear before closing contract and settling the ${returningContract.securityDeposit} security deposit.
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </p>
 
             <div>
@@ -521,7 +563,11 @@ export const RentalsView: React.FC<RentalsViewProps> = ({
             </div>
 
             <div>
+<<<<<<< HEAD
               <label className="block text-slate-600 font-semibold mb-1">Damage / Loss Charge (IDR)</label>
+=======
+              <label className="block text-slate-600 font-semibold mb-1">Damage / Loss Charge ($)</label>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               <input
                 type="number"
                 value={damageCharge}

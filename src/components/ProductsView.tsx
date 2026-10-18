@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Product, ProductType } from '../types/index.ts';
 import { api } from '../services/api.ts';
+<<<<<<< HEAD
 import { formatRupiahAmount } from '../shared/currency.tsx';
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 import {
   Boxes,
   Search,
@@ -214,10 +217,17 @@ export const ProductsView: React.FC<ProductsViewProps> = ({ products, onRefresh 
                       )}
                     </td>
                     <td className="py-3 px-4 text-right font-mono-numbers text-slate-600">
+<<<<<<< HEAD
                       {formatRupiahAmount(prod.purchaseCost)}
                     </td>
                     <td className="py-3 px-4 text-right font-mono-numbers font-semibold text-slate-900">
                       {formatRupiahAmount(prod.salesPrice)}
+=======
+                      ${prod.purchaseCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono-numbers font-semibold text-slate-900">
+                      ${prod.salesPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </td>
                     <td className="py-3 px-4 text-right font-mono-numbers text-emerald-700 font-medium">
                       {margin.toFixed(1)}%
@@ -333,7 +343,11 @@ export const ProductsView: React.FC<ProductsViewProps> = ({ products, onRefresh 
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
+<<<<<<< HEAD
                   <label className="block text-slate-600 font-semibold mb-1">Sales Price (IDR)</label>
+=======
+                  <label className="block text-slate-600 font-semibold mb-1">Sales Price ($)</label>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="number"
                     value={formData.salesPrice}
@@ -342,7 +356,11 @@ export const ProductsView: React.FC<ProductsViewProps> = ({ products, onRefresh 
                   />
                 </div>
                 <div>
+<<<<<<< HEAD
                   <label className="block text-slate-600 font-semibold mb-1">Purchase Cost (IDR)</label>
+=======
+                  <label className="block text-slate-600 font-semibold mb-1">Purchase Cost ($)</label>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="number"
                     value={formData.purchaseCost}

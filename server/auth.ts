@@ -15,10 +15,17 @@ import type { UserPermissionMatrix, UserRole } from '../src/types/index.ts';
 const scrypt = promisify(crypto.scrypt) as (pw: string, salt: Buffer, keylen: number) => Promise<Buffer>;
 
 // ------------------------------------------------------------------
+<<<<<<< HEAD
 // Configuration
 // ------------------------------------------------------------------
 export const IS_PROD = process.env.NODE_ENV === 'production';
 /** Demo mode: shows sample accounts on the login page. Enabled by default in development and disabled in production. */
+=======
+// Konfigurasi
+// ------------------------------------------------------------------
+export const IS_PROD = process.env.NODE_ENV === 'production';
+/** Mode demo: menampilkan akun contoh di halaman login. Default: aktif di dev, MATI di production. */
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 export const DEMO_MODE = process.env.DEMO_MODE ? process.env.DEMO_MODE === 'true' : !IS_PROD;
 const DEMO_PASSWORD = 'Demo@2026';
 const TOKEN_TTL_MS = (parseInt(process.env.SESSION_HOURS || '12', 10) || 12) * 60 * 60 * 1000;
@@ -57,7 +64,11 @@ export function generatePassword(): string {
   return `${out}#7`; // dijamin lolos kebijakan (huruf + angka)
 }
 
+<<<<<<< HEAD
 /** Set an initial password for accounts that do not have one (e.g. seed data / legacy database). */
+=======
+/** Beri password awal ke akun yang belum punya (mis. data seed / database lama). */
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 export function ensureUserCredentials(): void {
   let changed = false;
   const generated: { email: string; password: string }[] = [];
@@ -76,12 +87,21 @@ export function ensureUserCredentials(): void {
   }
   if (changed) db.save();
   if (generated.length) {
+<<<<<<< HEAD
     console.warn('\n[Auth] Production mode: initial passwords were generated randomly (shown ONCE). Share them securely and require a change at login:');
     generated.forEach((g) => console.warn(`  ${g.email}  =>  ${g.password}`));
     console.warn('[Auth] Or set SEED_PASSWORD before the first startup.\n');
   }
   if (DEMO_MODE) {
     console.warn(`[Auth] DEMO_MODE is enabled — sample accounts use password "${process.env.SEED_PASSWORD || DEMO_PASSWORD}". DO NOT use in production.`);
+=======
+    console.warn('\n[Auth] Mode production: password awal dibuat acak (tampil SEKALI ini saja). Segera dibagikan & wajib diganti saat login:');
+    generated.forEach((g) => console.warn(`  ${g.email}  =>  ${g.password}`));
+    console.warn('[Auth] Atau set env SEED_PASSWORD sebelum start pertama.\n');
+  }
+  if (DEMO_MODE) {
+    console.warn(`[Auth] DEMO_MODE aktif — akun contoh memakai password "${process.env.SEED_PASSWORD || DEMO_PASSWORD}". JANGAN dipakai di production.`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
 }
 
@@ -91,7 +111,11 @@ export function publicUser(u: User): Omit<User, 'passwordHash' | 'tokenVersion'>
 }
 
 // ------------------------------------------------------------------
+<<<<<<< HEAD
 // HMAC-signed session token (no additional dependencies)
+=======
+// Token sesi bertanda tangan HMAC (tanpa dependensi tambahan)
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 // ------------------------------------------------------------------
 function loadSecret(): Buffer {
   if (process.env.SESSION_SECRET && process.env.SESSION_SECRET.length >= 16) {
@@ -105,7 +129,11 @@ function loadSecret(): Buffer {
     fs.writeFileSync(file, secret.toString('hex'), { mode: 0o600 });
     return secret;
   } catch {
+<<<<<<< HEAD
     console.warn('[Auth] Unable to persist the session secret; sessions will expire when the server restarts. Set SESSION_SECRET.');
+=======
+    console.warn('[Auth] Tidak bisa menyimpan session secret; sesi akan gugur saat server restart. Set SESSION_SECRET.');
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     return crypto.randomBytes(48);
   }
 }
@@ -157,14 +185,24 @@ export function recordLoginSuccess(req: Request, email: string): void {
 }
 
 // ------------------------------------------------------------------
+<<<<<<< HEAD
 // Endpoint ACL — DENY BY DEFAULT. Routes not listed here are denied.
+=======
+// ACL endpoint — DENY BY DEFAULT. Route yang tidak terdaftar di sini ditolak.
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 // ------------------------------------------------------------------
 type Rule = {
   methods: string[];
   path: RegExp;
+<<<<<<< HEAD
   /** true = login required. Array = user must have one of these modules. */
   access: 'PUBLIC' | 'AUTH' | ModuleId[];
   /** Roles also allowed without the module (e.g. documents in Reports). */
+=======
+  /** true = cukup login. Array = pengguna harus punya salah satu modul ini. */
+  access: 'PUBLIC' | 'AUTH' | ModuleId[];
+  /** Peran yang juga diizinkan walau tidak memiliki modulnya (mis. dokumen di Pusat Laporan). */
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   roles?: UserRole[];
   /** Izin tindakan tambahan (di luar modul). */
   action?: keyof UserPermissionMatrix;
@@ -188,6 +226,7 @@ export const ACL: Rule[] = [
   { methods: ['POST'], path: /^\/auth\/change-password$/, access: 'AUTH' },
   { methods: ALLM, path: /^\/notifications(\/.*)?$/, access: 'AUTH' },
   { methods: GET, path: /^\/settings$/, access: 'AUTH' },
+<<<<<<< HEAD
   { methods: ['GET', 'PUT', 'DELETE'], path: /^\/drafts\/[^/]+$/, access: 'AUTH' },
   { methods: GET, path: /^\/manager\/approvals$/, access: ['manager-approvals'] },
   {
@@ -195,6 +234,8 @@ export const ACL: Rule[] = [
     path: /^\/manager\/approvals\/(quotation|sales|rental|invoice|procurement|delivery|maintenance)\/[^/]+\/(approve|reject)$/,
     access: ['manager-approvals'],
   },
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   // Administrasi IT
   { methods: ALLM, path: /^\/auth\/users(\/.*)?$/, access: ['user-management'] },
@@ -206,11 +247,19 @@ export const ACL: Rule[] = [
 
   // Customers
   { methods: GET, path: /^\/customers\/[^/]+\/statement$/, access: ['customers', 'invoices', 'payments'] },
+<<<<<<< HEAD
   { methods: GET, path: /^\/customers(\/[^/]+)?$/, access: CUSTOMER_READ, roles: ['MANAGER'] },
   { methods: WRITE, path: /^\/customers(\/[^/]+)?$/, access: ['customers'] },
 
   // Products
   { methods: GET, path: /^\/products(\/[^/]+)?$/, access: PRODUCT_READ, roles: ['MANAGER'] },
+=======
+  { methods: GET, path: /^\/customers(\/[^/]+)?$/, access: CUSTOMER_READ },
+  { methods: WRITE, path: /^\/customers(\/[^/]+)?$/, access: ['customers'] },
+
+  // Products
+  { methods: GET, path: /^\/products(\/[^/]+)?$/, access: PRODUCT_READ },
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   { methods: WRITE, path: /^\/products(\/[^/]+)?$/, access: ['products', 'procurement'] },
 
   // Assets
@@ -219,11 +268,16 @@ export const ACL: Rule[] = [
   { methods: ['POST'], path: /^\/assets\/status-logs$/, access: ['assets', 'maintenance', 'operator-status', 'technical-service'] },
   { methods: GET, path: /^\/assets\/[^/]+\/history$/, access: ['assets', 'maintenance', 'technical-service'] },
   { methods: ['POST'], path: /^\/assets\/[^/]+\/documents$/, access: ['assets'], action: 'canUploadLegalDocs' },
+<<<<<<< HEAD
   { methods: GET, path: /^\/assets$/, access: ASSET_READ, roles: ['MANAGER'] },
+=======
+  { methods: GET, path: /^\/assets$/, access: ASSET_READ },
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   { methods: WRITE, path: /^\/assets(\/[^/]+)?$/, access: ['assets'] },
 
   // Quotations & Sales
   { methods: ['POST'], path: /^\/quotations\/[^/]+\/convert-to-order$/, access: ['quotations', 'sales'] },
+<<<<<<< HEAD
   { methods: GET, path: /^\/quotations$/, access: ['quotations', 'sales', 'dashboard'], roles: ['MANAGER'] },
   { methods: WRITE, path: /^\/quotations(\/.*)?$/, access: ['quotations'] },
   { methods: GET, path: /^\/sales-orders$/, access: ['sales', 'quotations', 'deliveries', 'invoices', 'dashboard'], roles: ['MANAGER'] },
@@ -237,13 +291,32 @@ export const ACL: Rule[] = [
 
   // Finance
   { methods: GET, path: /^\/invoices(\/[^/]+)?$/, access: ['invoices', 'payments', 'dashboard'], roles: ['MANAGER'] },
+=======
+  { methods: GET, path: /^\/quotations$/, access: ['quotations', 'sales', 'dashboard'] },
+  { methods: WRITE, path: /^\/quotations(\/.*)?$/, access: ['quotations'] },
+  { methods: GET, path: /^\/sales-orders$/, access: ['sales', 'quotations', 'deliveries', 'invoices', 'dashboard'] },
+  { methods: WRITE, path: /^\/sales-orders(\/.*)?$/, access: ['sales'] },
+
+  // Rentals & Deliveries
+  { methods: GET, path: /^\/rentals$/, access: ['rentals', 'invoices', 'deliveries', 'maintenance', 'dashboard'], roles: ['SALES_MARKETING', 'AR_MANAGEMENT', 'ASSET_CONTROL'] },
+  { methods: WRITE, path: /^\/rentals(\/.*)?$/, access: ['rentals'] },
+  { methods: GET, path: /^\/deliveries$/, access: ['deliveries', 'sales', 'rentals', 'dashboard'] },
+  { methods: WRITE, path: /^\/deliveries(\/.*)?$/, access: ['deliveries'] },
+
+  // Finance
+  { methods: GET, path: /^\/invoices(\/[^/]+)?$/, access: ['invoices', 'payments', 'dashboard'] },
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   { methods: WRITE, path: /^\/invoices(\/.*)?$/, access: ['invoices'] },
   { methods: GET, path: /^\/payments$/, access: ['payments', 'invoices', 'dashboard'] },
   { methods: WRITE, path: /^\/payments(\/.*)?$/, access: ['payments'] },
 
   // Procurement
   { methods: ['POST'], path: /^\/procurement\/vendor-bills\/[^/]+\/pay$/, access: ['payments'] },
+<<<<<<< HEAD
   { methods: GET, path: /^\/procurement\/(vendors|purchase-orders|vendor-bills)$/, access: ['procurement', 'payments', 'dashboard'], roles: ['MANAGER'] },
+=======
+  { methods: GET, path: /^\/procurement\/(vendors|purchase-orders|vendor-bills)$/, access: ['procurement', 'payments', 'dashboard'] },
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   { methods: WRITE, path: /^\/procurement\/.*$/, access: ['procurement'] },
 
   // Operator lapangan, absensi, servis
@@ -253,7 +326,11 @@ export const ACL: Rule[] = [
   { methods: WRITE, path: /^\/operators(\/.*)?$/, access: ['maintenance'] },
   { methods: GET, path: /^\/technical-service\/dashboard$/, access: ['technical-service', 'maintenance'] },
   { methods: WRITE, path: /^\/technical-service\/.*$/, access: ['technical-service'] },
+<<<<<<< HEAD
   { methods: GET, path: /^\/maintenance\/work-orders$/, access: WO_READ, roles: ['MANAGER'] },
+=======
+  { methods: GET, path: /^\/maintenance\/work-orders$/, access: WO_READ },
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   { methods: WRITE, path: /^\/maintenance\/work-orders(\/.*)?$/, access: ['maintenance', 'technical-service'] },
 
   // Laporan
@@ -283,11 +360,16 @@ export function authenticateAndAuthorize(req: Request, res: Response, next: Next
   const user = payload ? db.getUsers().find((u) => u.id === payload.uid) : undefined;
 
   if (!payload || !user || user.status !== 'ACTIVE' || (user.tokenVersion || 1) !== payload.v) {
+<<<<<<< HEAD
     return res.status(401).json({ error: 'Your session is invalid or has expired. Please log in again.', code: 'UNAUTHENTICATED' });
+=======
+    return res.status(401).json({ error: 'Sesi tidak valid atau sudah berakhir. Silakan login kembali.', code: 'UNAUTHENTICATED' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
   (req as AuthedRequest).user = user;
 
   if (user.mustChangePassword && !PWD_CHANGE_ALLOWED.test(req.path)) {
+<<<<<<< HEAD
     return res.status(403).json({ error: 'You must change your password before continuing.', code: 'PASSWORD_CHANGE_REQUIRED' });
   }
 
@@ -316,20 +398,33 @@ export function authenticateAndAuthorize(req: Request, res: Response, next: Next
   ) {
     db.logAudit(user.name, 'ACCESS_DENIED', 'API', req.path, 'Manager access is restricted to approval operations.');
     return res.status(403).json({ error: 'Managers may only view data and process approvals.', code: 'FORBIDDEN' });
+=======
+    return res.status(403).json({ error: 'Anda wajib mengganti password sebelum melanjutkan.', code: 'PASSWORD_CHANGE_REQUIRED' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
 
   if (!rule) {
     // Deny-by-default: endpoint baru harus didaftarkan di ACL secara eksplisit.
+<<<<<<< HEAD
     return res.status(403).json({ error: 'This endpoint is not registered in the access policy.', code: 'FORBIDDEN' });
+=======
+    return res.status(403).json({ error: 'Endpoint ini tidak terdaftar pada kebijakan akses.', code: 'FORBIDDEN' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
   if (rule.access === 'AUTH') return next();
 
   const modules = getEffectiveModules(user);
   const allowed = rule.access.some((m) => modules.includes(m)) || !!rule.roles?.includes(user.role);
   if (!allowed || (rule.action && !hasActionPermission(user, rule.action))) {
+<<<<<<< HEAD
     db.logAudit(user.name, 'ACCESS_DENIED', 'API', req.path, `${req.method} ${req.path} denied for role ${user.role}`);
     return res.status(403).json({
       error: `Access denied: your account (${user.role}) is not authorized to perform this operation.`,
+=======
+    db.logAudit(user.name, 'ACCESS_DENIED', 'API', req.path, `${req.method} ${req.path} ditolak untuk peran ${user.role}`);
+    return res.status(403).json({
+      error: `Akses ditolak: akun Anda (${user.role}) tidak memiliki izin untuk operasi ini.`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       code: 'FORBIDDEN',
     });
   }

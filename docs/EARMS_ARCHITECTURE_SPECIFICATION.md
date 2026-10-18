@@ -67,7 +67,11 @@ EARMS encompasses 13 core subsystems:
 - **FR-06 (Timesheet Sync):** REST Webhook + Polling adapter with idempotent deduplication hashing (`SHA256(external_id + operator_id + date)`).
 - **FR-07 (Safety Hold):** Any failed item on a mandatory K3 pre-start checklist automatically flags asset status as `SAFETY_HOLD`, blocking dispatch.
 - **FR-08 (Maintenance Work Orders):** Automatically triggers preventive work orders when engine hour meters exceed configured thresholds (e.g., 250h, 500h, 1000h).
+<<<<<<< HEAD
 - **FR-09 (Procurement Segregation):** Purchase Orders > Rp5,000 require Branch Manager approval; > Rp25,000 require Executive Director sign-off. Requester cannot approve.
+=======
+- **FR-09 (Procurement Segregation):** Purchase Orders > $5,000 require Branch Manager approval; > $25,000 require Executive Director sign-off. Requester cannot approve.
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 - **FR-10 (AR Aging Calculation):** Daily automated cron evaluates open invoices against `due_date`, partitioning into `Current`, `1-30`, `31-60`, `61-90`, and `>90` day buckets.
 - **FR-11 (Tax Engine):** Computes Indonesian PPN 11% (VAT) and PPh Pasal 23 (2% equipment rental withholding) with precision formatting.
 

@@ -7,6 +7,7 @@
     background-color: #f8fafc;
     -webkit-font-smoothing: antialiased;
   }
+<<<<<<< HEAD
 
   button,
   input,
@@ -20,6 +21,8 @@
   .font-sans {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   }
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 }
 
 .font-mono-numbers {
@@ -27,6 +30,7 @@
   font-variant-numeric: tabular-nums;
 }
 
+<<<<<<< HEAD
 @media (max-width: 640px) {
   html,
   body,
@@ -170,6 +174,9 @@
     display: none !important;
   }
 
+=======
+@media print {
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   body {
     background-color: #ffffff !important;
     color: #0f172a !important;
@@ -181,6 +188,7 @@
   .print-only {
     display: block !important;
   }
+<<<<<<< HEAD
   body.printing-flow-content #root {
     display: block !important;
     width: 100% !important;
@@ -212,10 +220,39 @@
     display: table !important;
     overflow: visible !important;
     white-space: normal !important;
+=======
+  header, aside, button, select, input {
+    display: none !important;
+  }
+  /* Ensure modals and document previews print cleanly without dark backdrop */
+  .fixed.inset-0 {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+    box-shadow: none !important;
+  }
+  .max-h-\[92vh\], .max-h-\[90vh\], .max-h-\[85vh\] {
+    max-height: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  main {
+    padding: 0 !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+  table {
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     border-collapse: collapse !important;
     width: 100% !important;
     page-break-inside: auto;
   }
+<<<<<<< HEAD
   .print-scope h1,
   .print-scope h2,
   .print-scope h3,
@@ -359,6 +396,8 @@
     page-break-inside: avoid;
   }
 
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   tr {
     page-break-inside: avoid;
     page-break-after: auto;

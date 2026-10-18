@@ -53,7 +53,11 @@ export const Toaster: React.FC = () => {
           <div key={t.id} className={`flex items-start gap-2.5 p-3 rounded-lg border shadow-lg text-xs ${box}`}>
             <Icon className="w-4 h-4 shrink-0 mt-0.5" />
             <span className="flex-1 whitespace-pre-line break-words">{t.text}</span>
+<<<<<<< HEAD
             <button type="button" onClick={() => setItems((p) => p.filter((x) => x.id !== t.id))} className="opacity-60 hover:opacity-100 cursor-pointer"             aria-label="Close">
+=======
+            <button type="button" onClick={() => setItems((p) => p.filter((x) => x.id !== t.id))} className="opacity-60 hover:opacity-100 cursor-pointer" aria-label="Tutup">
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               <X className="w-3.5 h-3.5" />
             </button>
           </div>

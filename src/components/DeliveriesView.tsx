@@ -83,7 +83,11 @@ export const DeliveriesView: React.FC<DeliveriesViewProps> = ({ deliveries, onRe
                         type="button"
                         onClick={() => setSelectedPreviewDelivery(delivery)}
                         className="text-left font-mono font-bold text-indigo-700 hover:text-indigo-900 hover:underline cursor-pointer flex items-center gap-1"
+<<<<<<< HEAD
                         title="Open the official delivery note"
+=======
+                        title="Klik untuk membuka view data Surat Jalan resmi"
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       >
                         <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
                         <span>{delivery.deliveryNumber}</span>
@@ -177,7 +181,11 @@ export const DeliveriesView: React.FC<DeliveriesViewProps> = ({ deliveries, onRe
                   className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium border border-slate-300 rounded text-slate-700 hover:bg-slate-50"
                 >
                   <Printer className="w-3.5 h-3.5" />
+<<<<<<< HEAD
                   Print Delivery Note
+=======
+                  Print Note
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
                 <button
                   onClick={() => setSelectedPreviewDelivery(null)}
@@ -198,7 +206,11 @@ export const DeliveriesView: React.FC<DeliveriesViewProps> = ({ deliveries, onRe
                 <div className="text-right font-mono">
                   <div className="text-sm font-bold text-slate-900">DELIVERY NOTE</div>
                   <div className="font-bold text-slate-800 mt-0.5">{selectedPreviewDelivery.deliveryNumber}</div>
+<<<<<<< HEAD
                   <div className="text-slate-500 text-[11px]">Dispatch Date: {new Date(selectedPreviewDelivery.dispatchDate).toLocaleDateString('en-US')}</div>
+=======
+                  <div className="text-slate-500 text-[11px]">Dispatch: {new Date(selectedPreviewDelivery.dispatchDate).toLocaleDateString()}</div>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </div>
               </div>
 
@@ -217,7 +229,11 @@ export const DeliveriesView: React.FC<DeliveriesViewProps> = ({ deliveries, onRe
                   <div>Order Reference: <span className="font-mono font-medium">{selectedPreviewDelivery.sourceReferenceId}</span></div>
                   <div>Carrier / Driver: <span className="font-medium">{selectedPreviewDelivery.driverName}</span></div>
                   <div>Tracking: <span className="font-mono text-slate-600">{selectedPreviewDelivery.trackingNumber}</span></div>
+<<<<<<< HEAD
                   <div className="mt-1 text-emerald-700 font-semibold">Status: {selectedPreviewDelivery.status.replaceAll('_', ' ')}</div>
+=======
+                  <div className="mt-1 text-emerald-700 font-semibold">Status: {selectedPreviewDelivery.status}</div>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </div>
               </div>
 
@@ -268,7 +284,11 @@ export const DeliveriesView: React.FC<DeliveriesViewProps> = ({ deliveries, onRe
                   </div>
                   {selectedPreviewDelivery.actualDeliveryDate && (
                     <div className="text-[10px] text-emerald-700 font-mono mt-1">
+<<<<<<< HEAD
                       Received: {new Date(selectedPreviewDelivery.actualDeliveryDate).toLocaleString('en-US')}
+=======
+                      Received: {new Date(selectedPreviewDelivery.actualDeliveryDate).toLocaleString()}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </div>
                   )}
                 </div>

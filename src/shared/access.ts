@@ -11,12 +11,20 @@ export type ModuleId =
   | 'reports' | 'dashboard' | 'customers' | 'quotations' | 'sales' | 'rentals'
   | 'deliveries' | 'invoices' | 'payments' | 'assets' | 'products' | 'procurement'
   | 'maintenance' | 'operator-status' | 'technical-service'
+<<<<<<< HEAD
   | 'user-management' | 'api-explorer' | 'test-runner' | 'settings' | 'manager-approvals';
+=======
+  | 'user-management' | 'api-explorer' | 'test-runner' | 'settings';
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
 export const ALL_MODULES: ModuleId[] = [
   'reports', 'dashboard', 'customers', 'quotations', 'sales', 'rentals', 'deliveries',
   'invoices', 'payments', 'assets', 'products', 'procurement', 'maintenance',
+<<<<<<< HEAD
   'operator-status', 'technical-service', 'user-management', 'api-explorer', 'test-runner', 'settings', 'manager-approvals',
+=======
+  'operator-status', 'technical-service', 'user-management', 'api-explorer', 'test-runner', 'settings',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 ];
 
 /** Modul bawaan tiap peran (baseline). */
@@ -31,7 +39,10 @@ export const ROLE_MODULES: Record<UserRole, ModuleId[]> = {
   AR_MANAGEMENT: ['invoices', 'reports', 'payments', 'customers'],
   OPERATOR_USER: ['operator-status'],
   TECHNICAL_SERVICE: ['technical-service', 'maintenance', 'assets', 'products', 'reports'],
+<<<<<<< HEAD
   MANAGER: ['manager-approvals'],
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 };
 
 export const DEFAULT_TAB: Record<UserRole, ModuleId> = {
@@ -45,21 +56,34 @@ export const DEFAULT_TAB: Record<UserRole, ModuleId> = {
   AR_MANAGEMENT: 'invoices',
   OPERATOR_USER: 'operator-status',
   TECHNICAL_SERVICE: 'technical-service',
+<<<<<<< HEAD
   MANAGER: 'manager-approvals',
 };
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   EXECUTIVE: 'Executive Director',
   ADMIN_IT: 'IT Administrator',
+=======
+};
+
+export const ROLE_LABELS: Record<UserRole, string> = {
+  EXECUTIVE: 'Executive (Direktur)',
+  ADMIN_IT: 'Administrator IT',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   SALES_MARKETING: 'Sales & Marketing',
   ASSET_CONTROL: 'Asset Control',
   MANAGEMENT_OPERATION: 'Management Operation',
   PROCUREMENT: 'Procurement',
   FINANCE_ACCOUNTING_TAX: 'Finance, Accounting & Tax',
   AR_MANAGEMENT: 'AR Management',
+<<<<<<< HEAD
   OPERATOR_USER: 'Field Operator',
   TECHNICAL_SERVICE: 'Technical Service',
   MANAGER: 'Manager',
+=======
+  OPERATOR_USER: 'Operator Lapangan',
+  TECHNICAL_SERVICE: 'Technical Service',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 };
 
 export const ALL_ROLES = Object.keys(ROLE_MODULES) as UserRole[];
@@ -145,10 +169,18 @@ export function defaultTabFor(user: AclUser | null | undefined): ModuleId {
   return mods.includes(preferred) ? preferred : (mods[0] || preferred);
 }
 
+<<<<<<< HEAD
 export const PASSWORD_POLICY_TEXT = 'At least 8 characters, including letters and numbers.';
 export function validatePasswordStrength(pw: string): string | null {
   if (typeof pw !== 'string' || pw.length < 8) return 'Password must be at least 8 characters.';
   if (pw.length > 128) return 'Password must be no more than 128 characters.';
   if (!/[A-Za-z]/.test(pw) || !/\d/.test(pw)) return 'Password must contain letters and numbers.';
+=======
+export const PASSWORD_POLICY_TEXT = 'Minimal 8 karakter, mengandung huruf dan angka.';
+export function validatePasswordStrength(pw: string): string | null {
+  if (typeof pw !== 'string' || pw.length < 8) return 'Password minimal 8 karakter.';
+  if (pw.length > 128) return 'Password maksimal 128 karakter.';
+  if (!/[A-Za-z]/.test(pw) || !/\d/.test(pw)) return 'Password harus mengandung huruf dan angka.';
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   return null;
 }

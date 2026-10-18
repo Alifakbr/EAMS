@@ -2,6 +2,7 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
+<<<<<<< HEAD
 const nativePrint = window.print.bind(window);
 window.print = () => {
   const activeElement = document.activeElement;
@@ -49,4 +50,6 @@ window.print = () => {
   nativePrint();
 };
 
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 createRoot(document.getElementById('root')!).render(<App />);

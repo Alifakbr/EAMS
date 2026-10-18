@@ -35,7 +35,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       const { blob, filename } = await api.downloadBackup();
       saveBlob(blob, filename || `apex_eams_backup_${new Date().toISOString().slice(0, 10)}.json`);
     } catch (err: any) {
+<<<<<<< HEAD
       alert(`Failed to download backup: ${err.message}`);
+=======
+      alert(`Gagal mengunduh backup: ${err.message}`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     } finally {
       setBackingUp(false);
     }
@@ -158,12 +162,21 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
+<<<<<<< HEAD
               <label className="block text-slate-600 font-semibold mb-1">System Currency</label>
               <input
                 type="text"
                 value="IDR"
                 readOnly
                 className="w-full p-2 border border-slate-300 rounded font-mono outline-none bg-slate-50"
+=======
+              <label className="block text-slate-600 font-semibold mb-1">Default Currency</label>
+              <input
+                type="text"
+                value={formData.defaultCurrency}
+                onChange={(e) => setFormData({ ...formData, defaultCurrency: e.target.value })}
+                className="w-full p-2 border border-slate-300 rounded font-mono outline-none"
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               />
             </div>
             <div>

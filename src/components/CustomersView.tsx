@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Customer } from '../types/index.ts';
 import { api } from '../services/api.ts';
+<<<<<<< HEAD
 import { formatRupiahAmount } from '../shared/currency.tsx';
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 import {
   Users,
   Search,
@@ -213,11 +216,19 @@ export const CustomersView: React.FC<CustomersViewProps> = ({ customers, onRefre
                       </div>
                     </td>
                     <td className="py-3 px-4 text-right font-mono-numbers text-slate-800">
+<<<<<<< HEAD
                       {formatRupiahAmount(customer.creditLimit)}
                     </td>
                     <td className="py-3 px-4 text-right font-mono-numbers">
                       <span className={`font-semibold ${customer.outstandingBalance > 0 ? (isOverLimit ? 'text-rose-600' : 'text-amber-700') : 'text-slate-500'}`}>
                         {formatRupiahAmount(customer.outstandingBalance)}
+=======
+                      ${customer.creditLimit.toLocaleString()}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono-numbers">
+                      <span className={`font-semibold ${customer.outstandingBalance > 0 ? (isOverLimit ? 'text-rose-600' : 'text-amber-700') : 'text-slate-500'}`}>
+                        ${customer.outstandingBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">
@@ -286,19 +297,31 @@ export const CustomersView: React.FC<CustomersViewProps> = ({ customers, onRefre
                     <div>
                       <div className="text-slate-500 font-medium">Total Invoiced (All-Time)</div>
                       <div className="text-lg font-bold font-mono-numbers text-slate-900 mt-1">
+<<<<<<< HEAD
                         {formatRupiahAmount(statementData.totalInvoiced)}
+=======
+                        ${statementData.totalInvoiced?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </div>
                     </div>
                     <div>
                       <div className="text-slate-500 font-medium">Total Payments Settled</div>
                       <div className="text-lg font-bold font-mono-numbers text-emerald-600 mt-1">
+<<<<<<< HEAD
                         {formatRupiahAmount(statementData.totalPaid)}
+=======
+                        ${statementData.totalPaid?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </div>
                     </div>
                     <div>
                       <div className="text-slate-500 font-medium">Current Outstanding Balance</div>
                       <div className="text-lg font-bold font-mono-numbers text-amber-700 mt-1">
+<<<<<<< HEAD
                         {formatRupiahAmount(statementData.outstandingBalance)}
+=======
+                        ${statementData.outstandingBalance?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </div>
                     </div>
                   </div>
@@ -323,9 +346,15 @@ export const CustomersView: React.FC<CustomersViewProps> = ({ customers, onRefre
                             <td className="py-2 px-3 font-mono font-medium">{inv.invoiceNumber}</td>
                             <td className="py-2 px-3 text-slate-500">{inv.issueDate}</td>
                             <td className="py-2 px-3 text-slate-500">{inv.dueDate}</td>
+<<<<<<< HEAD
                             <td className="py-2 px-3 text-right font-mono-numbers">{formatRupiahAmount(inv.grandTotal)}</td>
                             <td className="py-2 px-3 text-right font-mono-numbers font-semibold text-slate-900">
                               {formatRupiahAmount(inv.outstandingBalance)}
+=======
+                            <td className="py-2 px-3 text-right font-mono-numbers">${inv.grandTotal?.toFixed(2)}</td>
+                            <td className="py-2 px-3 text-right font-mono-numbers font-semibold text-slate-900">
+                              ${inv.outstandingBalance?.toFixed(2)}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                             </td>
                             <td className="py-2 px-3 text-center">
                               <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">
@@ -359,7 +388,11 @@ export const CustomersView: React.FC<CustomersViewProps> = ({ customers, onRefre
                             <td className="py-2 px-3 text-slate-700">{pmt.method}</td>
                             <td className="py-2 px-3 font-mono text-slate-500">{pmt.referenceNumber}</td>
                             <td className="py-2 px-3 text-right font-mono-numbers font-bold text-emerald-700">
+<<<<<<< HEAD
                               {formatRupiahAmount(pmt.amount)}
+=======
+                              ${pmt.amount?.toFixed(2)}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                             </td>
                           </tr>
                         ))}
@@ -370,12 +403,20 @@ export const CustomersView: React.FC<CustomersViewProps> = ({ customers, onRefre
               ) : null}
             </div>
 
+<<<<<<< HEAD
             <div className="no-print p-4 border-t border-slate-200 flex justify-end gap-2">
+=======
+            <div className="p-4 border-t border-slate-200 flex justify-end gap-2">
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               <button
                 onClick={() => window.print()}
                 className="px-3.5 py-1.5 text-xs font-medium text-slate-700 border border-slate-300 rounded hover:bg-slate-50"
               >
+<<<<<<< HEAD
                 Print Customer Statement
+=======
+                Print Statement
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </button>
               <button
                 onClick={() => setSelectedStatementCustomer(null)}
@@ -441,7 +482,11 @@ export const CustomersView: React.FC<CustomersViewProps> = ({ customers, onRefre
                   />
                 </div>
                 <div>
+<<<<<<< HEAD
                   <label className="block text-slate-600 font-semibold mb-1">Credit Limit (IDR)</label>
+=======
+                  <label className="block text-slate-600 font-semibold mb-1">Credit Limit ($)</label>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="number"
                     value={formData.creditLimit}

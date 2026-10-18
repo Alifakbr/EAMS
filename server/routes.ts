@@ -3,7 +3,10 @@ import crypto from 'crypto';
 import { db, calculateLineTotals, toCents, fromCents } from './db.ts';
 import { openApiSpec } from './openapi.ts';
 import { runEamsTestSuite } from './tests.ts';
+<<<<<<< HEAD
 import { formatRupiahAmount } from '../src/shared/currency-format.ts';
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 import {
   authenticateAndAuthorize, actorName, actorUser, hashPassword, verifyPassword, generatePassword,
   publicUser, signToken, loginLockRemainingMs, recordLoginFailure, recordLoginSuccess,
@@ -38,6 +41,7 @@ export const apiRouter = express.Router();
 // Semua endpoint melewati autentikasi + ACL (deny-by-default). Lihat server/auth.ts.
 apiRouter.use(authenticateAndAuthorize);
 
+<<<<<<< HEAD
 apiRouter.get('/drafts/:key', (req: Request, res: Response) => {
   const user = actorUser(req);
   const formKey = req.params.key;
@@ -240,11 +244,18 @@ apiRouter.post('/manager/approvals/:type/:id/:decision', (req: Request, res: Res
 });
 
 // Additional role guard for special handler logic; the primary ACL is in auth.ts.
+=======
+// Pembatas peran tambahan untuk logika khusus di dalam handler (jarang dipakai; ACL utama ada di auth.ts).
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 export const requireRole = (allowedRoles: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const role = actorUser(req)?.role;
     if (role && (role === 'ADMIN_IT' || allowedRoles.includes(role))) return next();
+<<<<<<< HEAD
     return res.status(403).json({ error: `Access denied: role "${role}" is not authorized to perform this operation.`, code: 'FORBIDDEN' });
+=======
+    return res.status(403).json({ error: `Akses ditolak: peran "${role}" tidak berwenang untuk operasi ini.`, code: 'FORBIDDEN' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   };
 };
 
@@ -282,14 +293,22 @@ const newUserId = () => `USR-${crypto.randomBytes(4).toString('hex').toUpperCase
 apiRouter.post('/auth/login', async (req: Request, res: Response) => {
   const { email, password } = req.body || {};
   if (typeof email !== 'string' || typeof password !== 'string' || !email.trim() || !password) {
+<<<<<<< HEAD
     return res.status(400).json({ error: 'Email and password are required.' });
+=======
+    return res.status(400).json({ error: 'Email dan password wajib diisi.' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
   const cleanEmail = email.trim().toLowerCase();
 
   const lockMs = loginLockRemainingMs(req, cleanEmail);
   if (lockMs > 0) {
     return res.status(429).json({
+<<<<<<< HEAD
       error: `Too many failed attempts. Please try again in ${Math.ceil(lockMs / 60000)} minutes.`,
+=======
+      error: `Terlalu banyak percobaan gagal. Coba lagi dalam ${Math.ceil(lockMs / 60000)} menit.`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       code: 'LOCKED',
     });
   }
@@ -298,20 +317,36 @@ apiRouter.post('/auth/login', async (req: Request, res: Response) => {
   const ok = await verifyPassword(password, user?.passwordHash);
   if (!user || !ok) {
     recordLoginFailure(req, cleanEmail);
+<<<<<<< HEAD
     db.logAudit('Anonymous', 'LOGIN_FAILED', 'USER', cleanEmail, `Failed login attempt for ${cleanEmail}`);
     db.save();
     return res.status(401).json({ error: 'Incorrect email or password.' });
   }
   if (user.status !== 'ACTIVE') {
     return res.status(403).json({ error: 'Your account is inactive. Contact the IT Administrator.' });
+=======
+    db.logAudit('Anonim', 'LOGIN_FAILED', 'USER', cleanEmail, `Percobaan login gagal untuk ${cleanEmail}`);
+    db.save();
+    return res.status(401).json({ error: 'Email atau password salah.' });
+  }
+  if (user.status !== 'ACTIVE') {
+    return res.status(403).json({ error: 'Akun Anda tidak aktif. Hubungi Administrator IT.' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
 
   recordLoginSuccess(req, cleanEmail);
   user.lastLogin = new Date().toISOString();
+<<<<<<< HEAD
   db.logAudit(user.name, 'USER_LOGIN', 'USER', user.id, `User ${user.name} (${user.email}) logged in as ${user.role}`);
   db.save();
 
   res.json({ message: 'Login successful', token: signToken(user), ...sessionPayload(user) });
+=======
+  db.logAudit(user.name, 'USER_LOGIN', 'USER', user.id, `User ${user.name} (${user.email}) login sebagai ${user.role}`);
+  db.save();
+
+  res.json({ message: 'Login berhasil', token: signToken(user), ...sessionPayload(user) });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 });
 
 apiRouter.get('/auth/me', (req: Request, res: Response) => {
@@ -320,23 +355,37 @@ apiRouter.get('/auth/me', (req: Request, res: Response) => {
 
 apiRouter.post('/auth/logout', (req: Request, res: Response) => {
   const user = actorUser(req)!;
+<<<<<<< HEAD
   db.logAudit(user.name, 'USER_LOGOUT', 'USER', user.id, `User ${user.name} logged out`);
   db.save();
   res.json({ message: 'Logged out successfully' });
+=======
+  db.logAudit(user.name, 'USER_LOGOUT', 'USER', user.id, `User ${user.name} logout`);
+  db.save();
+  res.json({ message: 'Berhasil keluar' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 });
 
 apiRouter.post('/auth/change-password', async (req: Request, res: Response) => {
   const user = actorUser(req)!;
   const { currentPassword, newPassword } = req.body || {};
   if (typeof currentPassword !== 'string' || typeof newPassword !== 'string') {
+<<<<<<< HEAD
     return res.status(400).json({ error: 'Current and new passwords are required.' });
   }
   if (!(await verifyPassword(currentPassword, user.passwordHash))) {
     return res.status(400).json({ error: 'Incorrect current password.' });
+=======
+    return res.status(400).json({ error: 'Password lama dan baru wajib diisi.' });
+  }
+  if (!(await verifyPassword(currentPassword, user.passwordHash))) {
+    return res.status(400).json({ error: 'Password lama salah.' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
   const weak = validatePasswordStrength(newPassword);
   if (weak) return res.status(400).json({ error: weak });
   if (newPassword === currentPassword) {
+<<<<<<< HEAD
     return res.status(400).json({ error: 'The new password must be different from the current password.' });
   }
   user.passwordHash = await hashPassword(newPassword);
@@ -349,6 +398,20 @@ apiRouter.post('/auth/change-password', async (req: Request, res: Response) => {
 
 // ==========================================
 // IT USER MANAGEMENT (user-management module only)
+=======
+    return res.status(400).json({ error: 'Password baru harus berbeda dari password lama.' });
+  }
+  user.passwordHash = await hashPassword(newPassword);
+  user.tokenVersion = (user.tokenVersion || 1) + 1; // sesi lain di perangkat lain gugur
+  user.mustChangePassword = false;
+  db.logAudit(user.name, 'PASSWORD_CHANGED', 'USER', user.id, `User ${user.name} mengganti password sendiri`);
+  db.save();
+  res.json({ message: 'Password berhasil diganti.', token: signToken(user), ...sessionPayload(user) });
+});
+
+// ==========================================
+// IT USER MANAGEMENT (hanya modul user-management)
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 // ==========================================
 apiRouter.get('/auth/users', (_req: Request, res: Response) => {
   const list = db.getUsers().map(publicUser);
@@ -358,6 +421,7 @@ apiRouter.get('/auth/users', (_req: Request, res: Response) => {
 apiRouter.post('/auth/users', async (req: Request, res: Response) => {
   const { name, email, role, department, employeeBadge, assignedBranch, phone, permissions, customPassword } = req.body || {};
   if (typeof name !== 'string' || !name.trim() || typeof email !== 'string' || !role) {
+<<<<<<< HEAD
     return res.status(400).json({ error: 'Name, email, and role are required.' });
   }
   if (!EMAIL_RE.test(email.trim())) return res.status(400).json({ error: 'Invalid email format.' });
@@ -366,6 +430,16 @@ apiRouter.post('/auth/users', async (req: Request, res: Response) => {
   const cleanEmail = email.trim().toLowerCase();
   if (db.getUsers().some((u) => u.email.toLowerCase() === cleanEmail)) {
     return res.status(400).json({ error: `A user with email ${cleanEmail} is already registered.` });
+=======
+    return res.status(400).json({ error: 'Nama, email, dan peran (role) wajib diisi' });
+  }
+  if (!EMAIL_RE.test(email.trim())) return res.status(400).json({ error: 'Format email tidak valid.' });
+  if (!ALL_ROLES.includes(role)) return res.status(400).json({ error: 'Peran (role) tidak dikenal.' });
+
+  const cleanEmail = email.trim().toLowerCase();
+  if (db.getUsers().some((u) => u.email.toLowerCase() === cleanEmail)) {
+    return res.status(400).json({ error: `Pengguna dengan email ${cleanEmail} sudah terdaftar` });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
 
   let tempPassword = generatePassword();
@@ -380,9 +454,15 @@ apiRouter.post('/auth/users', async (req: Request, res: Response) => {
     name: name.trim(),
     email: cleanEmail,
     role,
+<<<<<<< HEAD
     department: department || 'Company Operations',
     employeeBadge: employeeBadge || `EMP-${crypto.randomBytes(2).toString('hex').toUpperCase()}`,
     assignedBranch: assignedBranch || 'Jakarta Head Office',
+=======
+    department: department || 'Operasional Perusahaan',
+    employeeBadge: employeeBadge || `EMP-${crypto.randomBytes(2).toString('hex').toUpperCase()}`,
+    assignedBranch: assignedBranch || 'Kantor Pusat Jakarta',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     phone: phone || '',
     status: 'ACTIVE' as const,
     permissions: sanitizePermissions(permissions),
@@ -392,7 +472,11 @@ apiRouter.post('/auth/users', async (req: Request, res: Response) => {
   };
 
   db.getUsers().push(newUser);
+<<<<<<< HEAD
   db.logAudit(actorName(req), 'USER_CREATED', 'USER', newUser.id, `Created account for ${newUser.name} with role ${newUser.role}`);
+=======
+  db.logAudit(actorName(req), 'USER_CREATED', 'USER', newUser.id, `Membuat akun ${newUser.name} dengan peran ${newUser.role}`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   db.save();
 
   res.status(201).json({ ...publicUser(newUser), temporaryPassword: tempPassword });
@@ -401,7 +485,11 @@ apiRouter.post('/auth/users', async (req: Request, res: Response) => {
 apiRouter.put('/auth/users/:id', (req: Request, res: Response) => {
   const { id } = req.params;
   const target = db.getUsers().find((u) => u.id === id);
+<<<<<<< HEAD
   if (!target) return res.status(404).json({ error: 'User not found.' });
+=======
+  if (!target) return res.status(404).json({ error: 'Pengguna tidak ditemukan' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   const actor = actorUser(req)!;
   const body = req.body || {};
   const isSelf = actor.id === target.id;
@@ -411,6 +499,7 @@ apiRouter.put('/auth/users/:id', (req: Request, res: Response) => {
     (body.status !== undefined && body.status !== target.status) ||
     body.permissions !== undefined;
   if (isSelf && sensitiveChange) {
+<<<<<<< HEAD
     return res.status(400).json({ error: 'You cannot change your own role, status, or permissions (to prevent lockout or privilege escalation).' });
   }
   if (body.role !== undefined && !ALL_ROLES.includes(body.role)) {
@@ -418,26 +507,47 @@ apiRouter.put('/auth/users/:id', (req: Request, res: Response) => {
   }
   if (body.status !== undefined && !(USER_STATUSES as readonly string[]).includes(body.status)) {
     return res.status(400).json({ error: 'Invalid status.' });
+=======
+    return res.status(400).json({ error: 'Anda tidak dapat mengubah peran, status, atau hak akses akun Anda sendiri (mencegah terkunci / eskalasi).' });
+  }
+  if (body.role !== undefined && !ALL_ROLES.includes(body.role)) {
+    return res.status(400).json({ error: 'Peran (role) tidak dikenal.' });
+  }
+  if (body.status !== undefined && !(USER_STATUSES as readonly string[]).includes(body.status)) {
+    return res.status(400).json({ error: 'Status tidak valid.' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
 
   const nextRole = body.role ?? target.role;
   const nextStatus = body.status ?? target.status;
   const staysActiveAdmin = nextRole === 'ADMIN_IT' && nextStatus === 'ACTIVE';
   if (target.role === 'ADMIN_IT' && !staysActiveAdmin && activeAdminCount(target.id) === 0) {
+<<<<<<< HEAD
     return res.status(400).json({ error: 'At least one active IT Administrator must always remain.' });
+=======
+    return res.status(400).json({ error: 'Tidak bisa: harus selalu ada minimal satu Administrator IT aktif.' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
 
   // Whitelist field — passwordHash, id, email, tokenVersion tidak bisa diubah dari sini.
   for (const f of ['name', 'department', 'assignedBranch', 'employeeBadge', 'phone'] as const) {
     if (typeof body[f] === 'string') (target as any)[f] = body[f].trim();
   }
+<<<<<<< HEAD
   if (!target.name) return res.status(400).json({ error: 'Name cannot be empty.' });
+=======
+  if (!target.name) return res.status(400).json({ error: 'Nama tidak boleh kosong.' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   target.role = nextRole;
   target.status = nextStatus;
   if (body.permissions !== undefined) target.permissions = sanitizePermissions(body.permissions);
   if (nextStatus !== 'ACTIVE') target.tokenVersion = (target.tokenVersion || 1) + 1;
 
+<<<<<<< HEAD
   db.logAudit(actor.name, 'USER_UPDATED', 'USER', id, `Updated account ${target.name} (${target.role}, ${target.status})`);
+=======
+  db.logAudit(actor.name, 'USER_UPDATED', 'USER', id, `Memperbarui akun ${target.name} (${target.role}, ${target.status})`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   db.save();
   res.json(publicUser(target));
 });
@@ -446,7 +556,11 @@ apiRouter.post('/auth/users/:id/reset-password', async (req: Request, res: Respo
   const { id } = req.params;
   const { customPassword, forcePasswordChange } = req.body || {};
   const user = db.getUsers().find((u) => u.id === id);
+<<<<<<< HEAD
   if (!user) return res.status(404).json({ error: 'User not found.' });
+=======
+  if (!user) return res.status(404).json({ error: 'Pengguna tidak ditemukan' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   let temporaryPassword = generatePassword();
   if (typeof customPassword === 'string' && customPassword.trim()) {
@@ -459,15 +573,26 @@ apiRouter.post('/auth/users/:id/reset-password', async (req: Request, res: Respo
   user.tokenVersion = (user.tokenVersion || 1) + 1;           // sesi lama gugur
   user.mustChangePassword = forcePasswordChange !== false;
   const operatorName = actorName(req);
+<<<<<<< HEAD
   db.logAudit(operatorName, 'PASSWORD_RESET', 'USER', id, `Admin reset the password for ${user.name} (${user.email}).`);
+=======
+  db.logAudit(operatorName, 'PASSWORD_RESET', 'USER', id, `Password akun ${user.name} (${user.email}) direset oleh admin.`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   db.addNotification({
     id: `NTF-${Date.now().toString().slice(-6)}`,
     timestamp: new Date().toISOString(),
+<<<<<<< HEAD
     sourceDepartment: 'IT & System Security',
     sourceUserName: operatorName,
     title: `Credentials Reset: ${user.name}`,
     message: `The password for ${user.name} (${user.email}) was reset by the IT Administrator.`,
+=======
+    sourceDepartment: 'Divisi IT & Keamanan Sistem',
+    sourceUserName: operatorName,
+    title: `Reset Kredensial: ${user.name}`,
+    message: `Password akun ${user.name} (${user.email}) direset oleh Administrator IT.`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     category: 'SYSTEM',
     severity: 'INFO',
     relatedEntity: 'USER',
@@ -479,7 +604,11 @@ apiRouter.post('/auth/users/:id/reset-password', async (req: Request, res: Respo
   db.save();
 
   res.json({
+<<<<<<< HEAD
     message: `Password for ${user.name} reset successfully.`,
+=======
+    message: `Password untuk ${user.name} berhasil di-reset.`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     temporaryPassword,
     forcePasswordChange: !!user.mustChangePassword,
     userEmail: user.email,
@@ -520,12 +649,17 @@ apiRouter.post('/notifications/mark-all-read', (req: Request, res: Response) => 
   const list = visibleNotifications(req);
   list.forEach((n) => { n.isRead = true; });
   db.save();
+<<<<<<< HEAD
   res.json({ message: 'All notifications marked as read.' });
+=======
+  res.json({ message: 'Semua notifikasi ditandai telah dibaca.' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 });
 
 apiRouter.delete('/auth/users/:id', (req: Request, res: Response) => {
   const { id } = req.params;
   const user = db.getUsers().find((u) => u.id === id);
+<<<<<<< HEAD
   if (!user) return res.status(404).json({ error: 'User not found.' });
   const actor = actorUser(req)!;
   if (actor.id === user.id) return res.status(400).json({ error: 'You cannot deactivate your own account.' });
@@ -537,6 +671,19 @@ apiRouter.delete('/auth/users/:id', (req: Request, res: Response) => {
   db.logAudit(actor.name, 'USER_DEACTIVATED', 'USER', id, `Deactivated account ${user.name}`);
   db.save();
   res.json({ message: `User ${user.name} deactivated successfully.` });
+=======
+  if (!user) return res.status(404).json({ error: 'Pengguna tidak ditemukan' });
+  const actor = actorUser(req)!;
+  if (actor.id === user.id) return res.status(400).json({ error: 'Anda tidak dapat menonaktifkan akun Anda sendiri.' });
+  if (user.role === 'ADMIN_IT' && user.status === 'ACTIVE' && activeAdminCount(user.id) === 0) {
+    return res.status(400).json({ error: 'Tidak bisa: harus selalu ada minimal satu Administrator IT aktif.' });
+  }
+  user.status = 'INACTIVE';
+  user.tokenVersion = (user.tokenVersion || 1) + 1;
+  db.logAudit(actor.name, 'USER_DEACTIVATED', 'USER', id, `Menonaktifkan akun ${user.name}`);
+  db.save();
+  res.json({ message: `Pengguna ${user.name} berhasil dinonaktifkan` });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 });
 
 // ==========================================
@@ -549,7 +696,11 @@ apiRouter.get('/operators', (_req: Request, res: Response) => {
 apiRouter.post('/operators', (req: Request, res: Response) => {
   const opData = req.body;
   if (!opData.name || !opData.sioNumber) {
+<<<<<<< HEAD
     return res.status(400).json({ error: 'Operator name and SIO number are required.' });
+=======
+    return res.status(400).json({ error: 'Nama operator dan nomor SIO wajib diisi' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
   const newOp = {
     id: `OPR-${Date.now().toString().slice(-4)}`,
@@ -646,7 +797,11 @@ apiRouter.post('/customers', (req: Request, res: Response) => {
         creditLimit: Number(creditLimit) || 100000,
         outstandingBalance: 0,
         paymentTermsDays: Number(paymentTermsDays) || 30,
+<<<<<<< HEAD
         currency: 'IDR',
+=======
+        currency: 'USD',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'ACTIVE',
         notes: notes || '',
         createdAt: new Date().toISOString(),
@@ -881,7 +1036,11 @@ apiRouter.get('/assets/barcode/:barcode', (req: Request, res: Response) => {
   );
 
   if (!asset) {
+<<<<<<< HEAD
     return res.status(404).json({ error: `Equipment with barcode/tag ${req.params.barcode} was not found.` });
+=======
+    return res.status(404).json({ error: `Alat berat dengan barcode/tag ${req.params.barcode} tidak ditemukan` });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
 
   const activeWorkOrders = db.getWorkOrders().filter((w) => (w.assetId === asset.id || w.assetTag === asset.assetTag) && w.status !== 'COMPLETED');
@@ -897,7 +1056,11 @@ apiRouter.get('/assets/barcode/:barcode', (req: Request, res: Response) => {
 // Upload / Update Centralized Legal Documents (STNK, BPKB, SIA)
 apiRouter.post('/assets/:id/documents', (req: Request, res: Response) => {
   const asset = db.getAssets().find((a) => a.id === req.params.id);
+<<<<<<< HEAD
   if (!asset) return res.status(404).json({ error: 'Asset not found.' });
+=======
+  if (!asset) return res.status(404).json({ error: 'Asset tidak ditemukan' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   db.transaction(() => {
     asset.legalDocs = {
@@ -920,12 +1083,20 @@ apiRouter.get('/assets/status-logs', (req: Request, res: Response) => {
 apiRouter.post('/assets/status-logs', (req: Request, res: Response) => {
   const { assetTag, status, hourMeter, location, damageCategory, damageSeverity, damageDescription, photoEvidenceUrl, operatorName } = req.body;
   if (!assetTag || !status) {
+<<<<<<< HEAD
     return res.status(400).json({ error: 'Asset tag and equipment status are required.' });
+=======
+    return res.status(400).json({ error: 'Asset tag dan status alat wajib diisi' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
 
   const asset = db.getAssets().find((a) => a.assetTag.toLowerCase() === assetTag.trim().toLowerCase());
   if (!asset) {
+<<<<<<< HEAD
     return res.status(404).json({ error: `Equipment ${assetTag} is not registered in the system.` });
+=======
+    return res.status(404).json({ error: `Alat berat ${assetTag} tidak terdaftar di sistem` });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
 
   const result = db.transaction(() => {
@@ -952,8 +1123,13 @@ apiRouter.post('/assets/status-logs', (req: Request, res: Response) => {
         assetId: asset.id,
         assetTag: asset.assetTag,
         assetName: asset.name,
+<<<<<<< HEAD
         title: `Field Damage Report: ${asset.name} (${damageCategory || 'General Issue'})`,
         description: `Reported by operator ${submitter} at ${location || 'Project Site'}: ${damageDescription || 'Damage detected during daily inspection'}. HM: ${hourMeter || 'N/A'}.`,
+=======
+        title: `Laporan Kerusakan Lapangan: ${asset.name} (${damageCategory || 'General Issue'})`,
+        description: `Dilaporkan oleh operator ${submitter} di ${location || 'Lokasi Proyek'}: ${damageDescription || 'Kerusakan terdeteksi saat inspeksi harian'}. HM: ${hourMeter || 'N/A'}.`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         priority: resolvedPriority,
         type: 'CORRECTIVE',
         assignedTechnician: 'Field Mechanic on Duty',
@@ -962,7 +1138,11 @@ apiRouter.post('/assets/status-logs', (req: Request, res: Response) => {
         laborCost: 350,
         totalCost: 350,
         downtimeHours: damageSeverity === 'CRITICAL_SHUTDOWN' ? 48 : 12,
+<<<<<<< HEAD
         status: 'PENDING_APPROVAL',
+=======
+        status: 'SCHEDULED',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       };
 
       db.getWorkOrders().unshift(autoWo);
@@ -1125,10 +1305,17 @@ apiRouter.post('/quotations', (req: Request, res: Response) => {
       db.addNotification({
         id: `NTF-QUO-${Date.now().toString().slice(-6)}`,
         timestamp: new Date().toISOString(),
+<<<<<<< HEAD
         sourceDepartment: 'Sales & Marketing',
         sourceUserName: actorName(req),
         title: `Quotation Created: ${quotation.quotationNumber}`,
         message: `Official quotation ${quotation.quotationNumber} for ${customer.name}, valued at ${formatRupiahAmount(quotation.grandTotal)}, was created and is awaiting approval (Status: ${quotation.status}).`,
+=======
+        sourceDepartment: 'Divisi Sales & Marketing',
+        sourceUserName: actorName(req),
+        title: `Penawaran Dibuat: ${quotation.quotationNumber}`,
+        message: `Proposal penawaran harga resmi ${quotation.quotationNumber} untuk ${customer.name} senilai $${quotation.grandTotal.toLocaleString()} telah dibuat dan menunggu persetujuan (Status: ${quotation.status}).`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'COMMERCIAL',
         severity: 'INFO',
         targetRoles: ['SALES_MARKETING', 'EXECUTIVE', 'ADMIN_IT'],
@@ -1160,10 +1347,17 @@ apiRouter.post('/quotations/:id/approve', (req: Request, res: Response) => {
     db.addNotification({
       id: `NTF-QUO-APP-${Date.now().toString().slice(-6)}`,
       timestamp: new Date().toISOString(),
+<<<<<<< HEAD
       sourceDepartment: 'Executive Leadership & Sales Leads',
       sourceUserName: quote.approvedBy,
       title: `Quotation Approved: ${quote.quotationNumber}`,
       message: `Official quotation ${quote.quotationNumber} for ${quote.customerName} was approved by ${quote.approvedBy}. Awaiting customer acceptance / order conversion.`,
+=======
+      sourceDepartment: 'Direksi Eksekutif & Sales Lead',
+      sourceUserName: quote.approvedBy,
+      title: `Penawaran Disetujui: ${quote.quotationNumber}`,
+      message: `Penawaran resmi ${quote.quotationNumber} untuk ${quote.customerName} telah disetujui oleh ${quote.approvedBy}. Menunggu penerimaan / konversi pesanan dari klien.`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       category: 'COMMERCIAL',
       severity: 'SUCCESS',
       targetRoles: ['SALES_MARKETING', 'MANAGEMENT_OPERATION', 'ASSET_CONTROL', 'EXECUTIVE'],
@@ -1201,7 +1395,11 @@ apiRouter.post('/quotations/:id/convert-to-order', (req: Request, res: Response)
 
       // Check credit limit
       if (customer.outstandingBalance + quote.grandTotal > customer.creditLimit * 1.2) {
+<<<<<<< HEAD
         throw new Error(`Customer credit limit of ${formatRupiahAmount(customer.creditLimit)} exceeded. Please obtain credit override.`);
+=======
+        throw new Error(`Customer credit limit of $${customer.creditLimit.toLocaleString()} exceeded. Please obtain credit override.`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       }
 
       // Check serialized assets availability
@@ -1231,7 +1429,11 @@ apiRouter.post('/quotations/:id/convert-to-order', (req: Request, res: Response)
         orderDate: new Date().toISOString().split('T')[0],
         targetDeliveryDate: req.body.targetDeliveryDate || new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
         deliveryAddress: customer.deliveryAddress,
+<<<<<<< HEAD
         status: 'PENDING',
+=======
+        status: 'CONFIRMED',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         items: quote.items.map((i) => ({
           ...i,
           allocatedAssetTag: i.equipmentNumber || i.assignedAssetId,
@@ -1261,7 +1463,11 @@ apiRouter.post('/quotations/:id/convert-to-order', (req: Request, res: Response)
         sourceDepartment: 'Divisi Sales & Marketing',
         sourceUserName: actorName(req),
         title: `Quotation Dikonversi: ${salesOrder.orderNumber}`,
+<<<<<<< HEAD
         message: `Quotation ${quote.quotationNumber} for ${customer.name} was approved and converted to Sales Order ${salesOrder.orderNumber}, valued at ${formatRupiahAmount(salesOrder.grandTotal)}. Warehouse and Asset Control teams are preparing equipment mobilization.`,
+=======
+        message: `Penawaran ${quote.quotationNumber} untuk ${customer.name} berhasil disetujui & dikonversi menjadi Sales Order ${salesOrder.orderNumber} senilai $${salesOrder.grandTotal.toLocaleString()}. Tim Gudang & Asset Control dipersiapkan untuk mobilisasi unit.`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'COMMERCIAL',
         severity: 'SUCCESS',
         targetRoles: ['SALES_MARKETING', 'MANAGEMENT_OPERATION', 'ASSET_CONTROL', 'FINANCE_ACCOUNTING_TAX', 'EXECUTIVE'],
@@ -1361,7 +1567,11 @@ apiRouter.post('/sales-orders', (req: Request, res: Response) => {
         orderDate: new Date().toISOString().split('T')[0],
         targetDeliveryDate: targetDeliveryDate || new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
         deliveryAddress: customer.deliveryAddress,
+<<<<<<< HEAD
         status: 'PENDING',
+=======
+        status: 'CONFIRMED',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         items: orderItems,
         subtotal: fromCents(subtotalCents),
         discountTotal: fromCents(discountTotalCents),
@@ -1456,7 +1666,11 @@ apiRouter.post('/rentals', (req: Request, res: Response) => {
         if (!asset) throw new Error(`Asset ${assetId} not found`);
 
         // Check if asset already rented or reserved for overlapping period
+<<<<<<< HEAD
         if (asset.status === 'RENTED' || asset.status === 'RESERVED' || asset.status === 'SOLD' || asset.status === 'IN_MAINTENANCE') {
+=======
+        if (asset.status === 'RENTED' || asset.status === 'SOLD' || asset.status === 'IN_MAINTENANCE') {
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           throw new Error(`Asset ${asset.assetTag} (${asset.name}) is currently ${asset.status} and cannot be rented.`);
         }
 
@@ -1481,7 +1695,11 @@ apiRouter.post('/rentals', (req: Request, res: Response) => {
         });
 
         // Reserve asset
+<<<<<<< HEAD
         asset.status = 'RESERVED';
+=======
+        asset.status = 'RENTED';
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         asset.currentCustomerId = customer.id;
         asset.currentCustomerName = customer.name;
         asset.activeRentalContractId = `${db.getSettings().rentalPrefix}${String(db.getRentals().length + 1).padStart(3, '0')}`;
@@ -1500,7 +1718,11 @@ apiRouter.post('/rentals', (req: Request, res: Response) => {
         customerId: customer.id,
         customerName: customer.name,
         customerContact: customer.contacts[0]?.phone || '',
+<<<<<<< HEAD
         status: 'PENDING_APPROVAL',
+=======
+        status: 'ACTIVE',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         items: rentalItems,
         startDate: startIso,
         expectedReturnDate: endIso,
@@ -1534,7 +1756,10 @@ apiRouter.post('/rentals/:id/extend', (req: Request, res: Response) => {
 
   const contract = db.getRentals().find((r) => r.id === req.params.id);
   if (!contract) return res.status(404).json({ error: 'Rental contract not found' });
+<<<<<<< HEAD
   if (contract.status !== 'ACTIVE') return res.status(409).json({ error: 'The rental contract must be approved by a Manager before it can be extended.' });
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   try {
     db.transaction(() => {
@@ -1569,7 +1794,10 @@ apiRouter.post('/rentals/:id/return', (req: Request, res: Response) => {
   const { returnCondition, damageCharge, inspectionNotes, returnedAssetIds } = req.body;
   const contract = db.getRentals().find((r) => r.id === req.params.id);
   if (!contract) return res.status(404).json({ error: 'Rental contract not found' });
+<<<<<<< HEAD
   if (contract.status !== 'ACTIVE') return res.status(409).json({ error: 'The rental contract must be active before processing its return.' });
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   try {
     db.transaction(() => {
@@ -1581,7 +1809,11 @@ apiRouter.post('/rentals/:id/return', (req: Request, res: Response) => {
       const actDate = new Date(today);
       if (actDate > expDate) {
         const diffDays = Math.ceil((actDate.getTime() - expDate.getTime()) / (1000 * 3600 * 24));
+<<<<<<< HEAD
         contract.lateReturnFee = fromCents(toCents(diffDays * 150));
+=======
+        contract.lateReturnFee = diffDays * 150; // $150 per day late fee
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       }
 
       const damage = Number(damageCharge) || 0;
@@ -1629,7 +1861,11 @@ apiRouter.post('/rentals/:id/return', (req: Request, res: Response) => {
                 laborCost: damage * 0.6,
                 totalCost: damage,
                 downtimeHours: 24,
+<<<<<<< HEAD
                 status: 'PENDING_APPROVAL',
+=======
+                status: 'SCHEDULED',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               });
             } else {
               asset.status = 'AVAILABLE';
@@ -1640,7 +1876,11 @@ apiRouter.post('/rentals/:id/return', (req: Request, res: Response) => {
       });
 
       contract.status = 'SETTLED';
+<<<<<<< HEAD
       db.logAudit(actorName(req), 'RENTAL_RETURN_SETTLED', 'RENTAL_CONTRACT', contract.id, `Settled return for ${contract.contractNumber}. Damage fee: ${formatRupiahAmount(damage)}, Late fee: ${formatRupiahAmount(contract.lateReturnFee)}`);
+=======
+      db.logAudit(actorName(req), 'RENTAL_RETURN_SETTLED', 'RENTAL_CONTRACT', contract.id, `Settled return for ${contract.contractNumber}. Damage fee: $${damage}, Late fee: $${contract.lateReturnFee}`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     });
 
     res.json(contract);
@@ -1668,9 +1908,12 @@ apiRouter.post('/deliveries', (req: Request, res: Response) => {
     if (sourceType === 'SALES_ORDER') {
       const order = db.getSalesOrders().find((o) => o.id === sourceReferenceId);
       if (!order) return res.status(404).json({ error: 'Source Sales Order not found' });
+<<<<<<< HEAD
       if (order.status === 'PENDING' || order.status === 'CANCELLED') {
         return res.status(409).json({ error: 'The sales order must be approved by a Manager before creating a delivery.' });
       }
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       customerId = order.customerId;
       customerName = order.customerName;
       deliveryAddress = order.deliveryAddress;
@@ -1685,9 +1928,12 @@ apiRouter.post('/deliveries', (req: Request, res: Response) => {
     } else if (sourceType === 'RENTAL_CONTRACT') {
       const rental = db.getRentals().find((r) => r.id === sourceReferenceId);
       if (!rental) return res.status(404).json({ error: 'Source Rental Contract not found' });
+<<<<<<< HEAD
       if (rental.status !== 'ACTIVE') {
         return res.status(409).json({ error: 'The rental contract must be approved by a Manager before creating a delivery.' });
       }
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       customerId = rental.customerId;
       customerName = rental.customerName;
       const cust = db.getCustomers().find((c) => c.id === customerId);
@@ -1714,7 +1960,11 @@ apiRouter.post('/deliveries', (req: Request, res: Response) => {
       recipientName: recipientName || 'Site Contact',
       recipientPhone: recipientPhone || '+1 (555) 000-0000',
       dispatchDate: new Date().toISOString(),
+<<<<<<< HEAD
       status: 'PENDING_APPROVAL',
+=======
+      status: 'IN_TRANSIT',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       driverName: driverName || 'Apex Fleet Logistics',
       trackingNumber: trackingNumber || `TRK-${Date.now().toString().slice(-6)}`,
       items,
@@ -1791,6 +2041,7 @@ apiRouter.post('/invoices', (req: Request, res: Response) => {
     const customer = db.getCustomers().find((c) => c.id === customerId);
     if (!customer) return res.status(404).json({ error: 'Customer not found' });
     if (!items || !items.length) return res.status(400).json({ error: 'Invoice must have line items' });
+<<<<<<< HEAD
     if (relatedSourceType === 'SALES_ORDER') {
       const order = db.getSalesOrders().find((row) => row.id === relatedSourceId);
       if (!order || order.status === 'PENDING' || order.status === 'CANCELLED') {
@@ -1803,6 +2054,8 @@ apiRouter.post('/invoices', (req: Request, res: Response) => {
         return res.status(409).json({ error: 'The rental contract must be approved by a Manager before creating an invoice.' });
       }
     }
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
     const newInvoice = db.transaction(() => {
       let subtotalCents = 0;
@@ -1854,7 +2107,11 @@ apiRouter.post('/invoices', (req: Request, res: Response) => {
         issueDate,
         dueDate,
         paymentTermsDays: customer.paymentTermsDays || 30,
+<<<<<<< HEAD
         currency: 'IDR',
+=======
+        currency: 'USD',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'DRAFT',
         items: invoiceItems,
         subtotal: fromCents(subtotalCents),
@@ -1882,14 +2139,28 @@ apiRouter.post('/invoices', (req: Request, res: Response) => {
 apiRouter.post('/invoices/:id/issue', (req: Request, res: Response) => {
   const invoice = db.getInvoices().find((i) => i.id === req.params.id);
   if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+<<<<<<< HEAD
   if (invoice.status !== 'DRAFT') {
+=======
+  if (invoice.status !== 'DRAFT' && invoice.status !== 'PENDING_APPROVAL') {
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     return res.status(400).json({ error: `Invoice cannot be issued in status ${invoice.status}` });
   }
 
   try {
     db.transaction(() => {
+<<<<<<< HEAD
       invoice.status = 'PENDING_APPROVAL';
       db.logAudit(actorName(req), 'INVOICE_SUBMITTED_FOR_APPROVAL', 'INVOICE', invoice.id, `Invoice ${invoice.invoiceNumber} submitted for approval.`);
+=======
+      invoice.status = 'ISSUED';
+      const customer = db.getCustomers().find((c) => c.id === invoice.customerId);
+      if (customer) {
+        // Increase customer outstanding balance decimal-safely
+        customer.outstandingBalance = fromCents(toCents(customer.outstandingBalance) + toCents(invoice.grandTotal));
+      }
+      db.logAudit(actorName(req), 'INVOICE_ISSUED', 'INVOICE', invoice.id, `Issued invoice ${invoice.invoiceNumber}. Balance updated.`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     });
 
     res.json(invoice);
@@ -1909,7 +2180,11 @@ apiRouter.post('/invoices/:id/credit-notes', (req: Request, res: Response) => {
     const creditNote = db.transaction(() => {
       const amount = Number(creditAmount) || invoice.outstandingBalance;
       if (amount <= 0 || amount > invoice.outstandingBalance) {
+<<<<<<< HEAD
         throw new Error(`Credit amount must be positive and cannot exceed the current balance (${formatRupiahAmount(invoice.outstandingBalance)}).`);
+=======
+        throw new Error(`Credit amount must be between $0.01 and current balance ($${invoice.outstandingBalance})`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       }
 
       const cnNumber = `CN-2026-${String(db.getInvoices().filter((i) => i.type === 'CREDIT_NOTE').length + 1).padStart(3, '0')}`;
@@ -1925,7 +2200,11 @@ apiRouter.post('/invoices/:id/credit-notes', (req: Request, res: Response) => {
         issueDate: new Date().toISOString().split('T')[0],
         dueDate: new Date().toISOString().split('T')[0],
         paymentTermsDays: 0,
+<<<<<<< HEAD
         currency: 'IDR',
+=======
+        currency: 'USD',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'PAID',
         items: [
           {
@@ -1963,7 +2242,11 @@ apiRouter.post('/invoices/:id/credit-notes', (req: Request, res: Response) => {
       }
 
       db.getInvoices().unshift(cn);
+<<<<<<< HEAD
       db.logAudit(actorName(req), 'CREDIT_NOTE_CREATED', 'INVOICE', cn.id, `Created credit note ${cn.invoiceNumber} for ${formatRupiahAmount(amount)}. Reason: ${reason}`);
+=======
+      db.logAudit(actorName(req), 'CREDIT_NOTE_CREATED', 'INVOICE', cn.id, `Created credit note ${cn.invoiceNumber} for $${amount}. Reason: ${reason}`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       return cn;
     });
 
@@ -2042,7 +2325,11 @@ apiRouter.post('/payments', (req: Request, res: Response) => {
         customerName: customer.name,
         paymentDate: paymentDate || new Date().toISOString().split('T')[0],
         amount: totalAmount,
+<<<<<<< HEAD
         currency: 'IDR',
+=======
+        currency: 'USD',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         method: method || 'BANK_TRANSFER',
         referenceNumber: referenceNumber || `REF-${Date.now().toString().slice(-6)}`,
         status: 'CONFIRMED',
@@ -2054,7 +2341,11 @@ apiRouter.post('/payments', (req: Request, res: Response) => {
       };
 
       db.getPayments().unshift(payment);
+<<<<<<< HEAD
       db.logAudit(actorName(req), 'PAYMENT_CONFIRMED', 'PAYMENT', payment.id, `Recorded confirmed payment ${payment.paymentNumber} of ${formatRupiahAmount(totalAmount)} for ${customer.name}`);
+=======
+      db.logAudit(actorName(req), 'PAYMENT_CONFIRMED', 'PAYMENT', payment.id, `Recorded confirmed payment ${payment.paymentNumber} of $${totalAmount.toFixed(2)} for ${customer.name}`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       return payment;
     });
 
@@ -2101,7 +2392,11 @@ apiRouter.post('/payments/:id/allocate', (req: Request, res: Response) => {
       }
 
       payment.unallocatedAmount = fromCents(unallocCents);
+<<<<<<< HEAD
       db.logAudit(actorName(req), 'PAYMENT_ALLOCATED', 'PAYMENT', payment.id, `Allocated payment funds to invoices. Remaining unallocated: ${formatRupiahAmount(payment.unallocatedAmount)}`);
+=======
+      db.logAudit(actorName(req), 'PAYMENT_ALLOCATED', 'PAYMENT', payment.id, `Allocated payment funds to invoices. Remaining unallocated: $${payment.unallocatedAmount}`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     });
 
     res.json(payment);
@@ -2120,7 +2415,11 @@ apiRouter.get('/procurement/vendors', (_req: Request, res: Response) => {
 apiRouter.post('/procurement/vendors', (req: Request, res: Response) => {
   try {
     const { name, contactName, email, phone, taxId, category, paymentTerms, address } = req.body;
+<<<<<<< HEAD
     if (!name || !name.trim()) return res.status(400).json({ error: 'Vendor name is required.' });
+=======
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Nama vendor wajib diisi' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
     const newVendor = db.transaction(() => {
       const vCode = `VEND-${String(db.getVendors().length + 1).padStart(3, '0')}`;
@@ -2134,7 +2433,11 @@ apiRouter.post('/procurement/vendors', (req: Request, res: Response) => {
         taxId: taxId || '01.999.888.7-011.000',
         address: address || { street: 'Kawasan Industri Pulogadung', city: 'Jakarta Timur', state: 'DKI Jakarta', postalCode: '13920', country: 'Indonesia' },
         paymentTerms: Number(paymentTerms) || 30,
+<<<<<<< HEAD
         currency: 'IDR',
+=======
+        currency: 'USD',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: category || 'Heavy Equipment Spare Parts & Logistics',
       };
 
@@ -2151,14 +2454,22 @@ apiRouter.post('/procurement/vendors', (req: Request, res: Response) => {
 
 apiRouter.delete('/procurement/vendors/:id', (req: Request, res: Response) => {
   const index = db.getVendors().findIndex((v) => v.id === req.params.id || v.vendorCode === req.params.id);
+<<<<<<< HEAD
   if (index === -1) return res.status(404).json({ error: 'Vendor not found.' });
+=======
+  if (index === -1) return res.status(404).json({ error: 'Vendor tidak ditemukan' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   db.transaction(() => {
     const removed = db.getVendors().splice(index, 1)[0];
     db.logAudit(actorName(req), 'VENDOR_DELETED', 'VENDOR', removed.id, `Deleted vendor ${removed.name}`);
   });
 
+<<<<<<< HEAD
   res.json({ message: 'Vendor deleted successfully.' });
+=======
+  res.json({ message: 'Vendor berhasil dihapus' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 });
 
 apiRouter.get('/procurement/purchase-orders', (_req: Request, res: Response) => {
@@ -2169,8 +2480,13 @@ apiRouter.post('/procurement/purchase-orders', (req: Request, res: Response) => 
   try {
     const { vendorId, items, expectedDate, notes, paymentTerms } = req.body;
     const vendor = db.getVendors().find((v) => v.id === vendorId);
+<<<<<<< HEAD
     if (!vendor) return res.status(404).json({ error: 'Vendor not found.' });
     if (!items || !items.length) return res.status(400).json({ error: 'The PO must contain at least one item or service.' });
+=======
+    if (!vendor) return res.status(404).json({ error: 'Vendor tidak ditemukan' });
+    if (!items || !items.length) return res.status(400).json({ error: 'PO harus memiliki minimal 1 item barang atau jasa' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
     const newPO = db.transaction(() => {
       let subtotalCents = 0;
@@ -2206,6 +2522,25 @@ apiRouter.post('/procurement/purchase-orders', (req: Request, res: Response) => 
       const grandTotal = fromCents(subtotalCents + taxTotalCents);
       const terms = paymentTerms || `Net ${vendor.paymentTerms || 30} Days`;
 
+<<<<<<< HEAD
+=======
+      // Auto-generate linked Vendor Bill in Accounts Payable (integrated with Finance/FAT)
+      const billNumber = `VBILL-${poNum.slice(-4)}-${Date.now().toString().slice(-4)}`;
+      const vendorBill: VendorBill = {
+        id: billNumber,
+        billNumber,
+        purchaseOrderId: poNum,
+        vendorId: vendor.id,
+        vendorName: vendor.name,
+        billDate: new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + (vendor.paymentTerms || 30) * 86400000).toISOString().split('T')[0],
+        amount: grandTotal,
+        paidAmount: 0,
+        status: 'UNPAID',
+      };
+      db.getVendorBills().unshift(vendorBill);
+
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       const po: PurchaseOrder = {
         id: poNum,
         poNumber: poNum,
@@ -2215,12 +2550,20 @@ apiRouter.post('/procurement/purchase-orders', (req: Request, res: Response) => 
         orderDate: new Date().toISOString().split('T')[0],
         expectedDate: expectedDate || new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
         paymentTerms: terms,
+<<<<<<< HEAD
         status: 'PENDING_APPROVAL',
+=======
+        status: 'APPROVED',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         items: poItems,
         subtotal,
         taxAmount,
         grandTotal,
         notes: notes || '',
+<<<<<<< HEAD
+=======
+        vendorBillId: billNumber,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       };
 
       db.getPurchaseOrders().unshift(po);
@@ -2229,7 +2572,11 @@ apiRouter.post('/procurement/purchase-orders', (req: Request, res: Response) => 
         'PO_CREATED',
         'PURCHASE_ORDER',
         po.id,
+<<<<<<< HEAD
         `Created Purchase Order ${po.poNumber} for vendor ${vendor.name}. Total: ${formatRupiahAmount(grandTotal)} (Tax Included). Waiting for Manager approval.`
+=======
+        `Created Purchase Order ${po.poNumber} for vendor ${vendor.name}. Total: $${grandTotal.toFixed(2)} (Tax Included). Vendor Bill ${billNumber} created in Accounts Payable.`
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       );
       return po;
     });
@@ -2242,12 +2589,20 @@ apiRouter.post('/procurement/purchase-orders', (req: Request, res: Response) => 
 
 apiRouter.delete('/procurement/purchase-orders/:id', (req: Request, res: Response) => {
   const index = db.getPurchaseOrders().findIndex((p) => p.id === req.params.id);
+<<<<<<< HEAD
   if (index === -1) return res.status(404).json({ error: 'Purchase Order not found.' });
+=======
+  if (index === -1) return res.status(404).json({ error: 'Purchase Order tidak ditemukan' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   db.transaction(() => {
     const po = db.getPurchaseOrders()[index];
     if (po.status === 'GOODS_RECEIVED') {
+<<<<<<< HEAD
       throw new Error('A PO with received items cannot be deleted.');
+=======
+      throw new Error('PO yang barangnya sudah diterima tidak dapat dihapus');
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
     po.status = 'CANCELLED';
     if (po.vendorBillId) {
@@ -2258,13 +2613,21 @@ apiRouter.delete('/procurement/purchase-orders/:id', (req: Request, res: Respons
     db.logAudit(actorName(req), 'PO_CANCELLED', 'PURCHASE_ORDER', po.id, `Cancelled and deleted PO ${po.poNumber}`);
   });
 
+<<<<<<< HEAD
   res.json({ message: 'Purchase Order cancelled and deleted successfully.' });
+=======
+  res.json({ message: 'Purchase Order berhasil dibatalkan dan dihapus' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 });
 
 apiRouter.post('/procurement/purchase-orders/:id/receive', (req: Request, res: Response) => {
   const po = db.getPurchaseOrders().find((p) => p.id === req.params.id);
+<<<<<<< HEAD
   if (!po) return res.status(404).json({ error: 'Purchase Order not found.' });
   if (po.status !== 'APPROVED') return res.status(409).json({ error: 'The Purchase Order must be approved by a Manager before receiving items.' });
+=======
+  if (!po) return res.status(404).json({ error: 'Purchase Order tidak ditemukan' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   try {
     db.transaction(() => {
@@ -2293,12 +2656,20 @@ apiRouter.get('/procurement/vendor-bills', (_req: Request, res: Response) => {
 
 apiRouter.post('/procurement/vendor-bills/:id/pay', (req: Request, res: Response) => {
   const bill = db.getVendorBills().find((b) => b.id === req.params.id);
+<<<<<<< HEAD
   if (!bill) return res.status(404).json({ error: 'Vendor bill not found.' });
+=======
+  if (!bill) return res.status(404).json({ error: 'Vendor bill tidak ditemukan' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   db.transaction(() => {
     bill.status = 'PAID';
     bill.paidAmount = bill.amount;
+<<<<<<< HEAD
     db.logAudit(actorName(req), 'VENDOR_BILL_PAID', 'VENDOR_BILL', bill.id, `Settled vendor bill ${bill.billNumber} (${formatRupiahAmount(bill.amount)}) for ${bill.vendorName}`);
+=======
+    db.logAudit(actorName(req), 'VENDOR_BILL_PAID', 'VENDOR_BILL', bill.id, `Settled vendor bill ${bill.billNumber} ($${bill.amount.toFixed(2)}) for ${bill.vendorName}`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   });
 
   res.json(bill);
@@ -2315,7 +2686,11 @@ apiRouter.post('/operators', (req: Request, res: Response) => {
   try {
     const { name, badgeNumber, phone, email, sioNumber, sioClass, sioExpiry, sioIssuer, equipmentSpecialization, assignedAssetId, assignedCustomerId, assignedCustomerName, assignedProjectName } = req.body;
     if (!name || !badgeNumber || !sioNumber) {
+<<<<<<< HEAD
       return res.status(400).json({ error: 'Operator name, badge number, and SIO number are required.' });
+=======
+      return res.status(400).json({ error: 'Nama, Nomor Badge, dan Nomor SIO operator wajib diisi' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
 
     const newOp = db.transaction(() => {
@@ -2366,7 +2741,11 @@ apiRouter.post('/operators', (req: Request, res: Response) => {
 
 apiRouter.put('/operators/:id', (req: Request, res: Response) => {
   const operator = db.getOperators().find((o) => o.id === req.params.id);
+<<<<<<< HEAD
   if (!operator) return res.status(404).json({ error: 'Operator not found.' });
+=======
+  if (!operator) return res.status(404).json({ error: 'Operator tidak ditemukan' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   db.transaction(() => {
     Object.assign(operator, req.body);
@@ -2378,7 +2757,11 @@ apiRouter.put('/operators/:id', (req: Request, res: Response) => {
 
 apiRouter.post('/operators/:id/assign', (req: Request, res: Response) => {
   const operator = db.getOperators().find((o) => o.id === req.params.id);
+<<<<<<< HEAD
   if (!operator) return res.status(404).json({ error: 'Operator not found.' });
+=======
+  if (!operator) return res.status(404).json({ error: 'Operator tidak ditemukan' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   const { customerId, customerName, projectName, assetId, assetTag, assetName } = req.body;
 
@@ -2406,14 +2789,22 @@ apiRouter.post('/operators/:id/assign', (req: Request, res: Response) => {
 
 apiRouter.delete('/operators/:id', (req: Request, res: Response) => {
   const index = db.getOperators().findIndex((o) => o.id === req.params.id);
+<<<<<<< HEAD
   if (index === -1) return res.status(404).json({ error: 'Operator not found.' });
+=======
+  if (index === -1) return res.status(404).json({ error: 'Operator tidak ditemukan' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   db.transaction(() => {
     const removed = db.getOperators().splice(index, 1)[0];
     db.logAudit(actorName(req), 'OPERATOR_DELETED', 'OPERATOR', removed.id, `Deleted operator ${removed.name}`);
   });
 
+<<<<<<< HEAD
   res.json({ message: 'Operator deleted successfully.' });
+=======
+  res.json({ message: 'Operator berhasil dihapus' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 });
 
 // ==========================================
@@ -2431,7 +2822,11 @@ apiRouter.post('/operators/attendance/check-in', (req: Request, res: Response) =
   );
 
   if (!asset) {
+<<<<<<< HEAD
     return res.status(404).json({ error: `Equipment with barcode "${barcode}" is not registered.` });
+=======
+    return res.status(404).json({ error: `Alat berat dengan barcode "${barcode}" tidak terdaftar` });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
 
   const opName = actorName(req);
@@ -2457,7 +2852,11 @@ apiRouter.post('/operators/attendance/check-in', (req: Request, res: Response) =
       checkInTime: nowTime,
       checkInHourMeter: Number(hourMeter) || (asset.legalDocs?.hourMeter || 0),
       status: 'CHECKED_IN',
+<<<<<<< HEAD
       notes: notes || 'Normal check-in at project site',
+=======
+      notes: notes || 'Absen datang normal di lokasi proyek',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       verifiedForBilling: false,
     };
 
@@ -2481,7 +2880,11 @@ apiRouter.post('/operators/attendance/check-out', (req: Request, res: Response) 
   );
 
   if (!asset) {
+<<<<<<< HEAD
     return res.status(404).json({ error: `Equipment with barcode "${barcode}" is not registered.` });
+=======
+    return res.status(404).json({ error: `Alat berat dengan barcode "${barcode}" tidak terdaftar` });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
 
   const opName = actorName(req);
@@ -2503,7 +2906,11 @@ apiRouter.post('/operators/attendance/check-out', (req: Request, res: Response) 
       existing.checkOutHourMeter = endHm;
       existing.workingHours = Math.max(0, Number((endHm - existing.checkInHourMeter).toFixed(1)));
       existing.status = 'CHECKED_OUT';
+<<<<<<< HEAD
       existing.notes = (existing.notes ? `${existing.notes} | ` : '') + (notes || 'Shift checkout completed');
+=======
+      existing.notes = (existing.notes ? `${existing.notes} | ` : '') + (notes || 'Absen pulang selesai shift');
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       existing.verifiedForBilling = true;
 
       if (asset.legalDocs) {
@@ -2514,10 +2921,17 @@ apiRouter.post('/operators/attendance/check-out', (req: Request, res: Response) 
       db.addNotification({
         id: `NTF-TS-${Date.now().toString().slice(-6)}`,
         timestamp: new Date().toISOString(),
+<<<<<<< HEAD
         sourceDepartment: 'Field Operations & Operators',
         sourceUserName: opName,
         title: `Shift Timesheet Completed: Unit ${asset.assetTag}`,
         message: `Operator ${opName} completed a work shift on ${asset.name} (${asset.assetTag}) at ${existing.projectName || asset.warehouseLocation}. Total operating hours: ${existing.workingHours} hours (HM ${existing.checkInHourMeter} to ${existing.checkOutHourMeter}). Data has been verified for the client's monthly billing attachment.`,
+=======
+        sourceDepartment: 'Operasional Lapangan & Operator',
+        sourceUserName: opName,
+        title: `Timesheet Shift Selesai: Unit ${asset.assetTag}`,
+        message: `Operator ${opName} telah menyelesaikan shift kerja pada unit ${asset.name} (${asset.assetTag}) di ${existing.projectName || asset.warehouseLocation}. Total jam operasi aktif: ${existing.workingHours} Jam (HM ${existing.checkInHourMeter} ke ${existing.checkOutHourMeter}). Data telah diverifikasi siap untuk lampiran billing bulanan klien.`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'OPERATIONAL',
         severity: 'SUCCESS',
         targetRoles: ['MANAGEMENT_OPERATION', 'FINANCE_ACCOUNTING_TAX', 'AR_MANAGEMENT', 'EXECUTIVE'],
@@ -2546,7 +2960,11 @@ apiRouter.post('/operators/attendance/check-out', (req: Request, res: Response) 
         checkOutHourMeter: endHm,
         workingHours: 8.0,
         status: 'CHECKED_OUT',
+<<<<<<< HEAD
         notes: notes || 'Direct shift checkout recorded',
+=======
+        notes: notes || 'Absen pulang tercatat langsung',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         verifiedForBilling: true,
       };
       db.getAttendanceLogs().unshift(att);
@@ -2554,10 +2972,17 @@ apiRouter.post('/operators/attendance/check-out', (req: Request, res: Response) 
       db.addNotification({
         id: `NTF-TS-${Date.now().toString().slice(-6)}`,
         timestamp: new Date().toISOString(),
+<<<<<<< HEAD
         sourceDepartment: 'Field Operations & Operators',
         sourceUserName: opName,
         title: `Shift Timesheet Completed: Unit ${asset.assetTag}`,
         message: `Operator ${opName} checked out of unit ${asset.assetTag}. A total of 8.0 operating hours was recorded for the billing attachment.`,
+=======
+        sourceDepartment: 'Operasional Lapangan & Operator',
+        sourceUserName: opName,
+        title: `Timesheet Shift Selesai: Unit ${asset.assetTag}`,
+        message: `Operator ${opName} mencatat absen pulang pada unit ${asset.assetTag}. Total jam operasi 8.0 Jam tercatat resmi untuk lampiran tagihan.`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'OPERATIONAL',
         severity: 'SUCCESS',
         targetRoles: ['MANAGEMENT_OPERATION', 'FINANCE_ACCOUNTING_TAX', 'AR_MANAGEMENT', 'EXECUTIVE'],
@@ -2576,7 +3001,11 @@ apiRouter.post('/operators/attendance/check-out', (req: Request, res: Response) 
 
 apiRouter.patch('/operators/attendance/:id', (req: Request, res: Response) => {
   const log = db.getAttendanceLogs().find((a) => a.id === req.params.id);
+<<<<<<< HEAD
   if (!log) return res.status(404).json({ error: 'Timesheet log not found.' });
+=======
+  if (!log) return res.status(404).json({ error: 'Timesheet log tidak ditemukan' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   const { date, checkInTime, checkOutTime, checkInHourMeter, checkOutHourMeter, workingHours, notes, status, verifiedForBilling } = req.body;
 
@@ -2601,10 +3030,17 @@ apiRouter.patch('/operators/attendance/:id', (req: Request, res: Response) => {
     db.addNotification({
       id: `NTF-ADJ-${Date.now().toString().slice(-6)}`,
       timestamp: new Date().toISOString(),
+<<<<<<< HEAD
       sourceDepartment: 'Field Operations (Timesheet)',
       sourceUserName: user,
       title: `Timesheet Adjustment: ${log.assetTag}`,
       message: `The timesheet for operator ${log.operatorName} on unit ${log.assetTag} (${log.date}) was adjusted by ${user}. Check-in: ${log.checkInTime}, Check-out: ${log.checkOutTime || '-'}, Total operating hours: ${log.workingHours} HM. Data is synchronized with Finance & Accounting.`,
+=======
+      sourceDepartment: 'Operasional Lapangan (Timesheet)',
+      sourceUserName: user,
+      title: `Penyesuaian Timesheet: ${log.assetTag}`,
+      message: `Data timesheet untuk operator ${log.operatorName} pada unit ${log.assetTag} (${log.date}) telah diadjust/disesuaikan oleh ${user}. Jam Datang: ${log.checkInTime}, Jam Pulang: ${log.checkOutTime || '-'}, Total Jam Aktif: ${log.workingHours} HM. Data sinkron dengan FAT.`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       category: 'OPERATIONAL',
       severity: 'INFO',
       targetRoles: ['MANAGEMENT_OPERATION', 'FINANCE_ACCOUNTING_TAX', 'EXECUTIVE'],
@@ -2626,7 +3062,11 @@ apiRouter.post('/operators/attendance/report-breakdown', (req: Request, res: Res
   );
 
   if (!asset) {
+<<<<<<< HEAD
     return res.status(404).json({ error: `No heavy equipment is registered with barcode "${barcode}".` });
+=======
+    return res.status(404).json({ error: `Alat berat dengan barcode "${barcode}" tidak terdaftar` });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
 
   const opName = actorName(req);
@@ -2643,8 +3083,13 @@ apiRouter.post('/operators/attendance/report-breakdown', (req: Request, res: Res
       assetId: asset.id,
       assetTag: asset.assetTag,
       assetName: asset.name,
+<<<<<<< HEAD
       title: `Field Damage: ${asset.name} (${damageCategory || 'General Issue'})`,
       description: damageDescription || 'The equipment breakdown cannot be handled by the field operator and requires Technical Service intervention.',
+=======
+      title: `Kerusakan Lapangan: ${asset.name} (${damageCategory || 'General Issue'})`,
+      description: damageDescription || 'Laporan breakdown alat tidak dapat ditangani operator lapangan. Membutuhkan intervensi Technical Service.',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       priority: 'HIGH',
       type: 'FIELD_BREAKDOWN',
       assignedTechnician: 'Technical Service Team',
@@ -2653,7 +3098,11 @@ apiRouter.post('/operators/attendance/report-breakdown', (req: Request, res: Res
       laborCost: 250,
       totalCost: 250,
       downtimeHours: 8,
+<<<<<<< HEAD
       status: 'PENDING_APPROVAL',
+=======
+      status: 'REPORTED',
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       reportedByOperator: opName,
       damageCategory: damageCategory || 'GENERAL',
       photoUrl,
@@ -2662,6 +3111,10 @@ apiRouter.post('/operators/attendance/report-breakdown', (req: Request, res: Res
     db.getWorkOrders().unshift(wo);
 
     // Transition Asset Status
+<<<<<<< HEAD
+=======
+    asset.status = 'IN_MAINTENANCE';
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     asset.condition = 'NEEDS_REPAIR';
     if (hourMeter && asset.legalDocs) {
       asset.legalDocs.hourMeter = Number(hourMeter);
@@ -2685,7 +3138,11 @@ apiRouter.post('/operators/attendance/report-breakdown', (req: Request, res: Res
       workingHours: 0,
       status: 'BREAKDOWN_REPORTED',
       breakdownReportId: woNum,
+<<<<<<< HEAD
       notes: `Equipment damage report: ${damageDescription || 'Technical issue'} (Ticket: ${woNum})`,
+=======
+      notes: `Laporan alat rusak: ${damageDescription || 'Kerusakan teknis'} (Tiket: ${woNum})`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       verifiedForBilling: false,
     };
     db.getAttendanceLogs().unshift(att);
@@ -2711,7 +3168,11 @@ apiRouter.get('/technical-service/dashboard', (_req: Request, res: Response) => 
   const workOrders = db.getWorkOrders();
   const products = db.getProducts();
 
+<<<<<<< HEAD
   const pendingRequests = workOrders.filter((w) => w.status === 'REPORTED' || w.status === 'PENDING_APPROVAL' || w.status === 'SCHEDULED');
+=======
+  const pendingRequests = workOrders.filter((w) => w.status === 'REPORTED' || w.status === 'SCHEDULED');
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   const inProgressRepairs = workOrders.filter((w) => w.status === 'IN_PROGRESS');
   const completedRepairs = workOrders.filter((w) => w.status === 'COMPLETED');
   const availableSpareParts = products.filter((p) => p.isActive);
@@ -2737,10 +3198,14 @@ apiRouter.post('/technical-service/scan-start', (req: Request, res: Response) =>
   );
 
   if (!wo) {
+<<<<<<< HEAD
     return res.status(404).json({ error: `Repair ticket for barcode ${barcode || workOrderId} was not found.` });
   }
   if (wo.status === 'PENDING_APPROVAL') {
     return res.status(409).json({ error: 'Work order is still awaiting Manager approval.' });
+=======
+    return res.status(404).json({ error: `Tiket perbaikan untuk barcode ${barcode || workOrderId} tidak ditemukan` });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
 
   const tech = actorName(req);
@@ -2764,7 +3229,11 @@ apiRouter.post('/technical-service/scan-start', (req: Request, res: Response) =>
 
 apiRouter.put('/technical-service/work-orders/:id', (req: Request, res: Response) => {
   const wo = db.getWorkOrders().find((w) => w.id === req.params.id);
+<<<<<<< HEAD
   if (!wo) return res.status(404).json({ error: 'Work order not found.' });
+=======
+  if (!wo) return res.status(404).json({ error: 'Work order tidak ditemukan' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   const { description, resolutionNotes, partsCost, laborCost, downtimeHours, sparePartsUsed } = req.body;
 
@@ -2783,7 +3252,11 @@ apiRouter.put('/technical-service/work-orders/:id', (req: Request, res: Response
     wo.totalCost = wo.partsCost + wo.laborCost;
 
     const tech = actorName(req);
+<<<<<<< HEAD
     db.logAudit(tech, 'WORK_ORDER_EDITED', 'WORK_ORDER', wo.id, `Updated technical work order ${wo.workOrderNumber}: Parts ${formatRupiahAmount(wo.partsCost)}, Labor ${formatRupiahAmount(wo.laborCost)}`);
+=======
+    db.logAudit(tech, 'WORK_ORDER_EDITED', 'WORK_ORDER', wo.id, `Updated technical work order ${wo.workOrderNumber}: Parts $${wo.partsCost}, Labor $${wo.laborCost}`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   });
 
   res.json(wo);
@@ -2797,7 +3270,11 @@ apiRouter.post('/technical-service/scan-complete', (req: Request, res: Response)
   );
 
   if (!wo) {
+<<<<<<< HEAD
     return res.status(404).json({ error: `In-progress repair ticket for barcode ${barcode || workOrderId} was not found.` });
+=======
+    return res.status(404).json({ error: `Tiket perbaikan berjalan untuk barcode ${barcode || workOrderId} tidak ditemukan` });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }
 
   const tech = actorName(req);
@@ -2805,7 +3282,11 @@ apiRouter.post('/technical-service/scan-complete', (req: Request, res: Response)
   db.transaction(() => {
     wo.status = 'COMPLETED';
     wo.completedDate = new Date().toISOString();
+<<<<<<< HEAD
     wo.resolutionNotes = resolutionNotes || 'Repair completed. Normal operation was tested and equipment safety verified.';
+=======
+    wo.resolutionNotes = resolutionNotes || 'Perbaikan tuntas, uji coba operasional normal dan kelaikan alat diverifikasi.';
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     if (partsCost !== undefined) wo.partsCost = Number(partsCost) || wo.partsCost;
     if (laborCost !== undefined) wo.laborCost = Number(laborCost) || wo.laborCost;
     if (sparePartsUsed) {
@@ -2829,7 +3310,11 @@ apiRouter.post('/technical-service/scan-complete', (req: Request, res: Response)
       asset.condition = 'EXCELLENT';
     }
 
+<<<<<<< HEAD
     db.logAudit(tech, 'TECH_SCAN_COMPLETE', 'WORK_ORDER', wo.id, `Technician ${tech} finished repair on ${wo.assetTag}. Asset returned to AVAILABLE status. Total cost: ${formatRupiahAmount(wo.totalCost)}`);
+=======
+    db.logAudit(tech, 'TECH_SCAN_COMPLETE', 'WORK_ORDER', wo.id, `Technician ${tech} finished repair on ${wo.assetTag}. Asset returned to AVAILABLE status. Total cost: $${wo.totalCost.toFixed(2)}`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   });
 
   res.json(wo);
@@ -2867,9 +3352,16 @@ apiRouter.post('/maintenance/work-orders', (req: Request, res: Response) => {
         laborCost: labor,
         totalCost: parts + labor,
         downtimeHours: 8,
+<<<<<<< HEAD
         status: 'PENDING_APPROVAL',
       };
 
+=======
+        status: 'SCHEDULED',
+      };
+
+      asset.status = 'IN_MAINTENANCE';
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       db.getWorkOrders().unshift(wo);
       db.logAudit(actorName(req), 'WORK_ORDER_CREATED', 'WORK_ORDER', wo.id, `Created Work Order ${wo.workOrderNumber} for asset ${asset.assetTag}`);
       return wo;
@@ -2885,9 +3377,12 @@ apiRouter.post('/maintenance/work-orders/:id/complete', (req: Request, res: Resp
   const { resolutionNotes } = req.body;
   const wo = db.getWorkOrders().find((w) => w.id === req.params.id);
   if (!wo) return res.status(404).json({ error: 'Work order not found' });
+<<<<<<< HEAD
   if (wo.status === 'PENDING_APPROVAL' || wo.status === 'CANCELLED') {
     return res.status(409).json({ error: 'The work order must be approved by a Manager before it can be completed.' });
   }
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   try {
     db.transaction(() => {
@@ -3068,10 +3563,14 @@ apiRouter.patch('/settings', (req: Request, res: Response) => {
     const current = db.getSettings() as Record<string, any>;
     const incoming = req.body || {};
     // Hanya kunci yang memang ada di pengaturan yang boleh diubah (cegah mass-assignment).
+<<<<<<< HEAD
     for (const k of Object.keys(incoming)) {
       if (k in current && k !== 'defaultCurrency') current[k] = incoming[k];
     }
     current.defaultCurrency = 'IDR';
+=======
+    for (const k of Object.keys(incoming)) if (k in current) current[k] = incoming[k];
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     db.logAudit(actorName(req), 'SETTINGS_UPDATED', 'SYSTEM_SETTINGS', 'GLOBAL', 'Updated enterprise system settings');
   });
   res.json(db.getSettings());
@@ -3082,9 +3581,15 @@ apiRouter.patch('/settings', (req: Request, res: Response) => {
 // ==========================================
 apiRouter.post('/system/reset-demo', (req: Request, res: Response) => {
   if (IS_PROD && process.env.ALLOW_DEMO_RESET !== 'true') {
+<<<<<<< HEAD
     return res.status(403).json({ error: 'Demo data reset is disabled in production (set ALLOW_DEMO_RESET=true to enable it).' });
   }
   db.logAudit(actorName(req), 'DEMO_RESET', 'SYSTEM', 'RESET', 'Database reset to demo data');
+=======
+    return res.status(403).json({ error: 'Reset data demo dinonaktifkan di production (set ALLOW_DEMO_RESET=true untuk mengizinkan).' });
+  }
+  db.logAudit(actorName(req), 'DEMO_RESET', 'SYSTEM', 'RESET', 'Database direset ke data demo');
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   const keptUsers = db.getUsers(); // reset hanya untuk data bisnis; akun & password dipertahankan
   const resetState = db.resetToDefault();
   resetState.users = keptUsers;
@@ -3096,7 +3601,11 @@ apiRouter.get('/system/backup', (req: Request, res: Response) => {
   // Backup TIDAK memuat hash password / data kredensial.
   const state = db.getState();
   const safe = { ...state, users: state.users.map(publicUser) };
+<<<<<<< HEAD
   db.logAudit(actorName(req), 'BACKUP_DOWNLOADED', 'SYSTEM', 'BACKUP', 'Downloaded database backup');
+=======
+  db.logAudit(actorName(req), 'BACKUP_DOWNLOADED', 'SYSTEM', 'BACKUP', 'Mengunduh backup database');
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   db.save();
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Content-Disposition', `attachment; filename="apex_eams_backup_${new Date().toISOString().split('T')[0]}.json"`);
@@ -3108,14 +3617,24 @@ apiRouter.post('/system/restore', (req: Request, res: Response) => {
     const backupState = req.body;
     const required = ['assets', 'customers', 'products'];
     if (!backupState || required.some((k) => !Array.isArray(backupState[k]))) {
+<<<<<<< HEAD
       return res.status(400).json({ error: 'Invalid backup file structure.' });
+=======
+      return res.status(400).json({ error: 'Struktur file backup tidak valid' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
     db.transaction(() => {
       const { users: _ignored, ...rest } = backupState; // akun & password TIDAK ditimpa oleh restore
       Object.assign(db.getState(), rest);
+<<<<<<< HEAD
       db.logAudit(actorName(req), 'DATABASE_RESTORED', 'SYSTEM', 'RESTORE', 'Database restored from backup archive');
     });
     res.json({ message: 'Database restored from backup successfully (user accounts were not changed).' });
+=======
+      db.logAudit(actorName(req), 'DATABASE_RESTORED', 'SYSTEM', 'RESTORE', 'Database dipulihkan dari arsip backup');
+    });
+    res.json({ message: 'Database berhasil dipulihkan dari backup (akun pengguna tidak diubah)' });
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }

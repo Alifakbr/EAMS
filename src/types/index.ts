@@ -8,8 +8,12 @@ export type UserRole =
   | 'FINANCE_ACCOUNTING_TAX'
   | 'AR_MANAGEMENT'
   | 'OPERATOR_USER'
+<<<<<<< HEAD
   | 'TECHNICAL_SERVICE'
   | 'MANAGER';
+=======
+  | 'TECHNICAL_SERVICE';
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
 export interface UserPermissionMatrix {
   canViewDashboard: boolean;
@@ -156,7 +160,11 @@ export interface Asset {
   status: AssetStatus;
   condition: AssetCondition;
   warehouseLocation: string;
+<<<<<<< HEAD
   purchaseCost: number; // Stored in IDR
+=======
+  purchaseCost: number; // in USD
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   currentBookValue: number;
   depreciationRateAnnual: number; // percentage
   purchaseDate: string;
@@ -332,7 +340,11 @@ export interface SalesOrder {
   invoiceId?: string;
 }
 
+<<<<<<< HEAD
 export type RentalStatus = 'QUOTATION' | 'PENDING_APPROVAL' | 'RESERVED' | 'ACTIVE' | 'OVERDUE' | 'RETURNED' | 'INSPECTED' | 'SETTLED' | 'CANCELLED';
+=======
+export type RentalStatus = 'QUOTATION' | 'RESERVED' | 'ACTIVE' | 'OVERDUE' | 'RETURNED' | 'INSPECTED' | 'SETTLED' | 'CANCELLED';
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 export type RentalRateType = 'DAILY' | 'WEEKLY' | 'MONTHLY';
 
 export interface RentalItem {
@@ -382,7 +394,11 @@ export interface RentalContract {
   }[];
 }
 
+<<<<<<< HEAD
 export type DeliveryStatus = 'DRAFT' | 'PENDING_APPROVAL' | 'PICKED' | 'IN_TRANSIT' | 'DELIVERED' | 'CUSTOMER_ACCEPTED' | 'RETURN_DISPATCHED' | 'CANCELLED';
+=======
+export type DeliveryStatus = 'DRAFT' | 'PICKED' | 'IN_TRANSIT' | 'DELIVERED' | 'CUSTOMER_ACCEPTED' | 'RETURN_DISPATCHED';
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
 export interface DeliveryItem {
   productId: string;
@@ -500,7 +516,11 @@ export interface Vendor {
   category: string;
 }
 
+<<<<<<< HEAD
 export type PurchaseOrderStatus = 'DRAFT' | 'PENDING_APPROVAL' | 'APPROVED' | 'GOODS_RECEIVED' | 'BILLED' | 'CANCELLED';
+=======
+export type PurchaseOrderStatus = 'DRAFT' | 'APPROVED' | 'GOODS_RECEIVED' | 'BILLED' | 'CANCELLED';
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 export type ProcurementItemType = 'GOODS' | 'SERVICE';
 
 export interface PurchaseOrderItem {
@@ -573,7 +593,11 @@ export interface WorkOrder {
   laborCost: number;
   totalCost: number;
   downtimeHours: number;
+<<<<<<< HEAD
   status: 'REPORTED' | 'PENDING_APPROVAL' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+=======
+  status: 'REPORTED' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   resolutionNotes?: string;
   sparePartsUsed?: WorkOrderSparePartUsed[];
   reportedByOperator?: string;
@@ -624,3 +648,7 @@ export interface AppNotification {
   targetTab?: string;
   isRead: boolean;
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443

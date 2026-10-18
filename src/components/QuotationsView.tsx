@@ -2,7 +2,10 @@ import { exportExcelFromHtml } from '../utils/download.ts';
 import React, { useState } from 'react';
 import { Quotation, Customer, Product, Asset, UserRole, RentalRateModel } from '../types/index.ts';
 import { api } from '../services/api.ts';
+<<<<<<< HEAD
 import { formatRupiahAmount } from '../shared/currency.tsx';
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 import {
   FileText,
   Plus,
@@ -66,9 +69,15 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
   // Form State
   const [selectedCustomerId, setSelectedCustomerId] = useState(customers[0]?.id || '');
   const [validDays, setValidDays] = useState('30');
+<<<<<<< HEAD
   const [notes, setNotes] = useState('Heavy equipment rental quotation includes an SIO-certified operator and maintenance.');
   const [terms, setTerms] = useState(
     'Payment terms: Net 30 calendar days after invoice issuance with the equipment timesheet attached. Mobilization and demobilization costs will be charged on the first invoice.'
+=======
+  const [notes, setNotes] = useState('Penawaran rental alat berat mencakup operator tersertifikasi SIO dan maintenance.');
+  const [terms, setTerms] = useState(
+    'Syarat Pembayaran: Net 30 hari kalender setelah invoice diterbitkan bersama lampiran timesheet absensi alat. Biaya mobilisasi & demobilisasi ditagihkan pada invoice pertama.'
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   );
 
   // Dynamic Multi-Equipment Items
@@ -81,8 +90,13 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
       rateModel: 'REGULAR',
       rentalRate: 4500,
       quantity: 1,
+<<<<<<< HEAD
       mobilizationFee: 0,
       demobilizationFee: 0,
+=======
+      mobilizationFee: 850,
+      demobilizationFee: 850,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       mobilizationDate: new Date().toISOString().split('T')[0],
       demobilizationDate: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
       discountPercent: 0,
@@ -152,7 +166,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
   const handleCreateQuotation = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCustomerId) {
+<<<<<<< HEAD
       alert('Please select a customer first.');
+=======
+      alert('Pilih customer terlebih dahulu.');
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       return;
     }
 
@@ -187,11 +205,19 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
         termsAndConditions: terms,
       });
 
+<<<<<<< HEAD
       alert('Equipment rental quotation created successfully!');
       setShowCreateModal(false);
       onRefresh();
     } catch (err: any) {
       alert(`Failed to create quotation: ${err.message}`);
+=======
+      alert('Quotation Penawaran Sewa Alat Berat berhasil dibuat!');
+      setShowCreateModal(false);
+      onRefresh();
+    } catch (err: any) {
+      alert(`Gagal membuat penawaran: ${err.message}`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
   };
 
@@ -215,7 +241,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
 
   const handleConvertToOrder = async (quote: Quotation) => {
     const poRef = prompt(
+<<<<<<< HEAD
       `Enter the customer PO reference number:`,
+=======
+      `Masukkan Nomor Referensi PO Customer:`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       `PO-${quote.customerName.slice(0, 4).toUpperCase()}-${Date.now().toString().slice(-4)}`
     );
     if (!poRef) return;
@@ -223,27 +253,43 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
     try {
       const order = await api.convertToOrder(quote.id, {
         customerPoReference: poRef,
+<<<<<<< HEAD
         shippingFee: quote.mobilizationTotal || 0,
       });
       alert(
         `Quotation ${quote.quotationNumber} was successfully converted to Sales Order ${order.orderNumber}! The sales order and quotation are now linked, equipment has been allocated, and mobilization can be scheduled.`
+=======
+        shippingFee: quote.mobilizationTotal || 850,
+      });
+      alert(
+        `Quotation ${quote.quotationNumber} BERHASIL DIKONVERSI ke Sales Order ${order.orderNumber}! Nomor SO dan Quotation telah terintegrasi dua arah, armada alat dialokasikan, dan jadwal mobilisasi siap dijalankan.`
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       );
       onRefresh();
       if (onNavigateToOrder) {
         onNavigateToOrder(order.id);
       }
     } catch (err: any) {
+<<<<<<< HEAD
       alert(`Failed to convert to Sales Order: ${err.message}`);
+=======
+      alert(`Gagal konversi ke Sales Order: ${err.message}`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
   };
 
   return (
+<<<<<<< HEAD
     <div data-print-area className="space-y-4">
+=======
+    <div className="space-y-4">
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       {/* Top Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 border border-slate-200 rounded-md">
         <div>
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-slate-700" />
+<<<<<<< HEAD
             <h2 className="text-base font-bold text-slate-900">Rental Offers &amp; Sales Quotations</h2>
             <span className="text-xs text-slate-400 font-mono">({quotations.length} records)</span>
           </div>
@@ -253,6 +299,17 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
         </div>
 
         <div className="no-print flex items-center gap-2 flex-wrap">
+=======
+            <h2 className="text-base font-bold text-slate-900">Penawaran Sewa &amp; Sales Quotations</h2>
+            <span className="text-xs text-slate-400 font-mono">({quotations.length} records)</span>
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Dukungan multi-alat berat dalam 1 quotation, tanggal mobilisasi berbeda, tarif regular vs lumpsum, dan integrasi nomor SO.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           <button
             type="button"
             onClick={() => {
@@ -264,7 +321,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                   <td><strong>${q.quotationNumber}</strong></td>
                   <td>${q.customerName}</td>
                   <td>${q.date}</td>
+<<<<<<< HEAD
                   <td>${formatRupiahAmount((q as any).totalAmount || q.grandTotal || 0)}</td>
+=======
+                  <td>$${((q as any).totalAmount || q.grandTotal || 0).toLocaleString()}</td>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <td>${q.status}</td>
                   <td>${q.linkedSalesOrderNumber || '-'}</td>
                 </tr>`
@@ -277,7 +338,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                     <h2>APEX COMMERCIAL QUOTATIONS REPORT</h2>
                     <table border="1">
                       <tr style="background:#0f172a; color:#fff; font-weight:bold;">
+<<<<<<< HEAD
                         <th>Quotation #</th><th>Customer</th><th>Date</th><th>Total Amount</th><th>Status</th><th>Linked SO</th>
+=======
+                        <th>No. Quotation</th><th>Customer</th><th>Tanggal</th><th>Nilai Total</th><th>Status</th><th>Linked SO</th>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </tr>
                       ${rows}
                     </table>
@@ -297,7 +362,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
             type="button"
             onClick={() => window.print()}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-800 bg-white hover:bg-slate-50 border border-slate-300 rounded shadow-xs cursor-pointer"
+<<<<<<< HEAD
             title="Print the quotation list or save it as a PDF"
+=======
+            title="Print Quotations list to PDF"
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           >
             <Printer className="w-3.5 h-3.5 text-slate-600" />
             <span>Print PDF</span>
@@ -308,7 +377,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded transition-colors cursor-pointer shadow-2xs"
           >
             <Plus className="w-4 h-4 text-amber-400" />
+<<<<<<< HEAD
             Create New Quotation
+=======
+            Buat Penawaran Baru
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </button>
         </div>
       </div>
@@ -319,6 +392,7 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
+<<<<<<< HEAD
                 <th className="py-2.5 px-4">Quotation # &amp; Sales Order</th>
                 <th className="py-2.5 px-4">Customer / Project</th>
                 <th className="py-2.5 px-4">Equipment &amp; Rate (Regular / Lump Sum)</th>
@@ -326,6 +400,15 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                 <th className="py-2.5 px-4 text-right">Quotation Amount</th>
                 <th className="py-2.5 px-4 text-center">Status</th>
                 <th className="py-2.5 px-4 text-right">Actions</th>
+=======
+                <th className="py-2.5 px-4">No. Quotation &amp; Integrasi SO</th>
+                <th className="py-2.5 px-4">Pelanggan / Project</th>
+                <th className="py-2.5 px-4">Armada Alat &amp; Tarif (Regular/Lumpsum)</th>
+                <th className="py-2.5 px-4 text-right">Biaya Mob / Demob</th>
+                <th className="py-2.5 px-4 text-right">Nilai Penawaran</th>
+                <th className="py-2.5 px-4 text-center">Status</th>
+                <th className="py-2.5 px-4 text-right">Aksi</th>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -344,7 +427,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                         type="button"
                         onClick={() => setSelectedPreviewQuote(quote)}
                         className="text-left font-mono font-bold text-indigo-700 hover:text-indigo-900 hover:underline cursor-pointer flex items-center gap-1"
+<<<<<<< HEAD
                         title="Open the official quotation document"
+=======
+                        title="Klik untuk membuka view data dokumen penawaran resmi"
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       >
                         <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
                         <span>{quote.quotationNumber}</span>
@@ -358,14 +445,22 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                         <div
                           onClick={() => onNavigateToOrder && onNavigateToOrder(quote.convertedSalesOrderId || '')}
                           className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-50 text-purple-700 border border-purple-200 cursor-pointer hover:bg-purple-100 transition-colors"
+<<<<<<< HEAD
                           title="Open the related sales order"
+=======
+                          title="Klik untuk membuka Sales Order terkait"
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         >
                           <LinkIcon className="w-3 h-3" />
                           SO: {quote.linkedSalesOrderNumber}
                         </div>
                       ) : (
                         <span className="text-[10px] text-slate-400 block mt-0.5 font-sans italic">
+<<<<<<< HEAD
                           Not Converted to a Sales Order
+=======
+                          Belum dikonversi ke SO
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         </span>
                       )}
                     </td>
@@ -374,7 +469,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                     <td className="py-3 px-4">
                       <div className="font-semibold text-slate-900">{quote.customerName}</div>
                       <div className="text-[11px] text-slate-500 font-mono">
+<<<<<<< HEAD
                         Valid Until: {quote.validUntil}
+=======
+                        Valid s/d: {quote.validUntil}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </div>
                     </td>
 
@@ -411,16 +510,27 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                     {/* Mob / Demob */}
                     <td className="py-3 px-4 text-right font-mono text-[11px]">
                       <div className="text-slate-700">
+<<<<<<< HEAD
                         Mobilization: {formatRupiahAmount(quote.mobilizationTotal || 0)}
                       </div>
                       <div className="text-slate-500 text-[10px]">
                         Demobilization: {formatRupiahAmount(quote.demobilizationTotal || 0)}
+=======
+                        Mob: ${(quote.mobilizationTotal || 850).toFixed(2)}
+                      </div>
+                      <div className="text-slate-500 text-[10px]">
+                        Demob: ${(quote.demobilizationTotal || 850).toFixed(2)}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </div>
                     </td>
 
                     {/* Grand Total */}
                     <td className="py-3 px-4 text-right font-mono font-bold text-slate-900">
+<<<<<<< HEAD
                       {formatRupiahAmount(quote.grandTotal)}
+=======
+                      ${quote.grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </td>
 
                     {/* Status */}
@@ -445,9 +555,15 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                       <button
                         onClick={() => setSelectedPreviewQuote(quote)}
                         className="px-2 py-1 text-[11px] font-medium border border-slate-200 rounded text-slate-700 hover:bg-slate-100 cursor-pointer"
+<<<<<<< HEAD
                         title="View the official quotation"
                       >
                         Official PDF
+=======
+                        title="Lihat Dokumen Resmi Penawaran"
+                      >
+                        PDF Resmi
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </button>
 
                       {canApprove && (
@@ -492,7 +608,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
             <div className="flex items-center justify-between p-4 border-b border-slate-200">
               <div>
                 <h3 className="text-base font-bold text-slate-900">
+<<<<<<< HEAD
                   Create Heavy Equipment Rental Quotation
+=======
+                  Buat Penawaran Rental Alat Berat (Commercial Quotation)
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </h3>
                 <p className="text-xs text-slate-500">
                   Konfigurasikan unit alat berat, tanggal mobilisasi masing-masing, tarif regular vs lumpsum, serta biaya mob &amp; demob kustom.
@@ -509,7 +629,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
             <form onSubmit={handleCreateQuotation} className="p-6 overflow-y-auto space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
+<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Select Customer Account *</label>
+=======
+                  <label className="block text-slate-700 font-semibold mb-1">Pilih Akun Pelanggan (Customer / Client) *</label>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <select
                     value={selectedCustomerId}
                     onChange={(e) => setSelectedCustomerId(e.target.value)}
@@ -523,7 +647,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                   </select>
                 </div>
                 <div>
+<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Quotation Validity (Days)</label>
+=======
+                  <label className="block text-slate-700 font-semibold mb-1">Masa Berlaku Penawaran (Hari)</label>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="number"
                     value={validDays}
@@ -538,10 +666,17 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
+<<<<<<< HEAD
                       Equipment, Mobilization Dates &amp; Rates
                     </h4>
                     <span className="text-[10px] text-slate-500">
                       One quotation can include multiple equipment items with different mobilization dates.
+=======
+                      Daftar Armada Alat Berat, Tanggal Mobilisasi &amp; Tarif
+                    </h4>
+                    <span className="text-[10px] text-slate-500">
+                      1 Quotation dapat memuat banyak alat dengan tanggal mobilisasi berbeda
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </span>
                   </div>
                   <button
@@ -550,7 +685,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                     className="px-2.5 py-1 text-xs font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 border border-indigo-200 rounded flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
+<<<<<<< HEAD
                     + Add Equipment
+=======
+                    + Tambah Unit Alat Berat
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </button>
                 </div>
 
@@ -571,7 +710,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                             onClick={() => handleRemoveItem(index)}
                             className="text-slate-400 hover:text-rose-600 text-xs flex items-center gap-1 cursor-pointer"
                           >
+<<<<<<< HEAD
                             <Trash2 className="w-3.5 h-3.5" /> Remove Equipment
+=======
+                            <Trash2 className="w-3.5 h-3.5" /> Hapus Alat
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           </button>
                         )}
                       </div>
@@ -580,7 +723,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                         {/* Equipment Tag Number */}
                         <div className="sm:col-span-3">
                           <label className="block text-[10px] text-slate-500 font-semibold mb-0.5">
+<<<<<<< HEAD
                             Equipment (Barcode Tag) *
+=======
+                            Nomor Alat (Tag Barcode) *
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           </label>
                           <select
                             value={item.equipmentNumber}
@@ -604,7 +751,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                             type="text"
                             value={item.equipmentType}
                             onChange={(e) => handleItemFieldChange(index, 'equipmentType', e.target.value)}
+<<<<<<< HEAD
                             placeholder="e.g., 20-Ton Excavator"
+=======
+                            placeholder="cth: Excavator 20-Ton"
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                             className="w-full p-1.5 border border-slate-300 rounded text-xs outline-none"
                           />
                         </div>
@@ -620,14 +771,22 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                             className="w-full p-1.5 border border-slate-300 rounded text-xs font-semibold outline-none"
                           >
                             <option value="REGULAR">REGULAR (Per Jam/Hari/Bulan)</option>
+<<<<<<< HEAD
                             <option value="LUMPSUM">LUMPSUM (Project Lump-Sum Contract)</option>
+=======
+                            <option value="LUMPSUM">LUMPSUM (Kontrak Borongan Proyek)</option>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           </select>
                         </div>
 
                         {/* Rental Rate */}
                         <div className="sm:col-span-3">
                           <label className="block text-[10px] text-slate-500 font-semibold mb-0.5">
+<<<<<<< HEAD
                             Rental Rate (IDR) *
+=======
+                            Harga Rental ($) *
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           </label>
                           <input
                             type="number"
@@ -642,7 +801,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                       <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 pt-1.5 bg-slate-50/60 p-2 rounded">
                         <div>
                           <label className="block text-[10px] text-slate-500 font-semibold mb-0.5">
+<<<<<<< HEAD
                             Mobilization Date (Delivery)
+=======
+                            Tgl Mobilisasi (Kirim)
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           </label>
                           <input
                             type="date"
@@ -654,7 +817,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
 
                         <div>
                           <label className="block text-[10px] text-slate-500 font-semibold mb-0.5">
+<<<<<<< HEAD
                             Mobilization Fee (IDR)
+=======
+                            Biaya Mobilisasi ($)
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           </label>
                           <input
                             type="number"
@@ -668,7 +835,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
 
                         <div>
                           <label className="block text-[10px] text-slate-500 font-semibold mb-0.5">
+<<<<<<< HEAD
                             Demobilization Date (Return)
+=======
+                            Tgl Demobilisasi (Kembali)
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           </label>
                           <input
                             type="date"
@@ -680,7 +851,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
 
                         <div>
                           <label className="block text-[10px] text-slate-500 font-semibold mb-0.5">
+<<<<<<< HEAD
                             Demobilization Fee (IDR)
+=======
+                            Biaya Demobilisasi ($)
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           </label>
                           <input
                             type="number"
@@ -700,6 +875,7 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                 <div className="flex justify-end pt-2">
                   <div className="w-72 space-y-1 text-xs">
                     <div className="flex justify-between text-slate-600">
+<<<<<<< HEAD
                       <span>Equipment Rental Subtotal:</span>
                       <span className="font-mono">{formatRupiahAmount(calculatedRentalSubtotal)}</span>
                     </div>
@@ -718,13 +894,37 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                     <div className="flex justify-between pt-1 border-t border-slate-300 font-bold text-slate-900 text-sm">
                       <span>Quotation Grand Total:</span>
                       <span className="font-mono text-emerald-700">{formatRupiahAmount(calculatedGrandTotal)}</span>
+=======
+                      <span>Subtotal Sewa Alat:</span>
+                      <span className="font-mono">${calculatedRentalSubtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-600">
+                      <span>Total Biaya Mobilisasi:</span>
+                      <span className="font-mono">${calculatedMobTotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-600">
+                      <span>Total Biaya Demobilisasi:</span>
+                      <span className="font-mono">${calculatedDemobTotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-600">
+                      <span>PPN (11%):</span>
+                      <span className="font-mono">${calculatedTaxTotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between pt-1 border-t border-slate-300 font-bold text-slate-900 text-sm">
+                      <span>Grand Total Penawaran:</span>
+                      <span className="font-mono text-emerald-700">${calculatedGrandTotal.toFixed(2)}</span>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </div>
                   </div>
                 </div>
               </div>
 
               <div>
+<<<<<<< HEAD
                 <label className="block text-slate-700 font-semibold mb-1">Commercial Notes</label>
+=======
+                <label className="block text-slate-700 font-semibold mb-1">Catatan Komersial</label>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 <textarea
                   rows={2}
                   value={notes}
@@ -749,13 +949,21 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                   onClick={() => setShowCreateModal(false)}
                   className="px-4 py-2 border border-slate-300 text-slate-700 rounded hover:bg-slate-50 cursor-pointer"
                 >
+<<<<<<< HEAD
                   Cancel
+=======
+                  Batal
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
                 <button
                   type="submit"
                   className="px-5 py-2 bg-slate-900 text-white rounded font-bold hover:bg-slate-800 cursor-pointer shadow-xs"
                 >
+<<<<<<< HEAD
                   Issue Official Quotation
+=======
+                  Terbitkan Dokumen Penawaran Resmi
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
               </div>
             </form>
@@ -769,7 +977,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
           <div className="bg-white rounded-lg shadow-2xl border border-slate-300 max-w-3xl w-full max-h-[95vh] flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-slate-200 no-print">
               <span className="text-sm font-bold text-slate-900">
+<<<<<<< HEAD
                 Official Heavy Equipment Rental Quotation
+=======
+                Dokumen Resmi Penawaran Sewa Alat Berat (Quotation)
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </span>
               <div className="flex items-center gap-2">
                 <button
@@ -777,7 +989,11 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                   className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-slate-900 text-white rounded hover:bg-slate-800 cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5" />
+<<<<<<< HEAD
                   Print / Save as PDF
+=======
+                  Cetak / Simpan PDF
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
                 <button
                   onClick={() => setSelectedPreviewQuote(null)}
@@ -794,27 +1010,44 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                 <div>
                   <h1 className="text-xl font-bold tracking-tight text-slate-900">PT Apex Commercial Assets Indonesia</h1>
                   <p className="text-slate-500 mt-0.5">Heavy Equipment Rental, Asset Management &amp; Fleet Operations</p>
+<<<<<<< HEAD
                   <p className="text-slate-500 text-[11px] mt-1">Indonesia Stock Exchange Building, Tower 2, 18th Floor, South Jakarta</p>
+=======
+                  <p className="text-slate-500 text-[11px] mt-1">Gedung Bursa Efek Indonesia Tower 2 Lt. 18, Jakarta Selatan</p>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <p className="text-slate-500 text-[11px]">Telepon: (021) 515-8899 · Email: commercial@apex-earms.co.id</p>
                 </div>
                 <div className="text-right">
                   <div className="text-base font-bold text-slate-900 uppercase font-mono">
+<<<<<<< HEAD
                     RENTAL QUOTATION
+=======
+                    SURAT PENAWARAN HARGA (QUOTATION)
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                   <div className="font-mono font-bold text-slate-800 mt-1">{selectedPreviewQuote.quotationNumber}</div>
                   {selectedPreviewQuote.linkedSalesOrderNumber && (
                     <div className="text-purple-700 font-mono font-bold text-[11px] mt-0.5">
+<<<<<<< HEAD
                       Sales Order Reference: {selectedPreviewQuote.linkedSalesOrderNumber}
                     </div>
                   )}
                   <div className="text-slate-500 text-[11px] mt-0.5">Date: {selectedPreviewQuote.date}</div>
                   <div className="text-amber-800 font-semibold text-[11px]">Valid Until: {selectedPreviewQuote.validUntil}</div>
+=======
+                      Rujukan SO: {selectedPreviewQuote.linkedSalesOrderNumber}
+                    </div>
+                  )}
+                  <div className="text-slate-500 text-[11px] mt-0.5">Tanggal: {selectedPreviewQuote.date}</div>
+                  <div className="text-amber-800 font-semibold text-[11px]">Validitas: {selectedPreviewQuote.validUntil}</div>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </div>
               </div>
 
               {/* Customer Info */}
               <div className="grid grid-cols-2 gap-6 bg-slate-50 p-4 rounded border border-slate-200">
                 <div>
+<<<<<<< HEAD
                   <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Prepared For:</span>
                   <div className="font-bold text-slate-900 text-sm">{selectedPreviewQuote.customerName}</div>
                   <div className="text-slate-600 mt-1">Project Procurement</div>
@@ -822,6 +1055,15 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                 </div>
                 <div>
                   <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Sales Representative:</span>
+=======
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Diajukan Kepada:</span>
+                  <div className="font-bold text-slate-900 text-sm">{selectedPreviewQuote.customerName}</div>
+                  <div className="text-slate-600 mt-1">Divisi Pengadaan Proyek (Project Procurement)</div>
+                  <div className="text-slate-500 text-[11px]">Lokasi Site Delivery Terdaftar</div>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Perwakilan Komersial:</span>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <div className="font-semibold text-slate-800">{selectedPreviewQuote.salespersonName}</div>
                   <div className="text-slate-500 text-[11px] mt-1">Senior Commercial Sales Engineer</div>
                 </div>
@@ -832,11 +1074,19 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                 <table className="w-full text-left text-xs border border-slate-200 rounded">
                   <thead className="bg-slate-100 text-slate-700 font-semibold uppercase text-[10px]">
                     <tr>
+<<<<<<< HEAD
                       <th className="py-2.5 px-3">Equipment ID &amp; Type</th>
                       <th className="py-2.5 px-3">Model Tarif</th>
                       <th className="py-2.5 px-3">Mobilization Date</th>
                       <th className="py-2.5 px-3 text-right">Rental Rate</th>
                       <th className="py-2.5 px-3 text-right">Mob./Demob. Fees</th>
+=======
+                      <th className="py-2.5 px-3">No. Alat &amp; Jenis Unit</th>
+                      <th className="py-2.5 px-3">Model Tarif</th>
+                      <th className="py-2.5 px-3">Tgl Mobilisasi</th>
+                      <th className="py-2.5 px-3 text-right">Harga Sewa</th>
+                      <th className="py-2.5 px-3 text-right">Biaya Mob/Demob</th>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       <th className="py-2.5 px-3 text-right">Subtotal</th>
                     </tr>
                   </thead>
@@ -855,6 +1105,7 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                           </span>
                         </td>
                         <td className="py-2.5 px-3 font-mono text-[11px] text-slate-600">
+<<<<<<< HEAD
                           {it.mobilizationDate || 'As Scheduled'}
                         </td>
                         <td className="py-2.5 px-3 text-right font-mono">{formatRupiahAmount(it.rentalRate || it.unitPrice)}</td>
@@ -863,6 +1114,16 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                         </td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900">
                           {formatRupiahAmount(it.total)}
+=======
+                          {it.mobilizationDate || 'Sesuai Jadwal'}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono">${(it.rentalRate || it.unitPrice).toFixed(2)}</td>
+                        <td className="py-2.5 px-3 text-right font-mono text-[11px]">
+                          ${((it.mobilizationFee || 850) + (it.demobilizationFee || 850)).toFixed(2)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900">
+                          ${it.total.toFixed(2)}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         </td>
                       </tr>
                     ))}
@@ -874,6 +1135,7 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
               <div className="flex justify-end">
                 <div className="w-72 space-y-1.5 text-xs">
                   <div className="flex justify-between text-slate-600">
+<<<<<<< HEAD
                     <span>Equipment Rental Subtotal:</span>
                     <span className="font-mono">{formatRupiahAmount(selectedPreviewQuote.subtotal)}</span>
                   </div>
@@ -890,6 +1152,24 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
                   <div className="flex justify-between pt-2 border-t border-slate-300 text-sm font-bold text-slate-900">
                     <span>Grand Total:</span>
                     <span className="font-mono text-emerald-700">{formatRupiahAmount(selectedPreviewQuote.grandTotal)}</span>
+=======
+                    <span>Subtotal Rental Alat:</span>
+                    <span className="font-mono">${selectedPreviewQuote.subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <span>Biaya Mobilisasi &amp; Demobilisasi:</span>
+                    <span className="font-mono">
+                      ${((selectedPreviewQuote.mobilizationTotal || 850) + (selectedPreviewQuote.demobilizationTotal || 850)).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <span>PPN (11%):</span>
+                    <span className="font-mono">${selectedPreviewQuote.taxTotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-slate-300 text-sm font-bold text-slate-900">
+                    <span>Grand Total:</span>
+                    <span className="font-mono text-emerald-700">${selectedPreviewQuote.grandTotal.toFixed(2)}</span>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                 </div>
               </div>
@@ -897,15 +1177,25 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
               {/* Signatures */}
               <div className="pt-6 border-t border-slate-200 text-center grid grid-cols-2 gap-8">
                 <div>
+<<<<<<< HEAD
                   <div className="text-[11px] text-slate-500">Prepared by Commercial Sales:</div>
+=======
+                  <div className="text-[11px] text-slate-500">Dibuat oleh EARMS Commercial:</div>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <div className="font-bold text-slate-800 mt-8 pt-1 border-t border-slate-300">
                     {selectedPreviewQuote.salespersonName}
                   </div>
                 </div>
                 <div>
+<<<<<<< HEAD
                   <div className="text-[11px] text-slate-500">Customer Acceptance:</div>
                   <div className="font-bold text-slate-800 mt-8 pt-1 border-t border-slate-300">
                     ( Authorized Signature &amp; Company Stamp )
+=======
+                  <div className="text-[11px] text-slate-500">Konfirmasi Persetujuan Pelanggan:</div>
+                  <div className="font-bold text-slate-800 mt-8 pt-1 border-t border-slate-300">
+                    ( Tanda Tangan &amp; Cap Perusahaan )
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                 </div>
               </div>

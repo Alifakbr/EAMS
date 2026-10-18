@@ -45,7 +45,11 @@ export function runEamsTestSuite(): TestSuiteSummary {
 
   // 1. Decimal-Safe Arithmetic Tests
   test('Decimal-safe calculation eliminates floating-point rounding errors', 'Finance & Math', () => {
+<<<<<<< HEAD
     // 3 items at 0.10 currency units + 8.25% tax
+=======
+    // 3 items @ $0.10 + 8.25% tax
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     const calc = calculateLineTotals(3, 0.1, 0, 8.25);
     if (calc.subtotal !== 0.3) throw new Error(`Subtotal expected 0.30, got ${calc.subtotal}`);
     // 0.30 * 0.0825 = 0.02475 -> round to 0.02

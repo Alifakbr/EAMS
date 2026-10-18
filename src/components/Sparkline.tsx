@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
+<<<<<<< HEAD
 import { formatRupiahAmount } from '../shared/currency.tsx';
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
 export interface SparklinePoint {
   label: string; // e.g. "Nov", "Dec", "Jan", "Feb", "Mar", "Apr"
@@ -22,7 +25,11 @@ export const Sparkline: React.FC<SparklineProps> = ({
   color = '#0f172a',
   fillColor,
   height = 36,
+<<<<<<< HEAD
   formatValue = formatRupiahAmount,
+=======
+  formatValue = (v) => `$${v.toLocaleString()}`,
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   badgeTrend,
   isPositive = true,
 }) => {

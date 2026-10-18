@@ -2,7 +2,10 @@ import { exportExcelFromHtml } from '../utils/download.ts';
 import React, { useState } from 'react';
 import { Invoice, InvoiceStatus, Customer } from '../types/index.ts';
 import { api } from '../services/api.ts';
+<<<<<<< HEAD
 import { formatRupiahAmount } from '../shared/currency.tsx';
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 import {
   CreditCard,
   Plus,
@@ -45,7 +48,11 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
   const handleIssueInvoice = async (invoice: Invoice) => {
     try {
       await api.issueInvoice(invoice.id);
+<<<<<<< HEAD
       alert(`Invoice ${invoice.invoiceNumber} submitted and is awaiting Manager approval.`);
+=======
+      alert(`Invoice ${invoice.invoiceNumber} has been officially issued! Customer ledger balance updated.`);
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       onRefresh();
     } catch (err: any) {
       alert(`Failed to issue invoice: ${err.message}`);
@@ -86,8 +93,11 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
         return <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">OVERDUE</span>;
       case 'DRAFT':
         return <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">DRAFT</span>;
+<<<<<<< HEAD
       case 'PENDING_APPROVAL':
         return <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">PENDING APPROVAL</span>;
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       case 'CREDITED':
         return <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200">CREDITED</span>;
       default:
@@ -96,7 +106,11 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
   };
 
   return (
+<<<<<<< HEAD
     <div data-print-area className="space-y-4">
+=======
+    <div className="space-y-4">
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 border border-slate-200 rounded-md">
         <div className="flex items-center gap-2">
@@ -105,7 +119,11 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
           <span className="text-xs text-slate-400">({invoices.length} billing documents)</span>
         </div>
 
+<<<<<<< HEAD
         <div className="no-print flex items-center gap-2.5 flex-wrap">
+=======
+        <div className="flex items-center gap-2.5 flex-wrap">
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -113,7 +131,10 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
           >
             <option value="ALL">All Statuses</option>
             <option value="DRAFT">Drafts</option>
+<<<<<<< HEAD
             <option value="PENDING_APPROVAL">Pending Approval</option>
+=======
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             <option value="ISSUED">Issued (Open)</option>
             <option value="PARTIALLY_PAID">Partially Paid</option>
             <option value="PAID">Paid</option>
@@ -133,9 +154,15 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                   <td>${inv.customerName}</td>
                   <td>${inv.issueDate}</td>
                   <td>${inv.dueDate}</td>
+<<<<<<< HEAD
                   <td>${formatRupiahAmount(inv.grandTotal)}</td>
                   <td>${formatRupiahAmount(inv.paidAmount)}</td>
                   <td>${formatRupiahAmount(inv.outstandingBalance)}</td>
+=======
+                  <td>$${inv.grandTotal.toFixed(2)}</td>
+                  <td>$${inv.paidAmount.toFixed(2)}</td>
+                  <td>$${inv.outstandingBalance.toFixed(2)}</td>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <td>${inv.status}</td>
                 </tr>`
                 )
@@ -168,7 +195,11 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
             type="button"
             onClick={() => window.print()}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-800 bg-white hover:bg-slate-50 border border-slate-300 rounded shadow-xs cursor-pointer"
+<<<<<<< HEAD
             title="Print the invoice list or save it as a PDF"
+=======
+            title="Print Invoices list to PDF"
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           >
             <Printer className="w-3.5 h-3.5 text-slate-600" />
             <span>Print PDF</span>
@@ -195,7 +226,11 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {filtered.map((inv) => {
+<<<<<<< HEAD
                 const isDraft = inv.status === 'DRAFT';
+=======
+                const isDraft = inv.status === 'DRAFT' || inv.status === 'PENDING_APPROVAL';
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 const canCredit = inv.status === 'ISSUED' || inv.status === 'PARTIALLY_PAID';
                 const canPay = (inv.status === 'ISSUED' || inv.status === 'PARTIALLY_PAID') && inv.outstandingBalance > 0;
 
@@ -206,7 +241,11 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                         type="button"
                         onClick={() => setSelectedPreviewInvoice(inv)}
                         className="text-left font-mono font-bold text-indigo-700 hover:text-indigo-900 hover:underline cursor-pointer flex items-center gap-1"
+<<<<<<< HEAD
                         title="Open the official invoice record"
+=======
+                        title="Klik untuk membuka view data Faktur Tagihan resmi"
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       >
                         <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
                         <span>{inv.invoiceNumber}</span>
@@ -222,6 +261,7 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                     <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">{inv.issueDate}</td>
                     <td className="py-3 px-4 text-slate-700 font-mono text-[11px]">{inv.dueDate}</td>
                     <td className="py-3 px-4 text-right font-mono-numbers font-medium text-slate-800">
+<<<<<<< HEAD
                       {formatRupiahAmount(inv.grandTotal)}
                     </td>
                     <td className="py-3 px-4 text-right font-mono-numbers text-emerald-600">
@@ -230,6 +270,16 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                     <td className="py-3 px-4 text-right font-mono-numbers">
                       <span className={`font-bold ${inv.outstandingBalance > 0 ? 'text-amber-700' : 'text-slate-400'}`}>
                         {formatRupiahAmount(inv.outstandingBalance)}
+=======
+                      ${inv.grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono-numbers text-emerald-600">
+                      ${inv.paidAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono-numbers">
+                      <span className={`font-bold ${inv.outstandingBalance > 0 ? 'text-amber-700' : 'text-slate-400'}`}>
+                        ${inv.outstandingBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">{getStatusBadge(inv.status)}</td>
@@ -255,7 +305,11 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                           onClick={() => onNavigateToPayment && onNavigateToPayment(inv.id)}
                           className="px-2 py-1 text-[11px] font-semibold bg-emerald-600 text-white rounded hover:bg-emerald-700"
                         >
+<<<<<<< HEAD
                           Receive Payment
+=======
+                          Receive $
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         </button>
                       )}
 
@@ -298,7 +352,11 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                   className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium border border-slate-300 rounded text-slate-700 hover:bg-slate-50"
                 >
                   <Printer className="w-3.5 h-3.5" />
+<<<<<<< HEAD
                   Print / Save as PDF
+=======
+                  Print / Save PDF
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
                 <button
                   onClick={() => setSelectedPreviewInvoice(null)}
@@ -338,10 +396,17 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                   <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Invoice Status &amp; Settlement</span>
                   <div className="mt-1">{getStatusBadge(selectedPreviewInvoice.status)}</div>
                   <div className="mt-2 text-slate-600">
+<<<<<<< HEAD
                     Paid to Date: <span className="font-mono font-bold text-emerald-700">{formatRupiahAmount(selectedPreviewInvoice.paidAmount)}</span>
                   </div>
                   <div className="text-slate-900 font-bold">
                     Balance Due: <span className="font-mono">{formatRupiahAmount(selectedPreviewInvoice.outstandingBalance)}</span>
+=======
+                    Paid to Date: <span className="font-mono font-bold text-emerald-700">${selectedPreviewInvoice.paidAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="text-slate-900 font-bold">
+                    Balance Due: <span className="font-mono">${selectedPreviewInvoice.outstandingBalance.toFixed(2)}</span>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                 </div>
               </div>
@@ -370,10 +435,17 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                           )}
                         </td>
                         <td className="py-2.5 px-3 text-right font-mono-numbers">{item.quantity}</td>
+<<<<<<< HEAD
                         <td className="py-2.5 px-3 text-right font-mono-numbers">{formatRupiahAmount(item.unitPrice)}</td>
                         <td className="py-2.5 px-3 text-right font-mono-numbers text-slate-500">{formatRupiahAmount(item.taxAmount)}</td>
                         <td className="py-2.5 px-3 text-right font-mono-numbers font-semibold text-slate-900">
                           {formatRupiahAmount(item.total)}
+=======
+                        <td className="py-2.5 px-3 text-right font-mono-numbers">${item.unitPrice.toFixed(2)}</td>
+                        <td className="py-2.5 px-3 text-right font-mono-numbers text-slate-500">${item.taxAmount.toFixed(2)}</td>
+                        <td className="py-2.5 px-3 text-right font-mono-numbers font-semibold text-slate-900">
+                          ${item.total.toFixed(2)}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         </td>
                       </tr>
                     ))}
@@ -386,16 +458,25 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                 <div className="w-64 space-y-1.5 text-xs">
                   <div className="flex justify-between text-slate-600">
                     <span>Subtotal:</span>
+<<<<<<< HEAD
                     <span className="font-mono-numbers">{formatRupiahAmount(selectedPreviewInvoice.subtotal)}</span>
+=======
+                    <span className="font-mono-numbers">${selectedPreviewInvoice.subtotal.toFixed(2)}</span>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                   {selectedPreviewInvoice.additionalCharges > 0 && (
                     <div className="flex justify-between text-slate-600">
                       <span>Logistics / Additional Fees:</span>
+<<<<<<< HEAD
                       <span className="font-mono-numbers">{formatRupiahAmount(selectedPreviewInvoice.additionalCharges)}</span>
+=======
+                      <span className="font-mono-numbers">${selectedPreviewInvoice.additionalCharges.toFixed(2)}</span>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </div>
                   )}
                   <div className="flex justify-between text-slate-600">
                     <span>Total Taxes:</span>
+<<<<<<< HEAD
                     <span className="font-mono-numbers">{formatRupiahAmount(selectedPreviewInvoice.taxTotal)}</span>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-slate-300 text-sm font-bold text-slate-900">
@@ -405,6 +486,17 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                   <div className="flex justify-between pt-1 text-xs text-amber-800 font-bold">
                     <span>Remaining Balance:</span>
                     <span className="font-mono-numbers">{formatRupiahAmount(selectedPreviewInvoice.outstandingBalance)}</span>
+=======
+                    <span className="font-mono-numbers">${selectedPreviewInvoice.taxTotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-slate-300 text-sm font-bold text-slate-900">
+                    <span>Grand Total:</span>
+                    <span className="font-mono-numbers">${selectedPreviewInvoice.grandTotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between pt-1 text-xs text-amber-800 font-bold">
+                    <span>Remaining Balance:</span>
+                    <span className="font-mono-numbers">${selectedPreviewInvoice.outstandingBalance.toFixed(2)}</span>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                 </div>
               </div>
@@ -433,7 +525,11 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
             </p>
 
             <div>
+<<<<<<< HEAD
               <label className="block text-slate-600 font-semibold mb-1">Credit Amount (IDR) *</label>
+=======
+              <label className="block text-slate-600 font-semibold mb-1">Credit Amount ($) *</label>
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               <input
                 type="number"
                 value={creditAmount}
@@ -441,7 +537,11 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                 className="w-full p-2 border border-slate-300 rounded font-mono outline-none"
               />
               <span className="text-[10px] text-slate-400 mt-0.5 block">
+<<<<<<< HEAD
                 Current outstanding balance on invoice: {formatRupiahAmount(creditNoteInvoice.outstandingBalance)}
+=======
+                Current outstanding balance on invoice: ${creditNoteInvoice.outstandingBalance.toFixed(2)}
+>>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </span>
             </div>
 
