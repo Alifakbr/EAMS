@@ -1,71 +1,50 @@
-# Apex EAMS & Commercial Operations — Installation Guide
+# Instalasi Apex EAMS
 
-## 1. System Requirements
+Dokumen ini adalah ringkasan. Panduan utama tentang konfigurasi server, database JSON, Docker, autentikasi, backup/restore, dan troubleshooting ada di [Panduan Lengkap](PANDUAN_LENGKAP.md).
 
-- **Node.js**: v20+ or v22 LTS
-- **Package Manager**: npm v10+
-- **Memory**: Minimum 2 GB RAM (4 GB recommended)
-- **Disk**: 500 MB free space
-- **Operating System**: Linux, macOS, or Windows WSL2
+## Persyaratan
 
----
+- Node.js 22 LTS dan npm 10 atau lebih baru.
+- Docker Engine dan Docker Compose v2 untuk instalasi container.
+- HTTPS dan reverse proxy untuk akses dari jaringan publik.
 
-## 2. Local Development Setup
+## Development Lokal
 
-1. **Clone and Navigate**:
-   ```bash
-   cd <project-directory>
-   ```
+### Windows PowerShell
 
-2. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
+```powershell
+npm install
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+npm run dev
+```
 
-3. **Configure Environment Variables**:
-   Copy the provided `.env.example` file to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
+### macOS / Linux
 
-4. **Start the Development Server**:
-   ```bash
-   npm run dev
-   ```
-   The application and backend API server will start on `http://localhost:3000`.
+```bash
+npm install
+[ -f .env ] || cp .env.example .env
+npm run dev
+```
 
-5. **Verify REST API & Health**:
-   - Web application: `http://localhost:3000`
-   - API health check: `http://localhost:3000/api/health`
-   - OpenAPI 3.0 specification: `http://localhost:3000/api/v1/openapi.json`
+Buka `http://localhost:3000`. Periksa server di `http://localhost:3000/api/health`. Dalam development, mode demo aktif secara default; jangan gunakan kredensial demo di production.
 
----
+## Production dengan Docker Compose
 
-## 3. Production Deployment with Docker
+Isi `.env` di root project, set `SESSION_SECRET` yang kuat, lalu jalankan:
 
-1. **Build and Run with Docker Compose**:
-   ```bash
-   docker-compose up -d --build
-   ```
+```bash
+docker compose up -d --build
+docker compose ps
+docker compose logs -f apex-eams
+```
 
-2. **Verify Container Health**:
-   ```bash
-   docker-compose ps
-   docker-compose logs -f apex-eams
-   ```
+Data persisten ada pada volume Docker `eams_data`. `docker compose down` mempertahankan volume; `docker compose down -v` menghapusnya.
 
-3. **Stop the Application**:
-   ```bash
-   docker-compose down
-   ```
+## Pemeriksaan
 
----
+```bash
+npm run lint
+npm run build
+```
 
-## 4. Automated Verification Testing
-
-You can run automated integration tests at any time either:
-- Via the in-app **Automated Test Suite** tab (`/test-runner`)
-- Via curl:
-  ```bash
-  curl http://localhost:3000/api/v1/system/run-tests
-  ```
+Untuk pengujian API, gunakan database uji yang terpisah. Script keamanan API membuat akun dan audit log; jangan jalankan pada production. Detail ada di [Panduan Lengkap](PANDUAN_LENGKAP.md#10-build-lint-dan-pengujian).

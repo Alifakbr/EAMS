@@ -1,42 +1,40 @@
-# Keamanan & Hak Akses (ACL)
+# Keamanan dan Hak Akses
 
-## Cara kerja login
-- Login memakai **email + password**. Password disimpan sebagai hash `scrypt` + salt (tidak pernah terbaca).
-- Server menerbitkan token sesi bertanda tangan (HMAC) berlaku `SESSION_HOURS` jam (default 12).
-- Klien **hanya menyimpan token**. Peran dan menu selalu diambil dari server (`GET /api/v1/auth/me`) — mengubah isi
-  localStorage tidak bisa menaikkan hak akses.
-- 5 kali gagal berturut-turut → akun/IP dikunci 15 menit.
-- Password diganti → semua sesi lama otomatis gugur. Akun dinonaktifkan → sesi gugur seketika.
-- Akun baru / hasil reset admin **wajib ganti password** pada login pertama.
+## Autentikasi
 
-## Modul & peran
-Definisi tunggal ada di `src/shared/access.ts` (dipakai server dan UI):
-- `ROLE_MODULES` — modul (menu) bawaan tiap peran.
-- `PERMISSION_MODULES` — pemetaan kunci "Hak Akses Kustom" di Manajemen Pengguna ke modul.
-- Hak akses kustom hanya berlaku bila **berbeda** dari bawaan peran (delta), jadi menyimpan matriks tanpa perubahan tidak mengubah apa pun.
+- Login menggunakan email dan password. Password disimpan dengan `scrypt` dan salt acak.
+- Server menerbitkan token sesi HMAC dengan masa berlaku default 12 jam (`SESSION_HOURS`). Token dikirim ke API sebagai `Authorization: Bearer <TOKEN>`.
+- Klien menyimpan token saja; profil dan modul efektif diminta dari server. Mengubah role di browser tidak memberi akses tambahan.
+- Lima kegagalan login berturut-turut mengunci kombinasi IP/email selama 15 menit. Counter lockout berada di memori dan hilang ketika proses restart.
+- Password minimal 8 karakter, harus memiliki huruf dan angka, maksimal 128 karakter. Akun baru production diminta mengganti password awal.
 
-## Penegakan di server (deny-by-default)
-Setiap request ke `/api/v1/*` melewati `authenticateAndAuthorize` (`server/auth.ts`). Tabel `ACL` memetakan
-`metode + path` → modul yang dibutuhkan. **Endpoint yang tidak terdaftar ditolak (403).** Saat menambah endpoint baru,
-daftarkan juga di tabel `ACL`.
+## Role dan ACL
 
-## Aturan khusus manajemen akun
-- Hanya modul `user-management` (Administrator IT secara bawaan).
-- Tidak bisa mengubah peran/status/hak akses akun sendiri; tidak bisa menonaktifkan diri sendiri.
-- Selalu harus ada minimal 1 Administrator IT aktif.
-- Field yang bisa diubah dibatasi (whitelist); hash password tidak pernah dikirim ke klien.
-- Backup tidak memuat hash password; restore tidak menimpa akun.
+Role serta modul bawaan didefinisikan di `src/shared/access.ts`. Server memeriksa akses setiap endpoint melalui ACL di `server/auth.ts`; endpoint yang tidak terdaftar ditolak. UI menyembunyikan menu yang tidak dimiliki pengguna, tetapi enforcement keamanan tetap dilakukan oleh API.
 
-## Variabel lingkungan
-Lihat `.env.example` (`SESSION_SECRET`, `SEED_PASSWORD`, `DEMO_MODE`, `TRUST_PROXY`, ...).
+Role yang tersedia: `EXECUTIVE`, `ADMIN_IT`, `SALES_MARKETING`, `ASSET_CONTROL`, `MANAGEMENT_OPERATION`, `PROCUREMENT`, `FINANCE_ACCOUNTING_TAX`, `AR_MANAGEMENT`, `OPERATOR_USER`, `TECHNICAL_SERVICE`, dan `MANAGER`. Akun `MANAGER` tidak termasuk seed default.
 
-## Menjalankan uji keamanan
-```bash
-rm -rf data && npm run dev          # terminal 1 (port 3000 → set PORT=3111 atau EAMS_URL)
-EAMS_URL=http://localhost:3000 npm run test:api   # terminal 2
-```
+## Pengelolaan Akun
 
-## Kamera / scanner
-Browser hanya mengizinkan kamera pada **HTTPS** atau `localhost`. Bila aplikasi dibuka lewat `http://IP-server`,
-kamera live tidak akan aktif; gunakan HTTPS (mis. reverse proxy dengan sertifikat) atau tombol "Foto Barcode" /
-input manual sebagai cadangan.
+- Manajemen pengguna tersedia bagi role yang memiliki modul `user-management` (bawaan: `ADMIN_IT`).
+- API membatasi field yang dapat diubah; password hash dan token version tidak dikirim dalam respons pengguna.
+- Admin tidak dapat menghapus/menonaktifkan dirinya sendiri atau menghilangkan administrator aktif terakhir.
+- Password awal production dibuat dari `SEED_PASSWORD` atau dihasilkan acak saat startup pertama dan dicetak sekali di log. Batasi akses log dan segera ganti password tersebut.
+- Backup tidak memuat password hash. Restore tidak mengganti akun maupun password yang tersimpan.
+
+## Konfigurasi Production
+
+- Set `NODE_ENV=production`, `DEMO_MODE=false`, dan `SESSION_SECRET` acak minimal 16 karakter (disarankan 32 byte acak atau lebih).
+- Simpan secret di secret manager atau environment server; jangan commit `.env`, secret, database, atau backup.
+- Pertahankan `SESSION_SECRET` yang sama ketika restart/deploy agar token tetap dapat diverifikasi. Mengubahnya membatalkan sesi lama.
+- Publikasikan aplikasi lewat HTTPS. Jika memakai reverse proxy, set `TRUST_PROXY` hanya sesuai topologi proxy yang dipercaya.
+- `ALLOW_DEMO_RESET=true` mengizinkan reset data demo di production; jangan aktifkan kecuali untuk prosedur pemulihan yang disetujui.
+- Batasi izin filesystem ke `data/` dan arsip backup. Database JSON memerlukan deployment satu instance penulis; jangan berbagi file database antar-replika.
+
+## Pengujian
+
+`scripts/api_security_test.py` menambah user uji dan audit log serta memicu login lockout. Jalankan hanya di lingkungan disposable, jangan hapus `data/` project untuk menyiapkan test. Instruksi lengkap dan konfigurasi port ada di [Panduan Lengkap](PANDUAN_LENGKAP.md#10-build-lint-dan-pengujian).
+
+## Scanner Kamera
+
+Browser mengizinkan kamera pada HTTPS atau `localhost`. Untuk akses melalui IP/domain server gunakan HTTPS; pada HTTP non-localhost gunakan input manual atau alur unggah foto yang tersedia.

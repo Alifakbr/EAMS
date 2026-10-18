@@ -3,8 +3,10 @@
 
 **Version:** 3.0.0 Enterprise  
 **Author:** Lead Enterprise Software Architect, Database Architect & Security Engineer  
-**Document Status:** Approved Architecture Blueprint & Phase 1 Specification  
+**Document Status:** Proposed target architecture; not an as-built implementation specification
 **Target Environment:** Multi-Branch Heavy Equipment Asset Management & Commercial Rental Operations
+
+> **Status penting:** Dokumen ini menjelaskan blueprint dan kebutuhan target, bukan seluruh kemampuan aplikasi saat ini. Implementasi repository memakai React/Vite, Express, dan file JSON `data/eams_db.json`; aplikasi saat ini tidak memakai PostgreSQL, Redis, worker terpisah, WAL backup, atau integrasi webhook timesheet. Persyaratan dan diagram di bawah harus dianggap sebagai rancangan sampai fitur tersebut benar-benar dikembangkan. Untuk instalasi, keamanan, database, dan fitur yang tersedia saat ini, gunakan [Panduan Lengkap](PANDUAN_LENGKAP.md).
 
 ---
 
@@ -67,11 +69,7 @@ EARMS encompasses 13 core subsystems:
 - **FR-06 (Timesheet Sync):** REST Webhook + Polling adapter with idempotent deduplication hashing (`SHA256(external_id + operator_id + date)`).
 - **FR-07 (Safety Hold):** Any failed item on a mandatory K3 pre-start checklist automatically flags asset status as `SAFETY_HOLD`, blocking dispatch.
 - **FR-08 (Maintenance Work Orders):** Automatically triggers preventive work orders when engine hour meters exceed configured thresholds (e.g., 250h, 500h, 1000h).
-<<<<<<< HEAD
-- **FR-09 (Procurement Segregation):** Purchase Orders > Rp5,000 require Branch Manager approval; > Rp25,000 require Executive Director sign-off. Requester cannot approve.
-=======
-- **FR-09 (Procurement Segregation):** Purchase Orders > $5,000 require Branch Manager approval; > $25,000 require Executive Director sign-off. Requester cannot approve.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
+- **FR-09 (Rancangan):** Persetujuan PO bertingkat; aturan pemisahan tugas dan batas nominal belum menjadi perilaku implementasi yang dijamin.
 - **FR-10 (AR Aging Calculation):** Daily automated cron evaluates open invoices against `due_date`, partitioning into `Current`, `1-30`, `31-60`, `61-90`, and `>90` day buckets.
 - **FR-11 (Tax Engine):** Computes Indonesian PPN 11% (VAT) and PPh Pasal 23 (2% equipment rental withholding) with precision formatting.
 

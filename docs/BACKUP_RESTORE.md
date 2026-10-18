@@ -1,70 +1,51 @@
-# Apex EAMS & Commercial Operations — Backup & Disaster Recovery Guide
+# Backup dan Restore
 
-## 1. Overview
+Database aktual disimpan sebagai file JSON di `data/eams_db.json`; pada Docker, direktori tersebut berada di volume `eams_data`. Aplikasi tidak membuat backup terjadwal secara otomatis. Buat backup manual dan uji pemulihan secara berkala.
 
-Apex EAMS maintains an immutable transactional store containing:
-- Asset Registry & Serial Numbers
-- Commercial Customers, Billing & Delivery Addresses
-- Product Catalog, Stock Levels, and Costing
-- Sales Quotations, Sales Orders & Deliveries
-- Rental Contracts, Extensions & Inspection Condition Logs
-- Invoices, Credit Notes, Payments & Multi-Invoice Allocations
-- Vendors, Purchase Orders & Inbound Bills
-- Maintenance Work Orders
-- Cryptographically timestamped Audit Logs
+## Membuat Backup
 
----
+1. Di aplikasi, buka **Settings & Audit Log** dan gunakan fungsi unduh backup.
+2. Atau gunakan API dengan token pengguna yang memiliki akses Settings:
 
-## 2. Automated & On-Demand Backup Procedures
-
-### Method A: Web UI Backup
-1. Navigate to **Settings & Audit Log** in the sidebar.
-2. Click **Download Backup (.json)** in the top right.
-3. A complete timestamped JSON snapshot (`apex_eams_backup_YYYY-MM-DD.json`) is downloaded directly to your machine.
-
-### Method B: API Endpoint
 ```bash
-curl -O -J http://localhost:3000/api/v1/system/backup
+curl -f -H "Authorization: Bearer <TOKEN>" -OJ http://localhost:3000/api/v1/system/backup
 ```
 
-### Method C: Docker Volume Snapshot
-The database file is persisted on disk inside the `data/` volume:
+3. Untuk menyalin file langsung dari container:
+
 ```bash
-# Copy persisted database file directly from Docker container
+mkdir -p backups
 docker cp apex_eams_platform:/app/data/eams_db.json ./backups/eams_db_$(date +%F).json
 ```
 
----
+Simpan backup di lokasi akses terbatas dan di luar volume/container yang sama. Backup berisi data bisnis dan informasi akun publik; password hash tidak disertakan.
 
-## 3. Restoration Procedures
+## Restore melalui API
 
-### Method A: API Restore
+Buat backup kondisi saat ini terlebih dahulu. Pastikan file JSON valid dan token memiliki akses Settings.
+
 ```bash
-curl -X POST http://localhost:3000/api/v1/system/restore \
+curl -f -X POST http://localhost:3000/api/v1/system/restore \
+  -H "Authorization: Bearer <TOKEN>" \
   -H "Content-Type: application/json" \
-  -d @./backups/eams_db_2026-10-14.json
+  --data-binary @./backups/apex_eams_backup.json
 ```
 
-### Method B: Docker Volume Replacement
-1. Stop container:
-   ```bash
-   docker-compose stop
-   ```
-2. Replace data file:
-   ```bash
-   docker cp ./backups/eams_db_2026-10-14.json apex_eams_platform:/app/data/eams_db.json
-   ```
-3. Restart container:
-   ```bash
-   docker-compose start
-   ```
+Restore memperbarui data bisnis, tetapi tidak menimpa akun/password. Struktur backup harus memiliki koleksi `assets`, `customers`, dan `products` berupa array. Ukuran body JSON API dibatasi 10 MB.
 
----
+## Restore File Database Docker
 
-## 4. Factory Demo Reset
+Hentikan service sebelum mengganti file agar tidak ada proses yang menulis bersamaan:
 
-To quickly clear experimental test data and return the system to pristine initial demonstration state:
-- Click **Reset Demo Data** in the Settings panel, or:
 ```bash
-curl -X POST http://localhost:3000/api/v1/system/reset-demo
+docker compose stop
+docker cp ./backups/eams_db.json apex_eams_platform:/app/data/eams_db.json
+docker compose start
+docker compose logs --tail=100 apex-eams
 ```
+
+Sesudahnya periksa `http://localhost:3000/api/health` dan validasi data dari UI. `docker compose down` tidak menghapus volume; jangan gunakan `docker compose down -v` kecuali memang bermaksud menghapus data.
+
+## Reset Data Demo
+
+Endpoint reset hanya untuk lingkungan uji dan tetap memerlukan akses Settings. Di production endpoint ditolak kecuali `ALLOW_DEMO_RESET=true`; jangan aktifkan untuk penggunaan normal. Reset mengganti data bisnis dengan seed tetapi mempertahankan akun pengguna. Detail konfigurasi ada di [Panduan Lengkap](PANDUAN_LENGKAP.md#8-backup-dan-restore).
