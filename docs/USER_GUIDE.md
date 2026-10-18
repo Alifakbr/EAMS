@@ -77,6 +77,23 @@ Gunakan modul invoice untuk penagihan dan Payments untuk pencatatan/penyelesaian
 
 Role Manager melihat item pending melalui **Approvals & Contracts**. Keputusan approval/reject hanya tersedia jika server memberi akses dan record masih menunggu keputusan.
 
+### Pengadaan alat berat dan pelabelan aset
+
+1. Di **Procurement & Vendor POs**, buat PO dengan tipe item **HEAVY EQUIPMENT**, jumlah unit bilangan bulat, dan harga beli per unit.
+2. Setelah PO disetujui Manager dan barang diterima, sistem membuat satu record aset provisional untuk setiap unit. Unit belum dapat dialokasikan sampai dilabeli.
+3. Di **Heavy Equipment & Compliance**, filter status **Pending Label**, pilih aksi tag, lalu isi asset tag, serial number pabrikan, nama, merek/model, lokasi, depresiasi tahunan, dan tipe rental.
+4. Simpan untuk mengaktifkan aset dan mencetak barcode/QR. Lengkapi dokumen STNK/BPKB/SIA sesuai proses Asset Control.
+
+**Wet rental** dan **Dry rental** adalah klasifikasi pada data aset. Wet biasanya berarti operator disertakan, dry berarti tanpa operator; klasifikasi ini tidak otomatis mengubah harga kontrak atau menambahkan biaya operator.
+
+### Depresiasi, penjualan, dan disposal
+
+- Pada aksi keuangan aset yang **AVAILABLE**, atur persentase depresiasi tahunan dan tipe rental. Nilai buku dihitung straight-line dari harga beli, diprorata sejak tanggal pembelian, dan dibatasi minimum nol.
+- Untuk penjualan, pilih customer, isi harga sebelum pajak dan tarif pajak. Aset berubah menjadi **SOLD** dan sistem membuat draft invoice yang perlu ditinjau/diproses Finance melalui **Invoices & Billing**. Laporan menampilkan proceeds serta gain/loss terhadap nilai buku saat penjualan.
+- Untuk disposal tanpa pemasukan, pilih **DISPOSAL**. Aset berubah menjadi **DISPOSED**, tidak ada invoice atau revenue, dan nilai buku saat disposal dicatat sebagai write-off.
+- Hanya aset berstatus **AVAILABLE** yang dapat dijual atau didispose. Pastikan aset tidak sedang disewa, reserved, atau dalam maintenance sebelum memprosesnya.
+- Angka pada dashboard merupakan ringkasan operasional, bukan pengganti jurnal atau laporan keuangan statutory. Konfirmasikan perlakuan akuntansi/pajak dengan Finance.
+
 ## 4. Mengelola Akun
 
 Admin dengan akses User Management dapat membuat atau mengubah akun sesuai kebijakan organisasi. Berikan hak minimum yang dibutuhkan. Password sementara harus disampaikan lewat kanal aman dan diganti pada login pertama di production. Admin tidak dapat menonaktifkan dirinya sendiri atau menghapus administrator aktif terakhir.

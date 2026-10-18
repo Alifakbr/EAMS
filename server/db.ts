@@ -32,6 +32,20 @@ export function fromCents(cents: number): number {
   return Number((cents / 100).toFixed(2));
 }
 
+export function calculateAssetBookValue(
+  asset: Pick<Asset, 'purchaseCost' | 'purchaseDate' | 'depreciationRateAnnual'>,
+  asOf = new Date(),
+): number {
+  const costCents = Math.max(0, toCents(Number(asset.purchaseCost) || 0));
+  const rate = Math.min(100, Math.max(0, Number(asset.depreciationRateAnnual) || 0));
+  const purchasedAt = Date.parse(asset.purchaseDate);
+  if (!Number.isFinite(purchasedAt) || asOf.getTime() <= purchasedAt) return fromCents(costCents);
+
+  const elapsedYears = (asOf.getTime() - purchasedAt) / (365.25 * 24 * 60 * 60 * 1000);
+  const accumulatedCents = Math.round(costCents * (rate / 100) * elapsedYears);
+  return fromCents(Math.max(0, costCents - accumulatedCents));
+}
+
 export function calculateLineTotals(quantity: number, unitPrice: number, discountPercent: number, taxRatePercent: number) {
   const qty = Number(quantity) || 0;
   const priceInCents = toCents(unitPrice);

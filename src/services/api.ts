@@ -134,6 +134,9 @@ export const api = {
   getAssetHistory: (id: string) => request<any>(`/assets/${id}/history`),
   createAsset: (data: Partial<Asset>) => request<Asset>('/assets', { method: 'POST', body: JSON.stringify(data) }),
   updateAsset: (id: string, data: Partial<Asset>) => request<Asset>(`/assets/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  labelAsset: (id: string, data: Partial<Asset>) => request<Asset>(`/assets/${id}/label`, { method: 'POST', body: JSON.stringify(data) }),
+  disposeAsset: (id: string, data: { type: 'SALE' | 'DISPOSAL'; customerId?: string; salePrice?: number; taxRatePercent?: number; notes?: string }) =>
+    request<{ asset: Asset; disposition: NonNullable<Asset['disposition']>; invoice?: Invoice }>(`/assets/${id}/disposition`, { method: 'POST', body: JSON.stringify(data) }),
 
   // Quotations
   getQuotations: () => request<{ data: Quotation[]; total: number }>('/quotations'),

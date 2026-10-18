@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Asset, AssetStatus, HeavyEquipmentDocs } from '../types/index.ts';
+import { Asset, AssetStatus, Customer, HeavyEquipmentDocs } from '../types/index.ts';
 import { api } from '../services/api.ts';
 import { formatRupiahAmount } from '../shared/currency.tsx';
 import { FleetGpsMap } from './FleetGpsMap.tsx';
@@ -33,10 +33,11 @@ import {
 
 interface AssetsViewProps {
   assets: Asset[];
+  customers: Customer[];
   onRefresh: () => void;
 }
 
-export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => {
+export const AssetsView: React.FC<AssetsViewProps> = ({ assets, customers, onRefresh }) => {
   const [assetViewMode, setAssetViewMode] = useState<'map' | 'table'>('map');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -48,6 +49,18 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [managingDocsAsset, setManagingDocsAsset] = useState<Asset | null>(null);
   const [printingLabelAsset, setPrintingLabelAsset] = useState<Asset | null>(null);
+  const [labelingAsset, setLabelingAsset] = useState<Asset | null>(null);
+  const [labelForm, setLabelForm] = useState<Partial<Asset>>({});
+  const [financeAsset, setFinanceAsset] = useState<Asset | null>(null);
+  const [financeForm, setFinanceForm] = useState({ depreciationRateAnnual: 10, rentalMode: 'DRY' as 'WET' | 'DRY' });
+  const [dispositionForm, setDispositionForm] = useState({
+    type: 'SALE' as 'SALE' | 'DISPOSAL',
+    customerId: '',
+    salePrice: 0,
+    taxRatePercent: 11,
+    notes: '',
+  });
+  const [savingAssetAction, setSavingAssetAction] = useState(false);
 
   // Registration Form State
   const [formData, setFormData] = useState({
@@ -62,6 +75,8 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
     weeklyRentalRate: '2600',
     monthlyRentalRate: '9500',
     sellPrice: '210000',
+    depreciationRateAnnual: '10',
+    rentalMode: 'DRY' as 'WET' | 'DRY',
     warehouseLocation: 'Balikpapan Depot & Workshop',
     plateNumber: 'B 9821 TQ',
     chassisNumber: 'CAT320D-VIN-99021',
@@ -134,6 +149,8 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
         weeklyRentalRate: parseFloat(formData.weeklyRentalRate) || 0,
         monthlyRentalRate: parseFloat(formData.monthlyRentalRate) || 0,
         sellPrice: parseFloat(formData.sellPrice) || 0,
+        depreciationRateAnnual: parseFloat(formData.depreciationRateAnnual) || 0,
+        rentalMode: formData.rentalMode,
         warehouseLocation: formData.warehouseLocation,
         legalDocs: {
           plateNumber: formData.plateNumber,
@@ -158,6 +175,90 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
       onRefresh();
     } catch (err: any) {
       alert(`Failed to register asset: ${err.message}`);
+    }
+  };
+
+  const openLabelForm = (asset: Asset) => {
+    setLabelingAsset(asset);
+    setLabelForm({
+      assetTag: '',
+      serialNumber: '',
+      name: asset.name,
+      category: asset.category,
+      brand: '',
+      model: '',
+      warehouseLocation: asset.warehouseLocation,
+      depreciationRateAnnual: asset.depreciationRateAnnual || 10,
+      rentalMode: asset.rentalMode || 'DRY',
+    });
+  };
+
+  const handleLabelAsset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!labelingAsset) return;
+    setSavingAssetAction(true);
+    try {
+      await api.labelAsset(labelingAsset.id, labelForm);
+      setLabelingAsset(null);
+      onRefresh();
+    } catch (err: any) {
+      alert(`Gagal memberi label aset: ${err.message}`);
+    } finally {
+      setSavingAssetAction(false);
+    }
+  };
+
+  const openFinanceForm = (asset: Asset) => {
+    setFinanceAsset(asset);
+    setFinanceForm({
+      depreciationRateAnnual: asset.depreciationRateAnnual ?? 10,
+      rentalMode: asset.rentalMode || 'DRY',
+    });
+    setDispositionForm({
+      type: 'SALE',
+      customerId: customers[0]?.id || '',
+      salePrice: asset.sellPrice || 0,
+      taxRatePercent: 11,
+      notes: '',
+    });
+  };
+
+  const handleSaveFinanceSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!financeAsset) return;
+    setSavingAssetAction(true);
+    try {
+      await api.updateAsset(financeAsset.id, financeForm);
+      onRefresh();
+      alert('Persentase depresiasi dan tipe rental aset diperbarui.');
+    } catch (err: any) {
+      alert(`Gagal memperbarui data aset: ${err.message}`);
+    } finally {
+      setSavingAssetAction(false);
+    }
+  };
+
+  const handleAssetDisposition = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!financeAsset) return;
+    const action = dispositionForm.type === 'SALE' ? 'menjual' : 'mendispose';
+    if (!confirm(`Konfirmasi ${action} aset ${financeAsset.assetTag}? Tindakan ini tidak dapat dibatalkan.`)) return;
+    setSavingAssetAction(true);
+    try {
+      const result = await api.disposeAsset(financeAsset.id, {
+        ...dispositionForm,
+        customerId: dispositionForm.type === 'SALE' ? dispositionForm.customerId : undefined,
+        salePrice: dispositionForm.type === 'SALE' ? dispositionForm.salePrice : undefined,
+      });
+      setFinanceAsset(null);
+      onRefresh();
+      alert(result.invoice
+        ? `Aset dijual. Draft invoice ${result.invoice.invoiceNumber} dibuat untuk ditinjau Finance.`
+        : 'Aset berhasil didispose dan nilai bukunya dicatat sebagai rugi pelepasan.');
+    } catch (err: any) {
+      alert(`Gagal memproses pelepasan aset: ${err.message}`);
+    } finally {
+      setSavingAssetAction(false);
     }
   };
 
@@ -225,6 +326,8 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
 
   const getStatusBadge = (status: AssetStatus) => {
     switch (status) {
+      case 'PENDING_LABEL':
+        return <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">PENDING LABEL</span>;
       case 'AVAILABLE':
         return <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">AVAILABLE</span>;
       case 'RENTED':
@@ -330,9 +433,12 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
           >
             <option value="ALL">All Operational Statuses</option>
             <option value="AVAILABLE">Available</option>
+            <option value="PENDING_LABEL">Pending Label</option>
             <option value="RENTED">Rented</option>
             <option value="IN_MAINTENANCE">In Maintenance</option>
             <option value="RESERVED">Reserved</option>
+            <option value="SOLD">Sold</option>
+            <option value="DISPOSED">Disposed</option>
           </select>
         </div>
 
@@ -357,7 +463,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
               <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
                 <th className="py-2.5 px-4">Tag Barcode / Serial</th>
                 <th className="py-2.5 px-4">Equipment / Identification</th>
-                <th className="py-2.5 px-4">Category &amp; Location</th>
+                <th className="py-2.5 px-4">Category, Rental &amp; Location</th>
                 <th className="py-2.5 px-4">Compliance Documents (STNK, BPKB, SIA)</th>
                 <th className="py-2.5 px-4 text-center">Status</th>
                 <th className="py-2.5 px-4 text-right">Monthly Rental Rate</th>
@@ -396,6 +502,12 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                         <Truck className="w-3 h-3" />
                         <span>{asset.warehouseLocation}</span>
                       </div>
+                      <div className="text-[10px] text-slate-500 mt-1">
+                        {asset.rentalMode === 'WET' ? 'Wet rental' : 'Dry rental'} · Depreciation {asset.depreciationRateAnnual}% / year
+                      </div>
+                      {asset.purchaseOrderId && (
+                        <div className="text-[10px] font-mono text-slate-400 mt-0.5">PO {asset.purchaseOrderId}</div>
+                      )}
                     </td>
 
                     {/* Centralized Legal Documents */}
@@ -433,14 +545,25 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                     <td className="py-3 px-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
                         {/* Print Barcode Label */}
-                        <button
-                          type="button"
-                          onClick={() => setPrintingLabelAsset(asset)}
-                          title="Print the heavy equipment barcode / QR label"
-                          className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-indigo-600 cursor-pointer"
-                        >
-                          <QrCode className="w-3.5 h-3.5" />
-                        </button>
+                        {asset.status === 'PENDING_LABEL' ? (
+                          <button
+                            type="button"
+                            onClick={() => openLabelForm(asset)}
+                            title="Lengkapi identitas dan pasang tag aset"
+                            className="p-1.5 rounded hover:bg-amber-50 text-amber-700 cursor-pointer"
+                          >
+                            <Tag className="w-3.5 h-3.5" />
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setPrintingLabelAsset(asset)}
+                            title="Print the heavy equipment barcode / QR label"
+                            className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-indigo-600 cursor-pointer"
+                          >
+                            <QrCode className="w-3.5 h-3.5" />
+                          </button>
+                        )}
 
                         {/* Upload / Manage Legal Docs */}
                         <button
@@ -461,6 +584,16 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                         >
                           <History className="w-3.5 h-3.5" />
                         </button>
+                        {asset.status === 'AVAILABLE' && (
+                          <button
+                            type="button"
+                            onClick={() => openFinanceForm(asset)}
+                            title="Atur depresiasi, tipe rental, jual, atau dispose"
+                            className="p-1.5 rounded hover:bg-emerald-50 text-emerald-700 cursor-pointer"
+                          >
+                            <DollarSign className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -783,6 +916,124 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
         </div>
       )}
 
+      {labelingAsset && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl border border-slate-200 max-w-2xl w-full p-6 text-sm space-y-4">
+            <div className="flex items-start justify-between border-b border-slate-200 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-900">Label Aset dari Procurement</h3>
+                <p className="text-xs text-slate-500 mt-1">PO {labelingAsset.purchaseOrderId} · Harga beli {formatRupiahAmount(labelingAsset.purchaseCost)}</p>
+              </div>
+              <button type="button" onClick={() => setLabelingAsset(null)} title="Tutup" className="p-1 text-slate-500 hover:text-slate-900"><X className="w-4 h-4" /></button>
+            </div>
+            <form onSubmit={handleLabelAsset} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {([
+                ['assetTag', 'Tag aset / barcode', true],
+                ['serialNumber', 'Nomor serial pabrikan', true],
+                ['name', 'Nama alat berat', true],
+                ['category', 'Kategori', false],
+                ['brand', 'Merek', false],
+                ['model', 'Model', false],
+                ['warehouseLocation', 'Lokasi', false],
+              ] as const).map(([key, label, required]) => (
+                <label key={key} className="text-xs font-semibold text-slate-700">
+                  {label}{required ? ' *' : ''}
+                  <input
+                    required={required}
+                    value={String(labelForm[key] || '')}
+                    onChange={(e) => setLabelForm({ ...labelForm, [key]: e.target.value })}
+                    className="mt-1 w-full rounded border border-slate-300 px-2.5 py-2 font-normal outline-none focus:border-slate-700"
+                  />
+                </label>
+              ))}
+              <label className="text-xs font-semibold text-slate-700">
+                Depresiasi per tahun (%)
+                <input type="number" min="0" max="100" step="0.1" required value={Number(labelForm.depreciationRateAnnual ?? 10)} onChange={(e) => setLabelForm({ ...labelForm, depreciationRateAnnual: Number(e.target.value) })} className="mt-1 w-full rounded border border-slate-300 px-2.5 py-2 font-normal" />
+              </label>
+              <label className="text-xs font-semibold text-slate-700">
+                Tipe rental
+                <select value={labelForm.rentalMode || 'DRY'} onChange={(e) => setLabelForm({ ...labelForm, rentalMode: e.target.value as 'WET' | 'DRY' })} className="mt-1 w-full rounded border border-slate-300 px-2.5 py-2 font-normal">
+                  <option value="WET">Wet rental (operator termasuk)</option>
+                  <option value="DRY">Dry rental (tanpa operator)</option>
+                </select>
+              </label>
+              <div className="sm:col-span-2 flex justify-end gap-2 border-t border-slate-200 pt-3">
+                <button type="button" onClick={() => setLabelingAsset(null)} className="rounded border border-slate-300 px-3 py-2 text-xs">Batal</button>
+                <button disabled={savingAssetAction} type="submit" className="rounded bg-slate-900 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Simpan Tag &amp; Aktifkan Aset</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {financeAsset && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl border border-slate-200 max-w-xl w-full p-6 text-sm space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between border-b border-slate-200 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-900">Keuangan &amp; Pelepasan Aset</h3>
+                <p className="text-xs text-slate-500 mt-1">{financeAsset.assetTag} · {financeAsset.name}</p>
+                <p className="text-xs text-slate-600 mt-1">Harga beli {formatRupiahAmount(financeAsset.purchaseCost)} · Nilai buku saat ini {formatRupiahAmount(financeAsset.currentBookValue)}</p>
+              </div>
+              <button type="button" onClick={() => setFinanceAsset(null)} title="Tutup" className="p-1 text-slate-500 hover:text-slate-900"><X className="w-4 h-4" /></button>
+            </div>
+
+            <form onSubmit={handleSaveFinanceSettings} className="grid grid-cols-2 gap-3 rounded border border-slate-200 bg-slate-50 p-3">
+              <label className="text-xs font-semibold text-slate-700">
+                Depresiasi tahunan (% dari harga beli)
+                <input type="number" min="0" max="100" step="0.1" required value={financeForm.depreciationRateAnnual} onChange={(e) => setFinanceForm({ ...financeForm, depreciationRateAnnual: Number(e.target.value) })} className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-2 font-normal" />
+              </label>
+              <label className="text-xs font-semibold text-slate-700">
+                Tipe rental
+                <select value={financeForm.rentalMode} onChange={(e) => setFinanceForm({ ...financeForm, rentalMode: e.target.value as 'WET' | 'DRY' })} className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-2 font-normal">
+                  <option value="WET">Wet rental</option>
+                  <option value="DRY">Dry rental</option>
+                </select>
+              </label>
+              <button disabled={savingAssetAction} type="submit" className="col-span-2 justify-self-end rounded bg-slate-800 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Simpan Pengaturan</button>
+            </form>
+
+            <form onSubmit={handleAssetDisposition} className="space-y-3 border-t border-slate-200 pt-4">
+              <label className="block text-xs font-semibold text-slate-700">
+                Tindakan aset
+                <select value={dispositionForm.type} onChange={(e) => setDispositionForm({ ...dispositionForm, type: e.target.value as 'SALE' | 'DISPOSAL' })} className="mt-1 w-full rounded border border-slate-300 px-2.5 py-2 font-normal">
+                  <option value="SALE">Jual aset dan buat draft invoice</option>
+                  <option value="DISPOSAL">Dispose / hapus aset tanpa pemasukan</option>
+                </select>
+              </label>
+              {dispositionForm.type === 'SALE' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <label className="text-xs font-semibold text-slate-700">
+                    Customer
+                    <select required value={dispositionForm.customerId} onChange={(e) => setDispositionForm({ ...dispositionForm, customerId: e.target.value })} className="mt-1 w-full rounded border border-slate-300 px-2.5 py-2 font-normal">
+                      <option value="">Pilih customer</option>
+                      {customers.map((customer) => <option key={customer.id} value={customer.id}>{customer.name}</option>)}
+                    </select>
+                  </label>
+                  <label className="text-xs font-semibold text-slate-700">
+                    Harga jual sebelum pajak (IDR)
+                    <input required type="number" min="1" step="0.01" value={dispositionForm.salePrice || ''} onChange={(e) => setDispositionForm({ ...dispositionForm, salePrice: Number(e.target.value) })} className="mt-1 w-full rounded border border-slate-300 px-2.5 py-2 font-normal" />
+                  </label>
+                  <label className="text-xs font-semibold text-slate-700">
+                    Pajak invoice (%)
+                    <input type="number" min="0" max="100" step="0.01" value={dispositionForm.taxRatePercent} onChange={(e) => setDispositionForm({ ...dispositionForm, taxRatePercent: Number(e.target.value) })} className="mt-1 w-full rounded border border-slate-300 px-2.5 py-2 font-normal" />
+                  </label>
+                </div>
+              )}
+              <label className="block text-xs font-semibold text-slate-700">
+                Catatan
+                <textarea value={dispositionForm.notes} onChange={(e) => setDispositionForm({ ...dispositionForm, notes: e.target.value })} className="mt-1 w-full rounded border border-slate-300 px-2.5 py-2 font-normal" rows={2} />
+              </label>
+              <div className="flex justify-end">
+                <button disabled={savingAssetAction || (dispositionForm.type === 'SALE' && customers.length === 0)} type="submit" className="rounded bg-rose-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">
+                  {dispositionForm.type === 'SALE' ? 'Jual & Buat Draft Invoice' : 'Dispose & Catat Nilai Buku'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* MODAL 3: Register New Heavy Equipment Asset Tag Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
@@ -982,6 +1233,32 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                     onChange={(e) => setFormData({ ...formData, monthlyRentalRate: e.target.value })}
                     className="w-full p-2 border border-slate-300 rounded font-mono font-bold"
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-700 font-semibold mb-1">Depresiasi per Tahun (%)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    value={formData.depreciationRateAnnual}
+                    onChange={(e) => setFormData({ ...formData, depreciationRateAnnual: e.target.value })}
+                    className="w-full p-2 border border-slate-300 rounded font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-semibold mb-1">Tipe Rental</label>
+                  <select
+                    value={formData.rentalMode}
+                    onChange={(e) => setFormData({ ...formData, rentalMode: e.target.value as 'WET' | 'DRY' })}
+                    className="w-full p-2 border border-slate-300 rounded bg-white"
+                  >
+                    <option value="WET">Wet rental (termasuk operator)</option>
+                    <option value="DRY">Dry rental (tanpa operator)</option>
+                  </select>
                 </div>
               </div>
 

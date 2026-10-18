@@ -176,7 +176,10 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
   const handleReceiveGoods = async (po: PurchaseOrder) => {
     try {
       await api.receivePurchaseOrder(po.id);
-      alert(`Items/services from PO ${po.poNumber} received successfully! Warehouse stock has been updated and the bill is ready for Finance.`);
+      const heavyEquipmentUnits = po.items
+        .filter((item) => item.itemType === 'HEAVY_EQUIPMENT')
+        .reduce((sum, item) => sum + item.quantity, 0);
+      alert(`PO ${po.poNumber} received. ${heavyEquipmentUnits} heavy-equipment asset(s) are now waiting for Asset Control labeling; stock goods and vendor billing were updated.`);
       onRefresh();
     } catch (err: any) {
       alert(`Failed to receive delivery: ${err.message}`);
@@ -343,7 +346,9 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                           : 'bg-blue-100 text-blue-800 border border-blue-300'
                       }`}
                     >
-                      {po.status === 'GOODS_RECEIVED' ? 'RECEIVED (STOCK UPDATED)' : 'APPROVED / PENDING'}
+                      {po.status === 'GOODS_RECEIVED'
+                        ? po.items.some((item) => item.itemType === 'HEAVY_EQUIPMENT') ? 'RECEIVED / ASSET LABEL PENDING' : 'RECEIVED (STOCK UPDATED)'
+                        : 'APPROVED / PENDING'}
                     </span>
                   </div>
 
@@ -641,6 +646,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                           className="w-full p-1.5 border border-slate-300 rounded text-xs outline-none font-semibold text-slate-800"
                         >
                           <option value="GOODS">GOODS</option>
+                          <option value="HEAVY_EQUIPMENT">HEAVY EQUIPMENT</option>
                           <option value="SERVICE">SERVICE</option>
                         </select>
                       </div>

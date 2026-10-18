@@ -210,7 +210,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ userRole = 'EXECUTIVE'
   // =========================================================================
   const [calcTargetGrowthPercent, setCalcTargetGrowthPercent] = useState<number>(15);
   const [calcOpexPercent, setCalcOpexPercent] = useState<number>(42);
-  const [calcDepreciationPercent, setCalcDepreciationPercent] = useState<number>(10);
+  const [calcDepreciationPercent, setCalcDepreciationPercent] = useState<number>(100);
   const [calcTaxRatePercent, setCalcTaxRatePercent] = useState<number>(11);
 
   useEffect(() => {
@@ -311,8 +311,13 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ userRole = 'EXECUTIVE'
     const grossEbitda = projectedRevenue - projectedOpex;
     
     // Total fleet book value
-    const totalFleetValue = assetsList.reduce((sum, a) => sum + (a.purchaseCost || 0), 0);
-    const fleetDepreciation = Math.round(totalFleetValue * (calcDepreciationPercent / 100));
+    const ownedAssets = assetsList.filter((asset) => asset.status !== 'SOLD' && asset.status !== 'DISPOSED');
+    const totalFleetValue = ownedAssets.reduce((sum, asset) => sum + (asset.currentBookValue ?? asset.purchaseCost ?? 0), 0);
+    const configuredDepreciation = financeData.metrics.annualDepreciationExpense ?? ownedAssets.reduce(
+      (sum, asset) => sum + (asset.purchaseCost || 0) * ((asset.depreciationRateAnnual || 0) / 100),
+      0,
+    );
+    const fleetDepreciation = Math.round(configuredDepreciation * (calcDepreciationPercent / 100));
     const operationalEbit = grossEbitda - fleetDepreciation;
     const estimatedTax = Math.round(Math.max(0, operationalEbit) * (calcTaxRatePercent / 100));
     const netProfitAfterTax = operationalEbit - estimatedTax;
@@ -690,7 +695,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ userRole = 'EXECUTIVE'
           <tr><td><strong>Total Cash Collected</strong></td><td>${formatRupiah(metrics.totalCollectedPayments)}</td><td>+11.6%</td><td>Cash and bank settlements</td></tr>
           <tr><td><strong>Total Outstanding Receivables (AR)</strong></td><td>${formatRupiah(metrics.totalOutstandingAR)}</td><td>-8.5%</td><td>Overdue: ${formatRupiah(metrics.overdueAmount)}</td></tr>
           <tr><td><strong>Heavy Equipment Fleet Utilization</strong></td><td>${metrics.utilizationRate.toFixed(1)}%</td><td>+14.2%</td><td>Units operating at customer sites</td></tr>
-          <tr><td><strong>Equipment and Parts Sales Revenue</strong></td><td>${formatRupiah(metrics.salesRevenue)}</td><td>+14.8%</td><td>Heavy equipment and spare parts</td></tr>
+          <tr><td><strong>Equipment and Parts Sales Revenue</strong></td><td>${formatRupiah(metrics.salesRevenue)}</td><td>+14.8%</td><td>Includes asset sale proceeds</td></tr>
           <tr><td><strong>Equipment Rental Revenue</strong></td><td>${formatRupiah(metrics.rentalRevenue)}</td><td>+10.5%</td><td>Daily and monthly fleet rentals</td></tr>
         </table>
 
@@ -705,7 +710,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ userRole = 'EXECUTIVE'
           <tr><td>Target Revenue Growth</td><td>+${calcTargetGrowthPercent}%</td><td><strong>${formatRupiah(executiveCalculations.projectedRevenue)}</strong></td></tr>
           <tr><td>Estimated Operating Expenses (OPEX)</td><td>${calcOpexPercent}% of revenue</td><td>- ${formatRupiah(executiveCalculations.projectedOpex)}</td></tr>
           <tr><td>Gross Operating Profit (EBITDA)</td><td>Margin ${((executiveCalculations.grossEbitda / executiveCalculations.projectedRevenue) * 100).toFixed(1)}%</td><td>${formatRupiah(executiveCalculations.grossEbitda)}</td></tr>
-          <tr><td>Fleet Depreciation</td><td>${calcDepreciationPercent}% per year</td><td>- ${formatRupiah(executiveCalculations.fleetDepreciation)}</td></tr>
+          <tr><td>Fleet Depreciation</td><td>${calcDepreciationPercent}% of configured annual asset depreciation</td><td>- ${formatRupiah(executiveCalculations.fleetDepreciation)}</td></tr>
           <tr><td>Net Operating Profit (EBIT)</td><td>Before tax</td><td>${formatRupiah(executiveCalculations.operationalEbit)}</td></tr>
           <tr><td>Estimated Net Tax Due</td><td>Effective rate ${calcTaxRatePercent}%</td><td>- ${formatRupiah(executiveCalculations.estimatedTax)}</td></tr>
           <tr style="background-color: #f1f5f9;"><td><strong>ESTIMATED NET OPERATING PROFIT</strong></td><td><strong>Margin: ${executiveCalculations.netProfitMarginPercent.toFixed(1)}%</strong></td><td><strong>${formatRupiah(executiveCalculations.netProfitAfterTax)}</strong></td></tr>
@@ -1605,6 +1610,25 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ userRole = 'EXECUTIVE'
             </div>
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+            <div className="rounded border border-slate-200 bg-white p-4">
+              <div className="text-xs font-semibold text-slate-500">Asset Sale Proceeds</div>
+              <div className="mt-1 font-mono text-lg font-bold text-slate-900">{formatRupiah(metrics.assetSaleRevenue || 0)}</div>
+            </div>
+            <div className="rounded border border-slate-200 bg-white p-4">
+              <div className="text-xs font-semibold text-slate-500">Gain / (Loss) on Asset Sales</div>
+              <div className={`mt-1 font-mono text-lg font-bold ${(metrics.assetSaleGainLoss || 0) >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>{formatRupiah(metrics.assetSaleGainLoss || 0)}</div>
+            </div>
+            <div className="rounded border border-slate-200 bg-white p-4">
+              <div className="text-xs font-semibold text-slate-500">Disposal Write-off</div>
+              <div className="mt-1 font-mono text-lg font-bold text-rose-700">{formatRupiah(metrics.assetDisposalLoss || 0)}</div>
+            </div>
+            <div className="rounded border border-slate-200 bg-white p-4">
+              <div className="text-xs font-semibold text-slate-500">Annual Asset Depreciation</div>
+              <div className="mt-1 font-mono text-lg font-bold text-slate-900">{formatRupiah(metrics.annualDepreciationExpense || 0)}</div>
+            </div>
+          </div>
+
           {/* ========================================================================= */}
           {/* HITUNGAN KALKULATOR EKSEKUTIF (PROYEKSI LABA, OPEX, PENYUSUTAN, PAJAK) */}
           {/* ========================================================================= */}
@@ -1661,7 +1685,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ userRole = 'EXECUTIVE'
               </div>
 
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">Fleet Depreciation (%/year):</label>
+                <label className="block text-slate-700 font-semibold mb-1">Depreciation Projection Adjustment (%):</label>
                 <div className="flex items-center gap-1.5">
                   <input
                     type="number"
@@ -1671,7 +1695,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ userRole = 'EXECUTIVE'
                   />
                   <span className="font-bold text-slate-500">%</span>
                 </div>
-                <span className="text-[10px] text-slate-400">Book value depreciation</span>
+                <span className="text-[10px] text-slate-400">100% uses the configured annual rate for each asset.</span>
               </div>
 
               <div>
@@ -1731,7 +1755,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ userRole = 'EXECUTIVE'
 
                     <tr>
                       <td className="py-2.5 px-4 font-semibold text-slate-900">Heavy Equipment Fleet Depreciation Expense</td>
-                      <td className="py-2.5 px-4 font-mono">{calcDepreciationPercent}% x Fleet Value ({formatRupiah(executiveCalculations.totalFleetValue)})</td>
+                      <td className="py-2.5 px-4 font-mono">{calcDepreciationPercent}% x configured annual depreciation</td>
                       <td className="py-2.5 px-4 text-right font-mono-numbers text-slate-600">
                         -{formatRupiah(executiveCalculations.fleetDepreciation)}
                       </td>

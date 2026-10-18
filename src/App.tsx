@@ -320,7 +320,7 @@ export default function App() {
           )}
 
           {activeTab === 'assets' && (
-            <AssetsView assets={assets} onRefresh={loadAllData} />
+            <AssetsView assets={assets} customers={customers} onRefresh={loadAllData} />
           )}
 
           {activeTab === 'products' && (

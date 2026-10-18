@@ -219,6 +219,7 @@ export const ACL: Rule[] = [
   { methods: ['POST'], path: /^\/assets\/status-logs$/, access: ['assets', 'maintenance', 'operator-status', 'technical-service'] },
   { methods: GET, path: /^\/assets\/[^/]+\/history$/, access: ['assets', 'maintenance', 'technical-service'] },
   { methods: ['POST'], path: /^\/assets\/[^/]+\/documents$/, access: ['assets'], action: 'canUploadLegalDocs' },
+  { methods: ['POST'], path: /^\/assets\/[^/]+\/(label|disposition)$/, access: ['assets'] },
   { methods: GET, path: /^\/assets$/, access: ASSET_READ, roles: ['MANAGER'] },
   { methods: WRITE, path: /^\/assets(\/[^/]+)?$/, access: ['assets'] },
 

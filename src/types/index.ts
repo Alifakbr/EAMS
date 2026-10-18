@@ -53,8 +53,22 @@ export interface User {
   tokenVersion?: number;
 }
 
-export type AssetStatus = 'AVAILABLE' | 'RENTED' | 'SOLD' | 'IN_MAINTENANCE' | 'RESERVED' | 'DISPOSED';
+export type AssetStatus = 'PENDING_LABEL' | 'AVAILABLE' | 'RENTED' | 'SOLD' | 'IN_MAINTENANCE' | 'RESERVED' | 'DISPOSED';
 export type AssetCondition = 'EXCELLENT' | 'GOOD' | 'FAIR' | 'NEEDS_REPAIR' | 'DAMAGED';
+export type AssetRentalMode = 'WET' | 'DRY';
+export type AssetDispositionType = 'SALE' | 'DISPOSAL';
+
+export interface AssetDisposition {
+  type: AssetDispositionType;
+  date: string;
+  proceeds: number;
+  bookValueAtDisposition: number;
+  gainLoss: number;
+  customerId?: string;
+  customerName?: string;
+  invoiceId?: string;
+  notes?: string;
+}
 
 export interface HeavyEquipmentDocs {
   stnkNumber?: string;
@@ -155,6 +169,9 @@ export interface Asset {
   model: string;
   status: AssetStatus;
   condition: AssetCondition;
+  purchaseOrderId?: string;
+  rentalMode?: AssetRentalMode;
+  disposition?: AssetDisposition;
   warehouseLocation: string;
   purchaseCost: number; // Stored in IDR
   currentBookValue: number;
@@ -436,7 +453,7 @@ export interface Invoice {
   invoiceNumber: string; // e.g. INV-2026-0033
   type: InvoiceType;
   relatedSourceId?: string;
-  relatedSourceType?: 'SALES_ORDER' | 'RENTAL_CONTRACT' | 'INVOICE_AMENDMENT';
+  relatedSourceType?: 'SALES_ORDER' | 'RENTAL_CONTRACT' | 'INVOICE_AMENDMENT' | 'ASSET_DISPOSITION';
   customerId: string;
   customerName: string;
   customerTaxId: string;
@@ -501,7 +518,7 @@ export interface Vendor {
 }
 
 export type PurchaseOrderStatus = 'DRAFT' | 'PENDING_APPROVAL' | 'APPROVED' | 'GOODS_RECEIVED' | 'BILLED' | 'CANCELLED';
-export type ProcurementItemType = 'GOODS' | 'SERVICE';
+export type ProcurementItemType = 'GOODS' | 'SERVICE' | 'HEAVY_EQUIPMENT';
 
 export interface PurchaseOrderItem {
   productId: string;

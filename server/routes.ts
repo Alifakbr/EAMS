@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
-import { db, calculateLineTotals, toCents, fromCents } from './db.ts';
+import { db, calculateAssetBookValue, calculateLineTotals, toCents, fromCents } from './db.ts';
 import { openApiSpec } from './openapi.ts';
 import { runEamsTestSuite } from './tests.ts';
 import { formatRupiahAmount } from '../src/shared/currency-format.ts';
@@ -787,7 +787,11 @@ apiRouter.get('/assets', (req: Request, res: Response) => {
     assets = assets.filter((a) => a.name.toLowerCase().includes(q) || a.assetTag.toLowerCase().includes(q) || a.serialNumber.toLowerCase().includes(q));
   }
 
-  res.json({ data: assets, total: assets.length });
+  const data = assets.map((asset) => ({
+    ...asset,
+    currentBookValue: calculateAssetBookValue(asset),
+  }));
+  res.json({ data, total: data.length });
 });
 
 apiRouter.post('/assets', (req: Request, res: Response) => {
@@ -804,12 +808,18 @@ apiRouter.post('/assets', (req: Request, res: Response) => {
       weeklyRentalRate,
       monthlyRentalRate,
       sellPrice,
+      depreciationRateAnnual,
+      rentalMode,
       warehouseLocation,
       specs,
       legalDocs,
     } = req.body;
     if (!assetTag || !serialNumber || !name) {
       return res.status(400).json({ error: 'Asset tag, serial number, and name are required' });
+    }
+    const annualDepreciationRate = Number(depreciationRateAnnual ?? 10);
+    if (!Number.isFinite(annualDepreciationRate) || annualDepreciationRate < 0 || annualDepreciationRate > 100) {
+      return res.status(400).json({ error: 'Annual depreciation rate must be between 0 and 100 percent.' });
     }
 
     // Ensure serial number uniqueness
@@ -829,10 +839,11 @@ apiRouter.post('/assets', (req: Request, res: Response) => {
         model: model || 'Standard',
         status: 'AVAILABLE',
         condition: 'EXCELLENT',
+        rentalMode: rentalMode === 'WET' ? 'WET' : 'DRY',
         warehouseLocation: warehouseLocation || 'Jakarta Central Depot',
         purchaseCost: Number(purchaseCost) || 0,
         currentBookValue: Number(purchaseCost) || 0,
-        depreciationRateAnnual: 10,
+        depreciationRateAnnual: annualDepreciationRate,
         purchaseDate: new Date().toISOString().split('T')[0],
         warrantyExpiry: new Date(Date.now() + 3 * 365 * 86400000).toISOString().split('T')[0],
         dailyRentalRate: Number(dailyRentalRate) || 250,
@@ -858,16 +869,173 @@ apiRouter.post('/assets', (req: Request, res: Response) => {
   }
 });
 
+apiRouter.post('/assets/:id/label', (req: Request, res: Response) => {
+  const asset = db.getAssets().find((item) => item.id === req.params.id);
+  if (!asset) return res.status(404).json({ error: 'Asset not found.' });
+  if (asset.status !== 'PENDING_LABEL') {
+    return res.status(409).json({ error: 'Only assets awaiting a label can be registered here.' });
+  }
+
+  const assetTag = typeof req.body?.assetTag === 'string' ? req.body.assetTag.trim() : '';
+  const serialNumber = typeof req.body?.serialNumber === 'string' ? req.body.serialNumber.trim() : '';
+  const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
+  if (!assetTag || !serialNumber || !name) {
+    return res.status(400).json({ error: 'Asset tag, serial number, and equipment name are required.' });
+  }
+  const duplicate = db.getAssets().find((item) => item.id !== asset.id && (
+    item.assetTag.toLowerCase() === assetTag.toLowerCase() ||
+    item.serialNumber.toLowerCase() === serialNumber.toLowerCase()
+  ));
+  if (duplicate) return res.status(409).json({ error: 'Asset tag or serial number is already in use.' });
+
+  const rate = Number(req.body?.depreciationRateAnnual ?? asset.depreciationRateAnnual);
+  if (!Number.isFinite(rate) || rate < 0 || rate > 100) {
+    return res.status(400).json({ error: 'Annual depreciation rate must be between 0 and 100 percent.' });
+  }
+  const rentalMode = req.body?.rentalMode;
+  if (rentalMode !== 'WET' && rentalMode !== 'DRY') {
+    return res.status(400).json({ error: 'Rental mode must be WET or DRY.' });
+  }
+
+  db.transaction(() => {
+    asset.assetTag = assetTag;
+    asset.serialNumber = serialNumber;
+    asset.name = name;
+    asset.category = typeof req.body.category === 'string' ? req.body.category.trim() || asset.category : asset.category;
+    asset.brand = typeof req.body.brand === 'string' ? req.body.brand.trim() || asset.brand : asset.brand;
+    asset.model = typeof req.body.model === 'string' ? req.body.model.trim() || asset.model : asset.model;
+    asset.warehouseLocation = typeof req.body.warehouseLocation === 'string'
+      ? req.body.warehouseLocation.trim() || asset.warehouseLocation
+      : asset.warehouseLocation;
+    asset.depreciationRateAnnual = rate;
+    asset.rentalMode = rentalMode;
+    asset.status = 'AVAILABLE';
+    asset.currentBookValue = calculateAssetBookValue(asset);
+    db.logAudit(actorName(req), 'ASSET_LABELED', 'ASSET', asset.id, `Registered tag ${asset.assetTag} for asset purchased through PO ${asset.purchaseOrderId || '-'}`);
+  });
+
+  res.json(asset);
+});
+
 apiRouter.patch('/assets/:id', (req: Request, res: Response) => {
   const asset = db.getAssets().find((a) => a.id === req.params.id);
   if (!asset) return res.status(404).json({ error: 'Asset not found' });
 
+  if ('depreciationRateAnnual' in req.body) {
+    const rate = Number(req.body.depreciationRateAnnual);
+    if (!Number.isFinite(rate) || rate < 0 || rate > 100) {
+      return res.status(400).json({ error: 'Annual depreciation rate must be between 0 and 100 percent.' });
+    }
+  }
+  if ('rentalMode' in req.body && req.body.rentalMode !== 'WET' && req.body.rentalMode !== 'DRY') {
+    return res.status(400).json({ error: 'Rental mode must be WET or DRY.' });
+  }
+
   db.transaction(() => {
     Object.assign(asset, req.body);
+    asset.currentBookValue = calculateAssetBookValue(asset);
     db.logAudit(actorName(req), 'ASSET_UPDATED', 'ASSET', asset.id, `Updated asset ${asset.assetTag}`);
   });
 
   res.json(asset);
+});
+
+apiRouter.post('/assets/:id/disposition', (req: Request, res: Response) => {
+  const asset = db.getAssets().find((item) => item.id === req.params.id);
+  if (!asset) return res.status(404).json({ error: 'Asset not found.' });
+  if (asset.status !== 'AVAILABLE') {
+    return res.status(409).json({ error: 'Only available, labeled assets can be sold or disposed.' });
+  }
+
+  const type = req.body?.type;
+  if (type !== 'SALE' && type !== 'DISPOSAL') {
+    return res.status(400).json({ error: 'Disposition type must be SALE or DISPOSAL.' });
+  }
+
+  const customer = type === 'SALE'
+    ? db.getCustomers().find((item) => item.id === req.body?.customerId)
+    : undefined;
+  if (type === 'SALE' && !customer) return res.status(404).json({ error: 'A valid customer is required for an asset sale.' });
+
+  const proceeds = type === 'SALE' ? Number(req.body?.salePrice) : 0;
+  if (type === 'SALE' && (!Number.isFinite(proceeds) || proceeds <= 0)) {
+    return res.status(400).json({ error: 'Sale price must be greater than zero.' });
+  }
+  const taxRate = Number(req.body?.taxRatePercent ?? db.getSettings().defaultTaxRatePercent ?? 0);
+  if (type === 'SALE' && (!Number.isFinite(taxRate) || taxRate < 0 || taxRate > 100)) {
+    return res.status(400).json({ error: 'Tax rate must be between 0 and 100 percent.' });
+  }
+
+  const bookValue = calculateAssetBookValue(asset);
+  let invoice: Invoice | undefined;
+  const disposition = db.transaction(() => {
+    if (type === 'SALE' && customer) {
+      const totals = calculateLineTotals(1, proceeds, 0, taxRate);
+      const invoiceNumber = `${db.getSettings().invoicePrefix}${String(db.getInvoices().length + 1).padStart(3, '0')}`;
+      const issueDate = new Date().toISOString().split('T')[0];
+      invoice = {
+        id: invoiceNumber,
+        invoiceNumber,
+        type: 'SALES',
+        relatedSourceId: asset.id,
+        relatedSourceType: 'ASSET_DISPOSITION',
+        customerId: customer.id,
+        customerName: customer.name,
+        customerTaxId: customer.taxId,
+        issueDate,
+        dueDate: new Date(Date.now() + (customer.paymentTermsDays || 30) * 86400000).toISOString().split('T')[0],
+        paymentTermsDays: customer.paymentTermsDays || 30,
+        currency: 'IDR',
+        status: 'DRAFT',
+        items: [{
+          id: `INI-${Date.now()}`,
+          description: `Asset sale: ${asset.assetTag} - ${asset.name}`,
+          quantity: 1,
+          unitPrice: proceeds,
+          discountPercent: 0,
+          taxRatePercent: taxRate,
+          subtotal: totals.subtotal,
+          taxAmount: totals.taxAmount,
+          total: totals.total,
+          assetTag: asset.assetTag,
+        }],
+        subtotal: totals.subtotal,
+        discountTotal: 0,
+        taxTotal: totals.taxAmount,
+        additionalCharges: 0,
+        grandTotal: totals.total,
+        paidAmount: 0,
+        outstandingBalance: totals.total,
+        notes: req.body?.notes || `Asset disposal transaction for PO ${asset.purchaseOrderId || 'manual asset'}.`,
+        terms: `Payment terms Net ${customer.paymentTermsDays || 30} days.`,
+      };
+      db.getInvoices().unshift(invoice);
+    }
+
+    asset.disposition = {
+      type,
+      date: new Date().toISOString().split('T')[0],
+      proceeds,
+      bookValueAtDisposition: bookValue,
+      gainLoss: type === 'SALE' ? fromCents(toCents(proceeds) - toCents(bookValue)) : -bookValue,
+      customerId: customer?.id,
+      customerName: customer?.name,
+      invoiceId: invoice?.id,
+      notes: typeof req.body?.notes === 'string' ? req.body.notes.trim() : undefined,
+    };
+    asset.status = type === 'SALE' ? 'SOLD' : 'DISPOSED';
+    asset.currentBookValue = bookValue;
+    db.logAudit(
+      actorName(req),
+      type === 'SALE' ? 'ASSET_SOLD' : 'ASSET_DISPOSED',
+      'ASSET',
+      asset.id,
+      `${type} recorded for ${asset.assetTag}; proceeds ${formatRupiahAmount(proceeds)}, book value ${formatRupiahAmount(bookValue)}${invoice ? `, draft invoice ${invoice.invoiceNumber}` : ''}.`,
+    );
+    return asset.disposition;
+  });
+
+  res.status(201).json({ asset, disposition, invoice });
 });
 
 // Barcode Quick Lookup
@@ -1455,8 +1623,8 @@ apiRouter.post('/rentals', (req: Request, res: Response) => {
         const asset = db.getAssets().find((a) => a.id === assetId || a.assetTag === assetId);
         if (!asset) throw new Error(`Asset ${assetId} not found`);
 
-        // Check if asset already rented or reserved for overlapping period
-        if (asset.status === 'RENTED' || asset.status === 'RESERVED' || asset.status === 'SOLD' || asset.status === 'IN_MAINTENANCE') {
+        // Only active, labeled assets can enter a rental contract.
+        if (asset.status !== 'AVAILABLE') {
           throw new Error(`Asset ${asset.assetTag} (${asset.name}) is currently ${asset.status} and cannot be rented.`);
         }
 
@@ -2179,6 +2347,10 @@ apiRouter.post('/procurement/purchase-orders', (req: Request, res: Response) => 
       const poItems = items.map((raw: any) => {
         const prod = db.getProducts().find((p) => p.id === raw.productId);
         const qty = Number(raw.quantity) || 1;
+        const itemType = raw.itemType || (prod?.productType === 'SERVICE' ? 'SERVICE' : 'GOODS');
+        if (itemType === 'HEAVY_EQUIPMENT' && (!Number.isInteger(qty) || qty < 1)) {
+          throw new Error('Heavy equipment quantity must be a positive whole number.');
+        }
         const cost = Number(raw.unitCost) || (prod ? prod.purchaseCost : 100);
         const lineSubtotal = qty * cost;
         const taxRate = Number(raw.taxRatePercent ?? 11); // 11% PPN standar
@@ -2190,7 +2362,7 @@ apiRouter.post('/procurement/purchase-orders', (req: Request, res: Response) => 
         return {
           productId: raw.productId || `PRD-${Date.now().toString().slice(-4)}`,
           productName: raw.productName || (prod ? prod.name : 'Procured Component'),
-          itemType: raw.itemType || (prod?.productType === 'SERVICE' ? 'SERVICE' : 'GOODS'),
+          itemType,
           quantity: qty,
           unitCost: cost,
           taxRatePercent: taxRate,
@@ -2269,16 +2441,49 @@ apiRouter.post('/procurement/purchase-orders/:id/receive', (req: Request, res: R
   try {
     db.transaction(() => {
       po.status = 'GOODS_RECEIVED';
-      po.items.forEach((item) => {
+      po.items.forEach((item, itemIndex) => {
         item.receivedQuantity = item.quantity;
-        // Increment inventory stock if it's GOODS
+        // Inventory goods update stock; serialized equipment becomes an asset record.
         const prod = db.getProducts().find((p) => p.id === item.productId);
-        if (prod && item.itemType !== 'SERVICE') {
+        if (prod && (!item.itemType || item.itemType === 'GOODS')) {
           prod.stockQuantity += item.quantity;
+        }
+        if (item.itemType === 'HEAVY_EQUIPMENT') {
+          const receivedDate = new Date().toISOString().split('T')[0];
+          for (let unitIndex = 0; unitIndex < item.quantity; unitIndex += 1) {
+            const provisionalTag = `PENDING-${po.poNumber}-${itemIndex + 1}-${unitIndex + 1}`;
+            const asset: Asset = {
+              id: provisionalTag,
+              assetTag: provisionalTag,
+              serialNumber: provisionalTag,
+              name: item.productName,
+              category: 'Heavy Equipment',
+              brand: 'Pending identification',
+              model: 'Pending identification',
+              status: 'PENDING_LABEL',
+              condition: 'GOOD',
+              purchaseOrderId: po.id,
+              rentalMode: 'DRY',
+              warehouseLocation: 'Pending Asset Control labeling',
+              purchaseCost: item.unitCost,
+              currentBookValue: item.unitCost,
+              depreciationRateAnnual: 10,
+              purchaseDate: receivedDate,
+              warrantyExpiry: '',
+              dailyRentalRate: 0,
+              weeklyRentalRate: 0,
+              monthlyRentalRate: 0,
+              sellPrice: 0,
+              specs: {},
+              notes: `Received from Purchase Order ${po.poNumber}; label and serial number required.`,
+            };
+            db.getAssets().push(asset);
+          }
         }
       });
 
-      db.logAudit(actorName(req), 'GOODS_RECEIVED', 'PURCHASE_ORDER', po.id, `Received items for ${po.poNumber}. Stock levels incremented.`);
+      const pendingAssets = db.getAssets().filter((asset) => asset.purchaseOrderId === po.id && asset.status === 'PENDING_LABEL').length;
+      db.logAudit(actorName(req), 'GOODS_RECEIVED', 'PURCHASE_ORDER', po.id, `Received items for ${po.poNumber}; created ${pendingAssets} heavy-equipment asset record(s) awaiting labeling.`);
     });
 
     res.json(po);
@@ -2934,12 +3139,19 @@ apiRouter.get('/reports/finance-dashboard', (_req: Request, res: Response) => {
   const overdueAmount = overdueInvoices.reduce((acc, i) => acc + i.outstandingBalance, 0);
 
   // Rental utilization rate
-  const totalAssetsCount = assets.length;
-  const rentedAssetsCount = assets.filter((a) => a.status === 'RENTED').length;
+  const operatingAssets = assets.filter((a) => !['PENDING_LABEL', 'SOLD', 'DISPOSED'].includes(a.status));
+  const totalAssetsCount = operatingAssets.length;
+  const rentedAssetsCount = operatingAssets.filter((a) => a.status === 'RENTED').length;
   const utilizationRate = totalAssetsCount > 0 ? (rentedAssetsCount / totalAssetsCount) * 100 : 0;
 
   // Breakdown by revenue stream
-  const salesRevenue = salesOrders.reduce((acc, so) => acc + (so.status !== 'CANCELLED' ? so.grandTotal : 0), 0);
+  const assetSaleRevenue = assets.reduce((acc, asset) => acc + (asset.disposition?.type === 'SALE' ? asset.disposition.proceeds : 0), 0);
+  const assetSaleGainLoss = assets.reduce((acc, asset) => acc + (asset.disposition?.type === 'SALE' ? asset.disposition.gainLoss : 0), 0);
+  const assetDisposalLoss = assets.reduce((acc, asset) => acc + (asset.disposition?.type === 'DISPOSAL' ? Math.abs(asset.disposition.gainLoss) : 0), 0);
+  const annualDepreciationExpense = assets
+    .filter((asset) => asset.status !== 'SOLD' && asset.status !== 'DISPOSED')
+    .reduce((acc, asset) => acc + (asset.purchaseCost * (asset.depreciationRateAnnual / 100)), 0);
+  const salesRevenue = salesOrders.reduce((acc, so) => acc + (so.status !== 'CANCELLED' ? so.grandTotal : 0), 0) + assetSaleRevenue;
   const rentalRevenue = rentals.reduce((acc, r) => acc + r.grandTotal, 0);
 
   res.json({
@@ -2949,6 +3161,10 @@ apiRouter.get('/reports/finance-dashboard', (_req: Request, res: Response) => {
       totalOutstandingAR: Number(totalOutstandingAR.toFixed(2)),
       overdueAmount: Number(overdueAmount.toFixed(2)),
       salesRevenue: Number(salesRevenue.toFixed(2)),
+      assetSaleRevenue: Number(assetSaleRevenue.toFixed(2)),
+      assetSaleGainLoss: Number(assetSaleGainLoss.toFixed(2)),
+      assetDisposalLoss: Number(assetDisposalLoss.toFixed(2)),
+      annualDepreciationExpense: Number(annualDepreciationExpense.toFixed(2)),
       rentalRevenue: Number(rentalRevenue.toFixed(2)),
       utilizationRate: Number(utilizationRate.toFixed(1)),
       activeRentalsCount: rentals.filter((r) => r.status === 'ACTIVE').length,

@@ -1,4 +1,4 @@
-import { db, calculateLineTotals, toCents, fromCents } from './db.ts';
+import { db, calculateAssetBookValue, calculateLineTotals, toCents, fromCents } from './db.ts';
 
 export interface TestResult {
   name: string;
@@ -55,6 +55,26 @@ export function runEamsTestSuite(): TestSuiteSummary {
     // Verify cents conversion
     if (toCents(19.99) !== 1999) throw new Error('toCents failed');
     if (fromCents(1999) !== 19.99) throw new Error('fromCents failed');
+  });
+
+  test('Asset book value applies annual depreciation and never falls below zero', 'Asset Accounting', () => {
+    const purchaseTimestamp = Date.parse('2024-01-01T00:00:00.000Z');
+    const asset = {
+      purchaseCost: 100_000,
+      purchaseDate: '2024-01-01',
+      depreciationRateAnnual: 12,
+    };
+    const oneYear = new Date(purchaseTimestamp + 365.25 * 24 * 60 * 60 * 1000);
+    const bookValueAfterOneYear = calculateAssetBookValue(asset, oneYear);
+    if (bookValueAfterOneYear !== 88_000) {
+      throw new Error(`Expected 88000 after one year, got ${bookValueAfterOneYear}`);
+    }
+
+    const tenYears = new Date(purchaseTimestamp + 10 * 365.25 * 24 * 60 * 60 * 1000);
+    const bookValueAfterTenYears = calculateAssetBookValue(asset, tenYears);
+    if (bookValueAfterTenYears !== 0) {
+      throw new Error(`Expected book value to floor at 0, got ${bookValueAfterTenYears}`);
+    }
   });
 
   // 2. Asset Integrity & Double Allocation Prevention
