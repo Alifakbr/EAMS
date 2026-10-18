@@ -28,11 +28,8 @@ import { SettingsView } from './components/SettingsView.tsx';
 import { OperatorScanStatusView } from './components/OperatorScanStatusView.tsx';
 import { TechnicalServiceView } from './components/TechnicalServiceView.tsx';
 import { UserManagementView } from './components/UserManagementView.tsx';
-<<<<<<< HEAD
 import { ManagerApprovalsView } from './components/ManagerApprovalsView.tsx';
 import { DraftPersistence } from './components/DraftPersistence.tsx';
-=======
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 import { X } from 'lucide-react';
 
 type View = 'landing' | 'login' | 'app';
@@ -127,11 +124,7 @@ export default function App() {
 
   // Sesi kedaluwarsa / dicabut dari server, atau wajib ganti password
   useEffect(() => {
-<<<<<<< HEAD
     const onExpired = () => endSession('Your session has expired. Please sign in again.');
-=======
-    const onExpired = () => endSession('Sesi Anda telah berakhir. Silakan masuk kembali.');
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     const onPwd = () => setCurrentUser((u) => (u ? { ...u, mustChangePassword: true } : u));
     window.addEventListener(SESSION_EVENTS.expired, onExpired);
     window.addEventListener(SESSION_EVENTS.passwordRequired, onPwd);
@@ -207,11 +200,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-<<<<<<< HEAD
     if (currentUser && currentUser.role !== 'MANAGER' && !mustChangePassword) loadAllData();
-=======
-    if (currentUser && !mustChangePassword) loadAllData();
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   }, [loadAllData, currentUser, mustChangePassword]);
 
   const handleLoginSuccess = (info: SessionInfo) => {
@@ -236,11 +225,7 @@ export default function App() {
     return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-sm">Memuat…</div>;
   }
 
-<<<<<<< HEAD
   // Not signed in: render the landing page or login screen.
-=======
-  // Belum login: landing page atau halaman login
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   if (!currentUser) {
     return (
       <>
@@ -292,11 +277,7 @@ export default function App() {
         onToggleMobileSidebar={() => setIsMobileSidebarOpen((prev) => !prev)}
       />
 
-<<<<<<< HEAD
       <div className="flex-1 flex min-h-0 min-w-0 overflow-hidden">
-=======
-      <div className="flex-1 flex overflow-hidden">
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         {/* Responsive Sidebar filtered by role */}
         {modules.length > 1 && <Sidebar
           currentTab={activeTab}
@@ -317,11 +298,7 @@ export default function App() {
         />}
 
         {/* Main Content Area */}
-<<<<<<< HEAD
         <main className="flex-1 min-w-0 p-2.5 sm:p-6 overflow-y-auto max-w-7xl w-full mx-auto">
-=======
-        <main className="flex-1 p-3 sm:p-6 overflow-y-auto max-w-7xl w-full mx-auto">
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           {activeTab === 'dashboard' && (
             <DashboardView
               metrics={financeMetrics}
@@ -457,10 +434,7 @@ export default function App() {
               onRefresh={loadAllData}
             />
           )}
-<<<<<<< HEAD
           {activeTab === 'manager-approvals' && <ManagerApprovalsView />}
-=======
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         </main>
       </div>
 
@@ -537,16 +511,10 @@ export default function App() {
       {showChangePassword && (
         <ChangePasswordModal
           onClose={() => setShowChangePassword(false)}
-<<<<<<< HEAD
           onChanged={(info) => { applySession(info); setShowChangePassword(false); alert('Password changed successfully.'); }}
         />
       )}
       <DraftPersistence userId={currentUser.id} />
-=======
-          onChanged={(info) => { applySession(info); setShowChangePassword(false); alert('Password berhasil diganti.'); }}
-        />
-      )}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       <Toaster />
     </div>
   );

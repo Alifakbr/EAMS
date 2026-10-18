@@ -42,20 +42,14 @@ const DEFAULT_ROLE_PERMISSIONS = Object.fromEntries(
 ) as Record<UserRole, UserPermissionMatrix>;
 
 const ROLE_OPTIONS: { role: UserRole; label: string; department: string }[] = [
-<<<<<<< HEAD
   { role: 'EXECUTIVE', label: '1. Executive Director', department: 'Executive Leadership' },
   { role: 'ADMIN_IT', label: '2. IT Administrator', department: 'IT & Infrastructure Division' },
-=======
-  { role: 'EXECUTIVE', label: '1. Executive (Direktur Utama)', department: 'Direksi & Eksekutif' },
-  { role: 'ADMIN_IT', label: '2. Administrator Admin (IT)', department: 'Divisi IT & Infrastruktur' },
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   { role: 'SALES_MARKETING', label: '3. Sales & Marketing Support', department: 'Sales & Client CRM' },
   { role: 'ASSET_CONTROL', label: '4. Asset Control (Asset Management)', department: 'Asset Management & Legal Docs' },
   { role: 'MANAGEMENT_OPERATION', label: '5. Management Operation (Field Operation)', department: 'Field Operations & SIO' },
   { role: 'PROCUREMENT', label: '6. Procurement', department: 'Procurement Department' },
   { role: 'FINANCE_ACCOUNTING_TAX', label: '7. Accounting Finance & Tax (FAT)', department: 'Finance, Accounting & Tax' },
   { role: 'AR_MANAGEMENT', label: '8. AR Management (Accounts Receivable)', department: 'AR & Collection Unit' },
-<<<<<<< HEAD
   { role: 'OPERATOR_USER', label: '9. Operator / Field Equipment User', department: 'Heavy Equipment & Field Operations' },
   { role: 'TECHNICAL_SERVICE', label: '10. Technical Service & Workshop Mechanics', department: 'Technical Service & Field Repair' },
   { role: 'MANAGER', label: '11. Manager (Approvals & Contracts)', department: 'Management' },
@@ -67,18 +61,6 @@ const BRANCH_OPTIONS = [
   'Site Project Morowali',
   'Site IKN Nusantara',
   'Surabaya & Gresik Branch',
-=======
-  { role: 'OPERATOR_USER', label: '9. Operator / Pengguna Alat Lapangan', department: 'Operator Alat Berat & Lapangan' },
-  { role: 'TECHNICAL_SERVICE', label: '10. Technical Service & Workshop Mekanik', department: 'Technical Service & Field Repair' },
-];
-
-const BRANCH_OPTIONS = [
-  'Kantor Pusat Jakarta',
-  'Depot & Workshop Balikpapan',
-  'Site Project Morowali',
-  'Site IKN Nusantara',
-  'Cabang Surabaya & Gresik',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   'Site Weda Bay Halmahera',
 ];
 
@@ -113,11 +95,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
   const [formRole, setFormRole] = useState<UserRole>('SALES_MARKETING');
   const [formDepartment, setFormDepartment] = useState('Sales & Client CRM');
   const [formBadge, setFormBadge] = useState('');
-<<<<<<< HEAD
   const [formBranch, setFormBranch] = useState('Jakarta Head Office');
-=======
-  const [formBranch, setFormBranch] = useState('Kantor Pusat Jakarta');
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   const [formPhone, setFormPhone] = useState('');
 
   const loadUsers = async () => {
@@ -153,11 +131,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName || !formEmail) {
-<<<<<<< HEAD
       alert('Name and email are required.');
-=======
-      alert('Nama dan Email wajib diisi.');
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       return;
     }
 
@@ -182,11 +156,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
           temporaryPassword: created.temporaryPassword,
           userEmail: created.email,
           userName: created.name,
-<<<<<<< HEAD
           resetAt: new Date().toLocaleTimeString('en-US'),
-=======
-          resetAt: new Date().toLocaleTimeString('id-ID'),
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         });
         setPasswordCopied(false);
       }
@@ -197,11 +167,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
       await loadUsers();
       if (onRefresh) onRefresh();
     } catch (err: any) {
-<<<<<<< HEAD
       alert(`Failed to create user: ${err.message}`);
-=======
-      alert(`Gagal membuat pengguna: ${err.message}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
   };
 
@@ -231,32 +197,19 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
         temporaryPassword: res.temporaryPassword,
         userEmail: resettingUser.email,
         userName: resettingUser.name,
-<<<<<<< HEAD
         resetAt: new Date().toLocaleTimeString('en-US'),
-=======
-        resetAt: new Date().toLocaleTimeString('id-ID'),
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       });
       await loadUsers();
       if (onRefresh) onRefresh();
     } catch (err: any) {
-<<<<<<< HEAD
       alert(`Failed to reset password: ${err.message}`);
-=======
-      alert(`Gagal reset password: ${err.message}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
   };
 
   const handleCopyCredentials = () => {
     if (!resetSuccessData) return;
-<<<<<<< HEAD
     const text = `EARMS LOGIN CREDENTIALS\nName: ${resetSuccessData.userName}\nEmail: ${resetSuccessData.userEmail}\nNew Password: ${resetSuccessData.temporaryPassword}\nStatus: Active\nNote: Please change your password immediately after logging in.`;
     navigator.clipboard?.writeText(text).catch(() => alert('Automatic copying failed. Please copy the credentials from the screen.'));
-=======
-    const text = `KREDENSIAL LOGIN EARMS\nNama: ${resetSuccessData.userName}\nEmail: ${resetSuccessData.userEmail}\nPassword Baru: ${resetSuccessData.temporaryPassword}\nStatus: Aktif\nCatatan: Harap segera mengganti password setelah berhasil masuk ke sistem.`;
-    navigator.clipboard?.writeText(text).catch(() => alert('Salin otomatis gagal. Salin manual dari layar.'));
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     setPasswordCopied(true);
     setTimeout(() => setPasswordCopied(false), 3000);
   };
@@ -269,11 +222,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
       await loadUsers();
       if (onRefresh) onRefresh();
     } catch (err: any) {
-<<<<<<< HEAD
       alert(`Failed to update status: ${err.message}`);
-=======
-      alert(`Gagal mengubah status: ${err.message}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
   };
 
@@ -294,30 +243,18 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
       await api.updateUser(customizingPermissionsUser.id, {
         permissions: activePermissions,
       });
-<<<<<<< HEAD
       alert(`Custom permissions for ${customizingPermissionsUser.name} were saved successfully!`);
-=======
-      alert(`Hak akses khusus untuk ${customizingPermissionsUser.name} berhasil disimpan!`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       setCustomizingPermissionsUser(null);
       await loadUsers();
       if (onRefresh) onRefresh();
     } catch (err: any) {
-<<<<<<< HEAD
       alert(`Failed to save permissions: ${err.message}`);
-=======
-      alert(`Gagal menyimpan hak akses: ${err.message}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
   };
 
   // Export to Excel / CSV
   const handleExportUsers = () => {
-<<<<<<< HEAD
     const headers = ['ID', 'Name', 'Email', 'Role', 'Department', 'Branch/Site', 'Badge ID', 'Status', 'Phone Number'];
-=======
-    const headers = ['ID', 'Nama', 'Email', 'Role', 'Departemen', 'Cabang/Site', 'No Badge', 'Status', 'No Telepon'];
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     const rows = filteredUsers.map((u) => [
       u.id,
       `${u.name}`,
@@ -334,7 +271,6 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
   };
 
   const permissionLabels: { key: keyof UserPermissionMatrix; label: string; desc: string; category: string }[] = [
-<<<<<<< HEAD
     { key: 'canViewDashboard', label: 'View Dashboard & Financial Metrics', desc: 'Access performance summaries and charts', category: 'Dashboard' },
     { key: 'canManageCustomers', label: 'Manage Customer Data (CRM)', desc: 'Add and update customer and project data', category: 'Commercial' },
     { key: 'canManageProducts', label: 'Manage Product & Spare Parts Catalog', desc: 'Add and update products, prices, and stock', category: 'Assets' },
@@ -353,26 +289,6 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
     { key: 'canManageUsers', label: 'User Management & IT Settings', desc: 'Manage user accounts, reset passwords, and configure settings', category: 'IT & Systems' },
     { key: 'canAccessApiAndAudit', label: 'REST API & System Audit Log Access', desc: 'Access detailed audit trails and the API explorer', category: 'IT & Systems' },
     { key: 'canExportReports', label: 'Export Reports to Excel & PDF', desc: 'Print and download official reports', category: 'Reports' },
-=======
-    { key: 'canViewDashboard', label: 'Lihat Dashboard & Metrik Finansial', desc: 'Akses ringkasan performa dan grafik', category: 'Dasbor' },
-    { key: 'canManageCustomers', label: 'Kelola Data Customer (CRM)', desc: 'Tambah & ubah data pelanggan dan proyek', category: 'Komersial' },
-    { key: 'canManageProducts', label: 'Kelola Katalog Produk & Sparepart', desc: 'Tambah & ubah produk, harga, dan stok', category: 'Aset' },
-    { key: 'canManageDeliveries', label: 'Delivery & Serah Terima Alat', desc: 'Buat surat jalan dan konfirmasi serah terima', category: 'Operasional' },
-    { key: 'canManageAssets', label: 'Registrasi & Kelola Aset Alat Berat', desc: 'Input aset baru, cetak barcode aset', category: 'Aset' },
-    { key: 'canUploadLegalDocs', label: 'Upload Dokumen Legalitas (STNK, BPKB, SIA)', desc: 'Unggah file izin dan lacak masa berlaku', category: 'Aset & Legal' },
-    { key: 'canManageOperators', label: 'Kelola Operator & Dokumen SIO', desc: 'Registrasi operator, upload SIO, dan penugasan alat', category: 'Operasional' },
-    { key: 'canScanAndSubmitStatus', label: 'Scan Barcode & Lapor Status Alat (User Lapangan)', desc: 'Submit status harian alat (Bekerja / Rusak)', category: 'Operasional' },
-    { key: 'canManageMaintenance', label: 'Catat Perbaikan & Work Order Barcode', desc: 'Buat tiket perbaikan alat dan penyelesaian servis', category: 'Pemeliharaan' },
-    { key: 'canAccessTechnicalService', label: 'Technical Service & Scan Servis Bengkel', desc: 'Mekanik scan perbaikan, ganti sparepart/jasa dan rilis alat', category: 'Pemeliharaan' },
-    { key: 'canManageQuotations', label: 'Kelola Sales Quotations (Penawaran)', desc: 'Penerbitan dan persetujuan proposal penawaran', category: 'Komersial' },
-    { key: 'canManageSalesRentals', label: 'Kelola Sales Order & Kontrak Rental', desc: 'Booking armada sewa dan order penjualan', category: 'Komersial' },
-    { key: 'canManageInvoices', label: 'Penerbitan Invoice & Faktur Pajak', desc: 'Generate commercial invoice dan credit notes', category: 'Finance' },
-    { key: 'canManagePayments', label: 'Recording Pembayaran & Settlement', desc: 'Pencatatan pelunasan dan rekonsiliasi bank', category: 'Finance' },
-    { key: 'canManageProcurement', label: 'Pengadaan, PO Vendor & Sparepart', desc: 'Pembelian aset, komponen, dan tagihan supplier', category: 'Pengadaan' },
-    { key: 'canManageUsers', label: 'Manajemen Pengguna & Pengaturan IT', desc: 'Kelola akun pengguna, reset password, konfigurasi', category: 'IT & Sistem' },
-    { key: 'canAccessApiAndAudit', label: 'Akses REST API & Log Audit Sistem', desc: 'Audit trail tingkat rendah dan API explorer', category: 'IT & Sistem' },
-    { key: 'canExportReports', label: 'Export Laporan ke Excel & PDF', desc: 'Mencetak dan mengunduh laporan resmi', category: 'Laporan' },
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   ];
 
   return (
@@ -383,22 +299,14 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-indigo-600" />
             <h1 className="text-base font-bold text-slate-900">
-<<<<<<< HEAD
               User Management &amp; Access Control (IT)
-=======
-              Manajemen Pengguna &amp; Hak Akses (Divisi IT)
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </h1>
             <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold">
               IT Controlled Matrix
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-<<<<<<< HEAD
             Full control over user configuration, role assignments, operating branches, and access permissions.
-=======
-            Otoritas penuh konfigurasi pengguna, penugasan peran kerja, cabang operasional, dan kustomisasi matriks hak akses.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </p>
         </div>
 
@@ -422,17 +330,10 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
               setResetSuccessData(null);
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 cursor-pointer shadow-xs"
-<<<<<<< HEAD
             title="Open User Password Reset"
           >
             <Key className="w-3.5 h-3.5 text-amber-700" />
             <span>Reset User Password</span>
-=======
-            title="Buka Menu Reset Password Pengguna"
-          >
-            <Key className="w-3.5 h-3.5 text-amber-700" />
-            <span>Reset Password Pengguna</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </button>
 
           <button
@@ -441,11 +342,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-slate-900 hover:bg-slate-800 text-white cursor-pointer shadow-xs"
           >
             <UserPlus className="w-3.5 h-3.5 text-amber-400" />
-<<<<<<< HEAD
             Add New User
-=======
-            Tambah Pengguna Baru
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </button>
         </div>
       </div>
@@ -456,11 +353,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
           <input
             type="text"
-<<<<<<< HEAD
             placeholder="Search name, email, badge ID, or department..."
-=======
-            placeholder="Cari nama, email, nomor badge, departemen..."
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded outline-none focus:border-slate-800"
@@ -474,11 +367,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
             onChange={(e) => setRoleFilter(e.target.value)}
             className="w-full py-2 px-2.5 border border-slate-300 rounded bg-slate-50 font-medium text-slate-700 outline-none cursor-pointer"
           >
-<<<<<<< HEAD
             <option value="ALL">All Roles</option>
-=======
-            <option value="ALL">Semua Peran (All Roles)</option>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             {ROLE_OPTIONS.map((r) => (
               <option key={r.role} value={r.role}>
                 {r.label}
@@ -494,11 +383,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
             onChange={(e) => setBranchFilter(e.target.value)}
             className="w-full py-2 px-2.5 border border-slate-300 rounded bg-slate-50 font-medium text-slate-700 outline-none cursor-pointer"
           >
-<<<<<<< HEAD
             <option value="ALL">All Branches / Sites</option>
-=======
-            <option value="ALL">Semua Cabang / Site</option>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             {BRANCH_OPTIONS.map((b) => (
               <option key={b} value={b}>
                 {b}
@@ -514,21 +399,12 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 text-[11px] uppercase tracking-wider">
-<<<<<<< HEAD
                 <th className="py-2.5 px-4">Employee / Identity</th>
                 <th className="py-2.5 px-4">System Role</th>
                 <th className="py-2.5 px-4">Department &amp; Branch</th>
                 <th className="py-2.5 px-4 text-center">Account Status</th>
                 <th className="py-2.5 px-4 text-center">Custom Permissions</th>
                 <th className="py-2.5 px-4 text-right">IT Actions</th>
-=======
-                <th className="py-2.5 px-4">Pegawai / Identitas</th>
-                <th className="py-2.5 px-4">Role Sistem</th>
-                <th className="py-2.5 px-4">Departemen &amp; Cabang</th>
-                <th className="py-2.5 px-4 text-center">Status Akun</th>
-                <th className="py-2.5 px-4 text-center">Hak Akses Kustom</th>
-                <th className="py-2.5 px-4 text-right">Aksi IT</th>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -570,11 +446,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                       <div className="font-medium text-slate-800">{user.department}</div>
                       <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
                         <Building2 className="w-3 h-3 text-slate-400" />
-<<<<<<< HEAD
                         <span>{user.assignedBranch || 'Jakarta Head Office'}</span>
-=======
-                        <span>{user.assignedBranch || 'Kantor Pusat Jakarta'}</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </div>
                     </td>
 
@@ -583,11 +455,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                       <button
                         type="button"
                         onClick={() => handleToggleStatus(user)}
-<<<<<<< HEAD
                         title="Click to change account status"
-=======
-                        title="Klik untuk mengubah status akun"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded cursor-pointer transition-colors ${
                           isSuspended
                             ? 'bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-200'
@@ -602,11 +470,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                         ) : (
                           <>
                             <CheckCircle2 className="w-3 h-3" />
-<<<<<<< HEAD
                             <span>ACTIVE</span>
-=======
-                            <span>AKTIF</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           </>
                         )}
                       </button>
@@ -620,11 +484,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 cursor-pointer"
                       >
                         <Sliders className="w-3 h-3 text-indigo-600" />
-<<<<<<< HEAD
                         <span>{hasCustomPerms ? 'Custom (Active)' : 'Configure Permissions'}</span>
-=======
-                        <span>{hasCustomPerms ? 'Kustom (Aktif)' : 'Atur Hak Akses'}</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </button>
                     </td>
 
@@ -634,11 +494,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                         <button
                           type="button"
                           onClick={() => handleOpenResetModal(user)}
-<<<<<<< HEAD
                           title="Open User Password Reset"
-=======
-                          title="Buka Menu Reset Password Pengguna"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-950 font-bold cursor-pointer flex items-center gap-1 text-[11px] shadow-2xs transition-colors"
                         >
                           <Key className="w-3.5 h-3.5 text-amber-800" />
@@ -648,11 +504,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                         <button
                           type="button"
                           onClick={() => setPrintingBadgeUser(user)}
-<<<<<<< HEAD
                           title="Print the ID card / access badge"
-=======
-                          title="Cetak ID Card / Badge Akses"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-indigo-700 cursor-pointer"
                         >
                           <Printer className="w-3.5 h-3.5" />
@@ -661,11 +513,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                         <button
                           type="button"
                           onClick={() => setEditingUser(user)}
-<<<<<<< HEAD
                           title="Edit User Profile"
-=======
-                          title="Edit Profil Pengguna"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -687,11 +535,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
                 <UserPlus className="w-4 h-4 text-indigo-600" />
-<<<<<<< HEAD
                 <h3 className="text-sm font-bold text-slate-900">New User Registration (IT)</h3>
-=======
-                <h3 className="text-sm font-bold text-slate-900">Pendaftaran Pengguna Baru (Divisi IT)</h3>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </div>
               <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-4 h-4" />
@@ -700,19 +544,11 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
 
             <form onSubmit={handleCreateUser} className="space-y-3">
               <div>
-<<<<<<< HEAD
                 <label className="block font-semibold text-slate-700 mb-1">Employee Full Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g., Alex Morgan"
-=======
-                <label className="block font-semibold text-slate-700 mb-1">Nama Lengkap Pegawai *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="cth: Rahmat Hidayat"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   className="w-full p-2 border border-slate-300 rounded font-medium focus:border-slate-800 outline-none"
@@ -720,11 +556,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
               </div>
 
               <div>
-<<<<<<< HEAD
                 <label className="block font-semibold text-slate-700 mb-1">Business Email *</label>
-=======
-                <label className="block font-semibold text-slate-700 mb-1">Email Perusahaan *</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 <input
                   type="email"
                   required
@@ -737,11 +569,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-<<<<<<< HEAD
                   <label className="block font-semibold text-slate-700 mb-1">System Role *</label>
-=======
-                  <label className="block font-semibold text-slate-700 mb-1">Peran Kerja (System Role) *</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <select
                     value={formRole}
                     onChange={(e: any) => {
@@ -761,17 +589,10 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                 </div>
 
                 <div>
-<<<<<<< HEAD
                   <label className="block font-semibold text-slate-700 mb-1">Badge / Employee ID</label>
                   <input
                     type="text"
                     placeholder="e.g., EMP-8821"
-=======
-                  <label className="block font-semibold text-slate-700 mb-1">Nomor Badge / ID Pegawai</label>
-                  <input
-                    type="text"
-                    placeholder="cth: EMP-8821"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     value={formBadge}
                     onChange={(e) => setFormBadge(e.target.value)}
                     className="w-full p-2 border border-slate-300 rounded font-mono focus:border-slate-800 outline-none"
@@ -781,11 +602,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-<<<<<<< HEAD
                   <label className="block font-semibold text-slate-700 mb-1">Branch / Site Assignment</label>
-=======
-                  <label className="block font-semibold text-slate-700 mb-1">Penempatan Cabang / Site</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <select
                     value={formBranch}
                     onChange={(e) => setFormBranch(e.target.value)}
@@ -800,11 +617,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                 </div>
 
                 <div>
-<<<<<<< HEAD
                   <label className="block font-semibold text-slate-700 mb-1">Phone / WhatsApp Number</label>
-=======
-                  <label className="block font-semibold text-slate-700 mb-1">Nomor Telepon / WhatsApp</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="text"
                     placeholder="0812-xxxx-xxxx"
@@ -816,11 +629,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
               </div>
 
               <div>
-<<<<<<< HEAD
                 <label className="block font-semibold text-slate-700 mb-1">Department</label>
-=======
-                <label className="block font-semibold text-slate-700 mb-1">Departemen</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 <input
                   type="text"
                   value={formDepartment}
@@ -830,13 +639,8 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
               </div>
 
               <div className="p-3 bg-amber-50 rounded border border-amber-200 text-amber-800 text-[11px]">
-<<<<<<< HEAD
                 <span className="font-semibold block mb-0.5">IT Security:</span>
                 A random temporary password will be generated automatically and sent to the registered user's email address.
-=======
-                <span className="font-semibold block mb-0.5">Keamanan IT:</span>
-                Password sementara acak akan dibuatkan secara otomatis dan dikirimkan ke alamat email pengguna yang didaftarkan.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </div>
 
               <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
@@ -845,21 +649,13 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                   onClick={() => setShowCreateModal(false)}
                   className="px-4 py-2 border border-slate-300 rounded text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
-<<<<<<< HEAD
                   Cancel
-=======
-                  Batal
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded cursor-pointer"
                 >
-<<<<<<< HEAD
                   Save User
-=======
-                  Simpan Pengguna
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
               </div>
             </form>
@@ -875,11 +671,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
               <div className="flex items-center gap-2">
                 <Sliders className="w-4 h-4 text-indigo-600" />
                 <h3 className="text-sm font-bold text-slate-900">
-<<<<<<< HEAD
                   Customize Access Permissions: {customizingPermissionsUser.name}
-=======
-                  Kustomisasi Matriks Hak Akses: {customizingPermissionsUser.name}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </h3>
               </div>
               <button onClick={() => setCustomizingPermissionsUser(null)} className="text-slate-400 hover:text-slate-700">
@@ -891,11 +683,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
               <div>
                 <span className="font-bold text-slate-900">{customizingPermissionsUser.name}</span>
                 <span className="text-slate-500 text-[11px] block">
-<<<<<<< HEAD
                   Base Role: <span className="font-mono font-semibold text-indigo-700">{customizingPermissionsUser.role}</span> · {customizingPermissionsUser.department}
-=======
-                  Peran Dasar: <span className="font-mono font-semibold text-indigo-700">{customizingPermissionsUser.role}</span> · {customizingPermissionsUser.department}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </span>
               </div>
               <button
@@ -903,11 +691,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                 onClick={() => setActivePermissions(DEFAULT_ROLE_PERMISSIONS[customizingPermissionsUser.role])}
                 className="px-2.5 py-1 rounded bg-white border border-slate-300 text-[11px] font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer"
               >
-<<<<<<< HEAD
                 Reset to Default Role
-=======
-                Reset ke Default Role
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </button>
             </div>
 
@@ -955,11 +739,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
 
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between shrink-0">
               <span className="text-[11px] text-slate-500">
-<<<<<<< HEAD
                 Changes take effect the next time the user logs in.
-=======
-                Perubahan langsung berlaku pada sesi login pengguna berikutnya.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </span>
 
               <div className="flex items-center gap-2">
@@ -968,22 +748,14 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                   onClick={() => setCustomizingPermissionsUser(null)}
                   className="px-4 py-2 border border-slate-300 rounded text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
-<<<<<<< HEAD
                   Cancel
-=======
-                  Batal
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
                 <button
                   type="button"
                   onClick={handleSavePermissions}
                   className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded cursor-pointer"
                 >
-<<<<<<< HEAD
                   Apply Permissions
-=======
-                  Terapkan Hak Akses
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
               </div>
             </div>
@@ -997,11 +769,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
           <div className="bg-white rounded-lg shadow-2xl border border-slate-300 max-w-sm w-full p-6 text-xs space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-slate-200">
               <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-<<<<<<< HEAD
                 Official Employee Access Badge
-=======
-                Kartu Akses Pegawai Resmi (ID Badge)
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </h3>
               <button onClick={() => setPrintingBadgeUser(null)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-4 h-4" />
@@ -1035,11 +803,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
               <div className="pt-2 border-t border-slate-700/80 flex items-center justify-between px-2">
                 <div className="text-left font-mono text-[9px] text-slate-400">
                   <div>ROLE: {printingBadgeUser.role}</div>
-<<<<<<< HEAD
                   <div>STATUS: ACTIVE</div>
-=======
-                  <div>STATUS: AKTIF</div>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </div>
                 <div className="bg-white p-1 rounded">
                   <QrCode className="w-9 h-9 text-slate-900" />
@@ -1047,21 +811,13 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
               </div>
             </div>
 
-<<<<<<< HEAD
             <div className="no-print pt-2 flex items-center justify-end gap-2">
-=======
-            <div className="pt-2 flex items-center justify-end gap-2">
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               <button
                 type="button"
                 onClick={() => setPrintingBadgeUser(null)}
                 className="px-3 py-1.5 border border-slate-300 rounded text-slate-700 hover:bg-slate-50 cursor-pointer"
               >
-<<<<<<< HEAD
                 Close
-=======
-                Tutup
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </button>
               <button
                 type="button"
@@ -1069,11 +825,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                 className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded cursor-pointer flex items-center gap-1.5"
               >
                 <Printer className="w-3.5 h-3.5" />
-<<<<<<< HEAD
                 Print ID Badge
-=======
-                Cetak Kartu Badge
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </button>
             </div>
           </div>
@@ -1103,30 +855,18 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                     employeeBadge: editingUser.employeeBadge,
                     phone: editingUser.phone,
                   });
-<<<<<<< HEAD
                   alert('Profile changes saved successfully!');
-=======
-                  alert('Perubahan profil berhasil disimpan!');
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   setEditingUser(null);
                   await loadUsers();
                   if (onRefresh) onRefresh();
                 } catch (err: any) {
-<<<<<<< HEAD
                   alert(`Failed to save: ${err.message}`);
-=======
-                  alert(`Gagal menyimpan: ${err.message}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 }
               }}
               className="space-y-3"
             >
               <div>
-<<<<<<< HEAD
                 <label className="block font-semibold text-slate-700 mb-1">Full Name</label>
-=======
-                <label className="block font-semibold text-slate-700 mb-1">Nama Lengkap</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 <input
                   type="text"
                   required
@@ -1137,11 +877,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
               </div>
 
               <div>
-<<<<<<< HEAD
                 <label className="block font-semibold text-slate-700 mb-1">Role</label>
-=======
-                <label className="block font-semibold text-slate-700 mb-1">Peran Kerja (Role)</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 <select
                   value={editingUser.role}
                   onChange={(e: any) => setEditingUser({ ...editingUser, role: e.target.value })}
@@ -1157,15 +893,9 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-<<<<<<< HEAD
                   <label className="block font-semibold text-slate-700 mb-1">Branch / Site</label>
                   <select
                     value={editingUser.assignedBranch || 'Jakarta Head Office'}
-=======
-                  <label className="block font-semibold text-slate-700 mb-1">Cabang / Site</label>
-                  <select
-                    value={editingUser.assignedBranch || 'Kantor Pusat Jakarta'}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     onChange={(e) => setEditingUser({ ...editingUser, assignedBranch: e.target.value })}
                     className="w-full p-2 border border-slate-300 rounded bg-white text-slate-800 outline-none"
                   >
@@ -1178,11 +908,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                 </div>
 
                 <div>
-<<<<<<< HEAD
                   <label className="block font-semibold text-slate-700 mb-1">Badge ID</label>
-=======
-                  <label className="block font-semibold text-slate-700 mb-1">Nomor Badge</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="text"
                     value={editingUser.employeeBadge || ''}
@@ -1193,11 +919,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
               </div>
 
               <div>
-<<<<<<< HEAD
                 <label className="block font-semibold text-slate-700 mb-1">Department</label>
-=======
-                <label className="block font-semibold text-slate-700 mb-1">Departemen</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 <input
                   type="text"
                   value={editingUser.department}
@@ -1207,11 +929,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
               </div>
 
               <div>
-<<<<<<< HEAD
                 <label className="block font-semibold text-slate-700 mb-1">Phone</label>
-=======
-                <label className="block font-semibold text-slate-700 mb-1">Telepon</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 <input
                   type="text"
                   value={editingUser.phone || ''}
@@ -1226,21 +944,13 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                   onClick={() => setEditingUser(null)}
                   className="px-4 py-2 border border-slate-300 rounded text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
-<<<<<<< HEAD
                   Cancel
-=======
-                  Batal
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded cursor-pointer"
                 >
-<<<<<<< HEAD
                   Save Changes
-=======
-                  Simpan Perubahan
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
               </div>
             </form>
@@ -1259,17 +969,10 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">
-<<<<<<< HEAD
                     User Password Reset
                   </h3>
                   <p className="text-[11px] text-slate-500">
                     IT Security &amp; Account Management
-=======
-                    Menu Reset Password Pengguna
-                  </h3>
-                  <p className="text-[11px] text-slate-500">
-                    Otoritas Manajemen Keamanan &amp; Akun Divisi IT
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </p>
                 </div>
               </div>
@@ -1288,11 +991,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
             {/* User Target Selector Dropdown */}
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-<<<<<<< HEAD
                 Select Employee Account to Reset *
-=======
-                Pilih Akun Pegawai yang Ingin di-Reset *
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </label>
               <select
                 value={resettingUser.id}
@@ -1317,13 +1016,8 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1 font-mono text-[11px]">
               <div className="text-slate-900 font-bold font-sans text-xs">{resettingUser.name}</div>
               <div className="text-slate-600">Email: <span className="font-semibold text-slate-800">{resettingUser.email}</span></div>
-<<<<<<< HEAD
               <div className="text-slate-600">Badge ID: <span className="font-semibold text-slate-800">{resettingUser.employeeBadge || '-'}</span> · Role: <span className="font-semibold text-indigo-700">{resettingUser.role}</span></div>
               <div className="text-slate-500 text-[10px]">Branch / Site: {resettingUser.assignedBranch || 'Jakarta Head Office'}</div>
-=======
-              <div className="text-slate-600">Badge ID: <span className="font-semibold text-slate-800">{resettingUser.employeeBadge || '-'}</span> · Peran: <span className="font-semibold text-indigo-700">{resettingUser.role}</span></div>
-              <div className="text-slate-500 text-[10px]">Cabang / Site: {resettingUser.assignedBranch || 'Kantor Pusat Jakarta'}</div>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </div>
 
             {/* If reset has succeeded: show credential card */}
@@ -1334,17 +1028,10 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                     <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                   </div>
                   <div className="font-bold text-sm text-emerald-900">
-<<<<<<< HEAD
                     Password Reset Successfully!
                   </div>
                   <p className="text-[11px] text-emerald-800">
                     New credentials were generated by the system and recorded in the IT audit log.
-=======
-                    Password Berhasil Di-Reset!
-                  </div>
-                  <p className="text-[11px] text-emerald-800">
-                    Kredensial baru telah diterbitkan oleh sistem dan tercatat dalam Audit Log IT.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </p>
 
                   {/* Password Display Box */}
@@ -1357,11 +1044,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                         type="button"
                         onClick={() => setShowPasswordText(!showPasswordText)}
                         className="p-1 text-slate-500 hover:text-slate-800 rounded"
-<<<<<<< HEAD
                         title={showPasswordText ? 'Hide' : 'Show'}
-=======
-                        title={showPasswordText ? 'Sembunyikan' : 'Tampilkan'}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       >
                         {showPasswordText ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -1371,11 +1054,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                         className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-semibold text-[11px] flex items-center gap-1 cursor-pointer shadow-2xs"
                       >
                         {passwordCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-<<<<<<< HEAD
                         {passwordCopied ? 'Copied!' : 'Copy Credentials'}
-=======
-                        {passwordCopied ? 'Tersalin!' : 'Salin Kredensial'}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </button>
                     </div>
                   </div>
@@ -1383,17 +1062,10 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
 
                 <div className="text-[11px] text-slate-500 space-y-1 bg-amber-50/70 p-2.5 rounded border border-amber-200 text-amber-900">
                   <div className="font-semibold flex items-center gap-1">
-<<<<<<< HEAD
                     <AlertTriangle className="w-3.5 h-3.5 text-amber-700" /> Instructions:
                   </div>
                   <p>
                     Copy the credentials above and share them with the employee through an official company channel (WhatsApp or corporate email).
-=======
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-700" /> Instruksi Penggunaan:
-                  </div>
-                  <p>
-                    Salin kredensial di atas dan sampaikan kepada pegawai yang bersangkutan melalui saluran resmi perusahaan (WhatsApp / Email korporat).
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </p>
                 </div>
 
@@ -1406,11 +1078,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                     }}
                     className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded cursor-pointer text-xs"
                   >
-<<<<<<< HEAD
                     Done &amp; Close
-=======
-                    Selesai &amp; Tutup
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </button>
                 </div>
               </div>
@@ -1419,21 +1087,13 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
               <form onSubmit={handleExecuteResetPassword} className="space-y-3.5">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-<<<<<<< HEAD
                     Custom New Password (Optional)
-=======
-                    Password Baru Kustom (Opsional)
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </label>
                   <input
                     type="text"
                     value={customPasswordInput}
                     onChange={(e) => setCustomPasswordInput(e.target.value)}
-<<<<<<< HEAD
                     placeholder="Leave blank to generate a password automatically"
-=======
-                    placeholder="Kosongkan jika ingin sistem men-generate password otomatis"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     className="w-full p-2 border border-slate-300 rounded font-mono text-xs focus:border-slate-800 outline-none"
                   />
                   <span className="text-[10px] text-slate-400 mt-0.5 block">
@@ -1449,11 +1109,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                       onChange={(e) => setForcePasswordChange(e.target.checked)}
                       className="w-4 h-4 accent-amber-600 rounded"
                     />
-<<<<<<< HEAD
                     <span>Require password change at first login</span>
-=======
-                    <span>Wajibkan ganti password saat login pertama</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </label>
                   <p className="text-[10px] text-slate-400 pl-6">
                     Sistem akan meminta pengguna menetapkan password pribadi saat sesi login berikutnya.
@@ -1466,22 +1122,14 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                     onClick={() => setResettingUser(null)}
                     className="px-4 py-2 border border-slate-300 rounded text-slate-700 hover:bg-slate-50 cursor-pointer"
                   >
-<<<<<<< HEAD
                     Cancel
-=======
-                    Batal
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </button>
                   <button
                     type="submit"
                     className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded flex items-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     <Key className="w-4 h-4" />
-<<<<<<< HEAD
                     Reset Password Now
-=======
-                    Reset Password Sekarang
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </button>
                 </div>
               </form>

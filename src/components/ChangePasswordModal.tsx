@@ -25,24 +25,15 @@ export const ChangePasswordModal: React.FC<Props> = ({ forced, onClose, onChange
     setError(null);
     const weak = validatePasswordStrength(next);
     if (weak) return setError(weak);
-<<<<<<< HEAD
     if (next !== confirmPw) return setError('Password confirmation does not match.');
     if (next === current) return setError('The new password must be different from the current password.');
-=======
-    if (next !== confirmPw) return setError('Konfirmasi password tidak sama.');
-    if (next === current) return setError('Password baru harus berbeda dari password saat ini.');
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     setBusy(true);
     try {
       const res = await api.changePassword({ currentPassword: current, newPassword: next });
       session.replaceToken(res.token);
       onChanged({ user: res.user, modules: res.modules });
     } catch (err: any) {
-<<<<<<< HEAD
       setError(err.message || 'Failed to change password.');
-=======
-      setError(err.message || 'Gagal mengganti password.');
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     } finally {
       setBusy(false);
     }
@@ -57,21 +48,12 @@ export const ChangePasswordModal: React.FC<Props> = ({ forced, onClose, onChange
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center"><KeyRound className="w-5 h-5" /></div>
             <div>
-<<<<<<< HEAD
               <h2 className="text-base font-bold">{forced ? 'Create a New Password' : 'Change Password'}</h2>
               <p className="text-slate-500">{forced ? 'For security, change your temporary password before continuing.' : 'Use a unique, hard-to-guess password.'}</p>
             </div>
           </div>
           {!forced && onClose && (
             <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-700 cursor-pointer" aria-label="Close"><X className="w-4 h-4" /></button>
-=======
-              <h2 className="text-base font-bold">{forced ? 'Buat Password Baru' : 'Ubah Password'}</h2>
-              <p className="text-slate-500">{forced ? 'Demi keamanan, ganti password sementara Anda sebelum melanjutkan.' : 'Gunakan password yang unik dan sulit ditebak.'}</p>
-            </div>
-          </div>
-          {!forced && onClose && (
-            <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-700 cursor-pointer" aria-label="Tutup"><X className="w-4 h-4" /></button>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           )}
         </div>
 
@@ -82,15 +64,9 @@ export const ChangePasswordModal: React.FC<Props> = ({ forced, onClose, onChange
         )}
 
         {([
-<<<<<<< HEAD
           ['Current password', current, setCurrent, 'current-password'],
           ['New password', next, setNext, 'new-password'],
           ['Confirm new password', confirmPw, setConfirmPw, 'new-password'],
-=======
-          ['Password saat ini', current, setCurrent, 'current-password'],
-          ['Password baru', next, setNext, 'new-password'],
-          ['Ulangi password baru', confirmPw, setConfirmPw, 'new-password'],
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         ] as const).map(([label, val, setter, ac], i) => (
           <label key={label} className="block">
             <span className="block font-semibold text-slate-700 mb-1">{label}</span>
@@ -98,11 +74,7 @@ export const ChangePasswordModal: React.FC<Props> = ({ forced, onClose, onChange
               <input type={show ? 'text' : 'password'} required autoComplete={ac} value={val}
                 onChange={(e) => setter(e.target.value)} className={input} autoFocus={i === 0} />
               {i === 1 && (
-<<<<<<< HEAD
                 <button type="button" onClick={() => setShow(!show)} className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700 cursor-pointer" aria-label="Show/hide password">
-=======
-                <button type="button" onClick={() => setShow(!show)} className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700 cursor-pointer" aria-label="Tampilkan/sembunyikan password">
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               )}
@@ -113,19 +85,11 @@ export const ChangePasswordModal: React.FC<Props> = ({ forced, onClose, onChange
 
         <div className="flex items-center justify-between gap-3 pt-1">
           {forced && onLogout ? (
-<<<<<<< HEAD
             <button type="button" onClick={onLogout} className="text-slate-500 hover:text-slate-800 underline cursor-pointer">Log out</button>
           ) : <span />}
           <button type="submit" disabled={busy}
             className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded flex items-center gap-2 disabled:opacity-50 cursor-pointer">
             {busy && <Loader2 className="w-3.5 h-3.5 animate-spin" />} Save Password
-=======
-            <button type="button" onClick={onLogout} className="text-slate-500 hover:text-slate-800 underline cursor-pointer">Keluar</button>
-          ) : <span />}
-          <button type="submit" disabled={busy}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded flex items-center gap-2 disabled:opacity-50 cursor-pointer">
-            {busy && <Loader2 className="w-3.5 h-3.5 animate-spin" />} Simpan Password
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </button>
         </div>
       </form>

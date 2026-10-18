@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { SalesOrder, Customer, Product, Asset } from '../types/index.ts';
 import { api } from '../services/api.ts';
-<<<<<<< HEAD
 import { formatRupiahAmount } from '../shared/currency.tsx';
-=======
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 import {
   ShoppingBag,
   Plus,
@@ -109,11 +106,7 @@ export const SalesOrdersView: React.FC<SalesOrdersViewProps> = ({
         driverName: 'Travis Vance (Apex Heavy Haul)',
         conditionNotes: 'Dispatched for site commissioning.',
       });
-<<<<<<< HEAD
       alert(`Delivery Order ${delivery.deliveryNumber} created and awaiting Manager approval.`);
-=======
-      alert(`Delivery Order ${delivery.deliveryNumber} generated!`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       onRefresh();
       if (onNavigateToDelivery) onNavigateToDelivery(delivery.id);
     } catch (err: any) {
@@ -193,11 +186,7 @@ export const SalesOrdersView: React.FC<SalesOrdersViewProps> = ({
                         type="button"
                         onClick={() => setPreviewDoc({ type: 'SALES_ORDER', data: order })}
                         className="text-left font-mono font-bold text-indigo-700 hover:text-indigo-900 hover:underline cursor-pointer flex items-center gap-1"
-<<<<<<< HEAD
                         title="Open the official sales order"
-=======
-                        title="Klik untuk membuka view data Sales Order resmi"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       >
                         <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
                         <span>{order.orderNumber}</span>
@@ -217,11 +206,7 @@ export const SalesOrdersView: React.FC<SalesOrdersViewProps> = ({
                             })
                           }
                           className="text-[11px] text-sky-700 hover:text-sky-900 hover:underline cursor-pointer mt-0.5 block text-left font-mono font-semibold"
-<<<<<<< HEAD
                           title="Open the customer purchase order"
-=======
-                          title="Klik untuk membuka view data PO dari Client"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         >
                           PO Client: {order.customerPoReference}
                         </button>
@@ -263,19 +248,11 @@ export const SalesOrdersView: React.FC<SalesOrdersViewProps> = ({
                     </td>
                     <td className="py-3 px-4 text-right font-mono-numbers">
                       <div className="font-bold text-slate-900">
-<<<<<<< HEAD
                         {formatRupiahAmount(order.grandTotal)}
                       </div>
                       {(order.mobilizationTotal || 0) > 0 && (
                         <div className="text-[10px] text-slate-400">
                           Mobilization: {formatRupiahAmount(order.mobilizationTotal)} · Demobilization: {formatRupiahAmount(order.demobilizationTotal || 0)}
-=======
-                        ${order.grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                      </div>
-                      {(order.mobilizationTotal || 0) > 0 && (
-                        <div className="text-[10px] text-slate-400">
-                          Mob: ${order.mobilizationTotal} · Demob: ${order.demobilizationTotal || 0}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         </div>
                       )}
                     </td>
@@ -400,11 +377,7 @@ export const SalesOrdersView: React.FC<SalesOrdersViewProps> = ({
                 >
                   {products.map((p) => (
                     <option key={p.id} value={p.id}>
-<<<<<<< HEAD
                       {p.name} - {formatRupiahAmount(p.salesPrice)} ({p.stockQuantity} in stock)
-=======
-                      {p.name} - ${p.salesPrice.toLocaleString()} ({p.stockQuantity} in stock)
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </option>
                   ))}
                 </select>
@@ -434,11 +407,7 @@ export const SalesOrdersView: React.FC<SalesOrdersViewProps> = ({
               </div>
 
               <div>
-<<<<<<< HEAD
                 <label className="block text-slate-600 font-semibold mb-1">Freight / Mobilization Fee (IDR)</label>
-=======
-                <label className="block text-slate-600 font-semibold mb-1">Freight / Mobilization Fee ($)</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 <input
                   type="number"
                   value={shippingFee}

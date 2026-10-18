@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { Asset, AssetStatus, HeavyEquipmentDocs } from '../types/index.ts';
 import { api } from '../services/api.ts';
-<<<<<<< HEAD
 import { formatRupiahAmount } from '../shared/currency.tsx';
-=======
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 import { FleetGpsMap } from './FleetGpsMap.tsx';
 import {
   Cpu,
@@ -65,11 +62,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
     weeklyRentalRate: '2600',
     monthlyRentalRate: '9500',
     sellPrice: '210000',
-<<<<<<< HEAD
     warehouseLocation: 'Balikpapan Depot & Workshop',
-=======
-    warehouseLocation: 'Depot & Workshop Balikpapan',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     plateNumber: 'B 9821 TQ',
     chassisNumber: 'CAT320D-VIN-99021',
     engineNumber: 'C7.1-ENG-48921',
@@ -115,11 +108,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
       const data = await api.getAssetHistory(asset.id);
       setSelectedAssetHistory(data);
     } catch (err: any) {
-<<<<<<< HEAD
       alert(`Failed to load asset history: ${err.message}`);
-=======
-      alert(`Gagal memuat riwayat aset: ${err.message}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     } finally {
       setLoadingHistory(false);
     }
@@ -128,11 +117,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
   const handleCreateAsset = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.assetTag || !formData.serialNumber || !formData.name) {
-<<<<<<< HEAD
       alert('Asset Tag, Serial Number, and Equipment Name are required.');
-=======
-      alert('Asset Tag, Serial Number, dan Nama Alat Berat wajib diisi.');
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       return;
     }
 
@@ -168,19 +153,11 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
         },
       });
 
-<<<<<<< HEAD
       alert(`Equipment ${formData.assetTag} (${formData.name}) was registered successfully.`);
       setShowCreateModal(false);
       onRefresh();
     } catch (err: any) {
       alert(`Failed to register asset: ${err.message}`);
-=======
-      alert(`Aset alat berat ${formData.assetTag} (${formData.name}) berhasil diregistrasi secara terpusat!`);
-      setShowCreateModal(false);
-      onRefresh();
-    } catch (err: any) {
-      alert(`Gagal meregistrasi aset: ${err.message}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
   };
 
@@ -222,19 +199,11 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
         siaFileName: siaFilePreview ? 'SIA_Kelaikan_Uploaded.jpg' : docsModalData.siaFileName,
       });
 
-<<<<<<< HEAD
       alert(`Compliance documents (STNK, BPKB, SIA) for asset ${managingDocsAsset.assetTag} were updated successfully.`);
       setManagingDocsAsset(null);
       onRefresh();
     } catch (err: any) {
       alert(`Failed to save documents: ${err.message}`);
-=======
-      alert(`Dokumen legalitas (STNK, BPKB, SIA) untuk aset ${managingDocsAsset.assetTag} berhasil diperbarui di sistem pusat!`);
-      setManagingDocsAsset(null);
-      onRefresh();
-    } catch (err: any) {
-      alert(`Gagal menyimpan dokumen: ${err.message}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     } finally {
       setSavingDocs(false);
     }
@@ -281,21 +250,12 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
           <div className="flex items-center gap-2">
             <Cpu className="w-5 h-5 text-indigo-700" />
             <h2 className="text-base font-bold text-slate-900">
-<<<<<<< HEAD
               Asset Registration &amp; Heavy Equipment Compliance
             </h2>
             <span className="text-xs text-slate-500 font-mono">({assets.length} fleet units)</span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
             Manage vehicle registration (STNK), ownership documents (BPKB), and Ministry of Manpower equipment certificates (SIA), and print barcode labels.
-=======
-              Registrasi Aset Terpusat &amp; Legalitas Alat Berat
-            </h2>
-            <span className="text-xs text-slate-500 font-mono">({assets.length} unit armada)</span>
-          </div>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Manajemen dokumen kelaikan fisik: STNK, BPKB, dan SIA (Surat Ijin Alat Kemenaker) beserta cetak label barcode fisik.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </p>
         </div>
 
@@ -312,11 +272,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
               }`}
             >
               <Navigation className="w-3.5 h-3.5" />
-<<<<<<< HEAD
               <span>Live GPS Map</span>
-=======
-              <span>Peta Aktual GPS</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </button>
             <button
               type="button"
@@ -328,11 +284,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
-<<<<<<< HEAD
               <span>Catalog &amp; Compliance</span>
-=======
-              <span>Katalog &amp; Legalitas</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </button>
           </div>
 
@@ -341,20 +293,12 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded shadow-xs cursor-pointer"
           >
             <Plus className="w-4 h-4 text-amber-400" />
-<<<<<<< HEAD
             Register Heavy Equipment
-=======
-            Registrasi Alat Berat Baru
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </button>
         </div>
       </div>
 
-<<<<<<< HEAD
       {/* 1. Live fleet GPS telematics map */}
-=======
-      {/* 1. Live Fleet GPS Telematics Map (Aktual Lokasi Alat Berat) */}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       {assetViewMode === 'map' && (
         <FleetGpsMap
           assets={assets}
@@ -371,11 +315,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
           <input
             type="text"
-<<<<<<< HEAD
             placeholder="Search tag, serial number, equipment name, plate, or SIA..."
-=======
-            placeholder="Cari Tag, Serial, Nama Alat Berat, No Plat, atau No SIA..."
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded font-mono outline-none focus:border-slate-800"
@@ -388,19 +328,11 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
             onChange={(e) => setStatusFilter(e.target.value)}
             className="w-full py-2 px-2.5 border border-slate-300 rounded bg-slate-50 font-medium text-slate-700 outline-none cursor-pointer"
           >
-<<<<<<< HEAD
             <option value="ALL">All Operational Statuses</option>
             <option value="AVAILABLE">Available</option>
             <option value="RENTED">Rented</option>
             <option value="IN_MAINTENANCE">In Maintenance</option>
             <option value="RESERVED">Reserved</option>
-=======
-            <option value="ALL">Semua Status Operasional</option>
-            <option value="AVAILABLE">AVAILABLE (Tersedia)</option>
-            <option value="RENTED">RENTED (Sedang Disewa)</option>
-            <option value="IN_MAINTENANCE">IN MAINTENANCE (Perbaikan)</option>
-            <option value="RESERVED">RESERVED (Teralokasi)</option>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </select>
         </div>
 
@@ -410,15 +342,9 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
             onChange={(e) => setDocFilter(e.target.value)}
             className="w-full py-2 px-2.5 border border-slate-300 rounded bg-slate-50 font-medium text-slate-700 outline-none cursor-pointer"
           >
-<<<<<<< HEAD
             <option value="ALL">All Compliance Statuses</option>
             <option value="VALID">Complete &amp; Valid</option>
             <option value="EXPIRING">Expiring Soon</option>
-=======
-            <option value="ALL">Semua Status Legalitas</option>
-            <option value="VALID">Legalitas Lengkap &amp; Valid</option>
-            <option value="EXPIRING">Masa Berlaku Segera Berakhir</option>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </select>
         </div>
       </div>
@@ -430,21 +356,12 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
                 <th className="py-2.5 px-4">Tag Barcode / Serial</th>
-<<<<<<< HEAD
                 <th className="py-2.5 px-4">Equipment / Identification</th>
                 <th className="py-2.5 px-4">Category &amp; Location</th>
                 <th className="py-2.5 px-4">Compliance Documents (STNK, BPKB, SIA)</th>
                 <th className="py-2.5 px-4 text-center">Status</th>
                 <th className="py-2.5 px-4 text-right">Monthly Rental Rate</th>
                 <th className="py-2.5 px-4 text-right">Actions</th>
-=======
-                <th className="py-2.5 px-4">Alat Berat / Identitas</th>
-                <th className="py-2.5 px-4">Kategori &amp; Lokasi</th>
-                <th className="py-2.5 px-4">Dokumen Legalitas (STNK, BPKB, SIA)</th>
-                <th className="py-2.5 px-4 text-center">Status</th>
-                <th className="py-2.5 px-4 text-right">Tarif Sewa/Bulan</th>
-                <th className="py-2.5 px-4 text-right">Aksi Terpusat</th>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -468,11 +385,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                         {asset.brand} · {asset.model}
                       </div>
                       <div className="text-[10px] font-mono text-slate-600 mt-0.5">
-<<<<<<< HEAD
                         Plate: <span className="font-semibold text-slate-800">{docs?.plateNumber || 'B 9201 TQ'}</span> · HM: <span className="font-semibold">{docs?.hourMeter || 0} hrs</span>
-=======
-                        Plat: <span className="font-semibold text-slate-800">{docs?.plateNumber || 'B 9201 TQ'}</span> · HM: <span className="font-semibold">{docs?.hourMeter || 0} hrs</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </div>
                     </td>
 
@@ -513,11 +426,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
 
                     {/* Rate */}
                     <td className="py-3 px-4 text-right font-mono font-bold text-slate-900">
-<<<<<<< HEAD
                       {formatRupiahAmount(asset.monthlyRentalRate)}/mo
-=======
-                      ${asset.monthlyRentalRate?.toLocaleString()}/mo
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </td>
 
                     {/* Actions */}
@@ -527,11 +436,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                         <button
                           type="button"
                           onClick={() => setPrintingLabelAsset(asset)}
-<<<<<<< HEAD
                           title="Print the heavy equipment barcode / QR label"
-=======
-                          title="Cetak Label Barcode / QR Alat Berat"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-indigo-600 cursor-pointer"
                         >
                           <QrCode className="w-3.5 h-3.5" />
@@ -541,11 +446,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                         <button
                           type="button"
                           onClick={() => handleOpenDocsModal(asset)}
-<<<<<<< HEAD
                           title="Manage and upload compliance documents (STNK/BPKB/SIA)"
-=======
-                          title="Kelola & Upload Dokumen Legalitas (STNK/BPKB/SIA)"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-emerald-700 cursor-pointer"
                         >
                           <FileText className="w-3.5 h-3.5" />
@@ -555,11 +456,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                         <button
                           type="button"
                           onClick={() => handleOpenHistory(asset)}
-<<<<<<< HEAD
                           title="Complete usage and maintenance history"
-=======
-                          title="Riwayat Lengkap Pemakaian & Perbaikan"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           className="p-1.5 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer"
                         >
                           <History className="w-3.5 h-3.5" />
@@ -572,11 +469,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
               {filtered.length === 0 && (
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-slate-400">
-<<<<<<< HEAD
                     No equipment matches the selected search filters.
-=======
-                    Tidak ada data alat berat yang cocok dengan filter pencarian.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </td>
                 </tr>
               )}
@@ -596,11 +489,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                 <FileCheck className="w-5 h-5 text-emerald-600" />
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">
-<<<<<<< HEAD
                     Compliance Documents: {managingDocsAsset.assetTag}
-=======
-                    Dokumen Legalitas Terpusat: {managingDocsAsset.assetTag}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </h3>
                   <span className="text-[11px] text-slate-500">{managingDocsAsset.name}</span>
                 </div>
@@ -614,11 +503,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
               {/* Unit Identifiers */}
               <div className="p-3 bg-slate-50 rounded border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-500 text-[10px] uppercase font-semibold">License Plate</label>
-=======
-                  <label className="block text-slate-500 text-[10px] uppercase font-semibold">Nomor Polisi / Plat</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="text"
                     value={docsModalData.plateNumber || ''}
@@ -628,11 +513,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                   />
                 </div>
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-500 text-[10px] uppercase font-semibold">Chassis Number (VIN)</label>
-=======
-                  <label className="block text-slate-500 text-[10px] uppercase font-semibold">Nomor Rangka (VIN)</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="text"
                     value={docsModalData.chassisNumber || ''}
@@ -642,11 +523,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                   />
                 </div>
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-500 text-[10px] uppercase font-semibold">Engine Number</label>
-=======
-                  <label className="block text-slate-500 text-[10px] uppercase font-semibold">Nomor Mesin</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="text"
                     value={docsModalData.engineNumber || ''}
@@ -671,27 +548,16 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                 <div className="flex items-center justify-between pb-2 border-b border-indigo-100">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-indigo-700" />
-<<<<<<< HEAD
                     <span className="font-bold text-indigo-950">1. SIA (Ministry of Manpower Equipment Certificate)</span>
                   </div>
                   <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">
                     Required for heavy equipment
-=======
-                    <span className="font-bold text-indigo-950">1. SIA (Surat Ijin Alat / Sertifikat Kelaikan Kemenaker)</span>
-                  </div>
-                  <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">
-                    Wajib Untuk Alat Berat
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-<<<<<<< HEAD
                     <label className="block font-semibold text-slate-700 mb-1">SIA Registration Number *</label>
-=======
-                    <label className="block font-semibold text-slate-700 mb-1">Nomor Registrasi SIA *</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     <input
                       type="text"
                       required
@@ -702,11 +568,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                     />
                   </div>
                   <div>
-<<<<<<< HEAD
                     <label className="block font-semibold text-slate-700 mb-1">SIA Expiry Date *</label>
-=======
-                    <label className="block font-semibold text-slate-700 mb-1">Masa Berlaku SIA s/d *</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     <input
                       type="date"
                       required
@@ -721,11 +583,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                       type="text"
                       value={docsModalData.siaIssuer || ''}
                       onChange={(e) => setDocsModalData({ ...docsModalData, siaIssuer: e.target.value })}
-<<<<<<< HEAD
                       placeholder="Ministry of Manpower (Kemenaker) / Regional Manpower Office"
-=======
-                      placeholder="Disnaker / Kemenaker RI"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       className="w-full p-2 border border-slate-300 rounded bg-white"
                     />
                   </div>
@@ -736,28 +594,16 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                   <div className="flex items-center gap-3">
                     <label className="px-3 py-1.5 bg-white border border-indigo-300 text-indigo-800 rounded font-semibold text-xs hover:bg-indigo-50 cursor-pointer flex items-center gap-2">
                       <Upload className="w-3.5 h-3.5" />
-<<<<<<< HEAD
                       Upload SIA Certificate (PDF / Image)
-=======
-                      Unggah File Sertifikat SIA (PDF/Foto)
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       <input type="file" accept="image/*,application/pdf" onChange={(e) => handleFileUpload(e, setSiaFilePreview)} className="hidden" />
                     </label>
                     {siaFilePreview && (
                       <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-<<<<<<< HEAD
                         <CheckCircle2 className="w-3.5 h-3.5" /> SIA file attached
                       </span>
                     )}
                   </div>
                   <span className="text-[10px] text-slate-400">File is securely stored on the centralized ERP server</span>
-=======
-                        <CheckCircle2 className="w-3.5 h-3.5" /> File SIA Terlampir
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[10px] text-slate-400">File tersimpan aman di server ERP terpusat</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </div>
               </div>
 
@@ -766,21 +612,13 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4 text-slate-700" />
-<<<<<<< HEAD
                     <span className="font-bold text-slate-900">2. STNK (Vehicle Registration Certificate)</span>
-=======
-                    <span className="font-bold text-slate-900">2. STNK (Surat Tanda Nomor Kendaraan)</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-<<<<<<< HEAD
                     <label className="block font-semibold text-slate-700 mb-1">STNK Number</label>
-=======
-                    <label className="block font-semibold text-slate-700 mb-1">Nomor STNK</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     <input
                       type="text"
                       value={docsModalData.stnkNumber || ''}
@@ -790,11 +628,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                     />
                   </div>
                   <div>
-<<<<<<< HEAD
                     <label className="block font-semibold text-slate-700 mb-1">STNK Tax Expiry Date</label>
-=======
-                    <label className="block font-semibold text-slate-700 mb-1">Masa Berlaku Pajak STNK</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     <input
                       type="date"
                       value={docsModalData.stnkExpiry || ''}
@@ -808,20 +642,12 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                 <div className="pt-2 flex items-center gap-3">
                   <label className="px-3 py-1.5 bg-slate-50 border border-slate-300 text-slate-700 rounded font-semibold text-xs hover:bg-slate-100 cursor-pointer flex items-center gap-2">
                     <Upload className="w-3.5 h-3.5" />
-<<<<<<< HEAD
                     Upload STNK Document
-=======
-                    Unggah Dokumen STNK
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     <input type="file" accept="image/*,application/pdf" onChange={(e) => handleFileUpload(e, setStnkFilePreview)} className="hidden" />
                   </label>
                   {stnkFilePreview && (
                     <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-<<<<<<< HEAD
                       <CheckCircle2 className="w-3.5 h-3.5" /> STNK attached
-=======
-                      <CheckCircle2 className="w-3.5 h-3.5" /> STNK Terlampir
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </span>
                   )}
                 </div>
@@ -832,21 +658,13 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4 text-slate-700" />
-<<<<<<< HEAD
                     <span className="font-bold text-slate-900">3. BPKB (Vehicle Ownership Certificate)</span>
-=======
-                    <span className="font-bold text-slate-900">3. BPKB (Buku Pemilik Kendaraan Bermotor)</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-<<<<<<< HEAD
                     <label className="block font-semibold text-slate-700 mb-1">BPKB Number</label>
-=======
-                    <label className="block font-semibold text-slate-700 mb-1">Nomor BPKB</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     <input
                       type="text"
                       value={docsModalData.bpkbNumber || ''}
@@ -856,11 +674,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                     />
                   </div>
                   <div>
-<<<<<<< HEAD
                     <label className="block font-semibold text-slate-700 mb-1">Issuing Authority / Police Department</label>
-=======
-                    <label className="block font-semibold text-slate-700 mb-1">Instansi / Polda Penerbit</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     <input
                       type="text"
                       value={docsModalData.bpkbIssuer || 'Ditlantas Polda Metro Jaya'}
@@ -874,20 +688,12 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                 <div className="pt-2 flex items-center gap-3">
                   <label className="px-3 py-1.5 bg-slate-50 border border-slate-300 text-slate-700 rounded font-semibold text-xs hover:bg-slate-100 cursor-pointer flex items-center gap-2">
                     <Upload className="w-3.5 h-3.5" />
-<<<<<<< HEAD
                     Upload BPKB Document
-=======
-                    Unggah Dokumen BPKB
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     <input type="file" accept="image/*,application/pdf" onChange={(e) => handleFileUpload(e, setBpkbFilePreview)} className="hidden" />
                   </label>
                   {bpkbFilePreview && (
                     <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-<<<<<<< HEAD
                       <CheckCircle2 className="w-3.5 h-3.5" /> BPKB attached
-=======
-                      <CheckCircle2 className="w-3.5 h-3.5" /> BPKB Terlampir
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </span>
                   )}
                 </div>
@@ -899,22 +705,14 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                   onClick={() => setManagingDocsAsset(null)}
                   className="px-4 py-2 border border-slate-300 rounded text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
-<<<<<<< HEAD
                   Cancel
-=======
-                  Batal
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
                 <button
                   type="submit"
                   disabled={savingDocs}
                   className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded cursor-pointer disabled:opacity-50"
                 >
-<<<<<<< HEAD
                   {savingDocs ? 'Saving...' : 'Save All Documents'}
-=======
-                  {savingDocs ? 'Menyimpan...' : 'Simpan Semua Dokumen'}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
               </div>
             </form>
@@ -928,11 +726,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
           <div className="bg-white rounded-lg shadow-2xl border border-slate-300 max-w-sm w-full p-6 text-xs space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-slate-200">
               <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-<<<<<<< HEAD
                 Heavy Equipment Barcode Label
-=======
-                Label Barcode Fisik Alat Berat
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </h3>
               <button onClick={() => setPrintingLabelAsset(null)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-4 h-4" />
@@ -960,7 +754,6 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                 <div><span className="text-slate-500">SERIAL:</span> {printingLabelAsset.serialNumber}</div>
                 <div><span className="text-slate-500">PLAT NO:</span> {printingLabelAsset.legalDocs?.plateNumber || 'B 9821 TQ'}</div>
                 <div><span className="text-slate-500">SIA NO:</span> {printingLabelAsset.legalDocs?.siaNumber || 'SIA-KEM-2025'}</div>
-<<<<<<< HEAD
                 <div><span className="text-slate-500">BRANCH:</span> {printingLabelAsset.warehouseLocation}</div>
               </div>
 
@@ -970,27 +763,12 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
             </div>
 
             <div className="no-print pt-2 flex items-center justify-end gap-2">
-=======
-                <div><span className="text-slate-500">CABANG:</span> {printingLabelAsset.warehouseLocation}</div>
-              </div>
-
-              <p className="text-[9px] text-slate-500 italic">
-                Pindai dengan kamera smartphone untuk mencatat status harian (Bekerja / Rusak) atau tiket perbaikan.
-              </p>
-            </div>
-
-            <div className="pt-2 flex items-center justify-end gap-2">
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               <button
                 type="button"
                 onClick={() => setPrintingLabelAsset(null)}
                 className="px-3 py-1.5 border border-slate-300 rounded text-slate-700 hover:bg-slate-50 cursor-pointer"
               >
-<<<<<<< HEAD
                 Close
-=======
-                Tutup
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </button>
               <button
                 type="button"
@@ -998,11 +776,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                 className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded cursor-pointer flex items-center gap-1.5"
               >
                 <Printer className="w-3.5 h-3.5" />
-<<<<<<< HEAD
                 Print Asset Label
-=======
-                Cetak Label Sticker
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </button>
             </div>
           </div>
@@ -1015,13 +789,8 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
           <div className="bg-white rounded-lg shadow-xl border border-slate-200 max-w-2xl w-full max-h-[90vh] flex flex-col p-6 text-xs space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 shrink-0">
               <div>
-<<<<<<< HEAD
                 <h3 className="text-base font-bold text-slate-900">Heavy Equipment Registration &amp; Compliance Documents</h3>
                 <span className="text-[11px] text-slate-500">Asset identification and STNK, BPKB, and SIA compliance records</span>
-=======
-                <h3 className="text-base font-bold text-slate-900">Registrasi Alat Berat &amp; Dokumen Terpusat</h3>
-                <span className="text-[11px] text-slate-500">Penomoran aset, legalitas STNK, BPKB, dan SIA kelaikan</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </div>
               <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-4 h-4" />
@@ -1035,30 +804,18 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                   <input
                     type="text"
                     required
-<<<<<<< HEAD
                     placeholder="e.g., AST-10028"
-=======
-                    placeholder="cth: AST-10028"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     value={formData.assetTag}
                     onChange={(e) => setFormData({ ...formData, assetTag: e.target.value })}
                     className="w-full p-2 border border-slate-300 rounded font-mono font-bold focus:border-slate-800 outline-none"
                   />
                 </div>
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Manufacturer Serial Number *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g., CAT-SN-99821"
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Serial Number Pabrikan *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="cth: CAT-SN-99821"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     value={formData.serialNumber}
                     onChange={(e) => setFormData({ ...formData, serialNumber: e.target.value })}
                     className="w-full p-2 border border-slate-300 rounded font-mono focus:border-slate-800 outline-none"
@@ -1067,19 +824,11 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
               </div>
 
               <div>
-<<<<<<< HEAD
                 <label className="block text-slate-700 font-semibold mb-1">Equipment Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g., Caterpillar 320D3 Hydraulic Excavator, 20 Ton"
-=======
-                <label className="block text-slate-700 font-semibold mb-1">Nama Lengkap Unit Alat Berat *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="cth: Caterpillar 320D3 Hydraulic Excavator 20-Ton"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full p-2 border border-slate-300 rounded font-medium focus:border-slate-800 outline-none"
@@ -1088,11 +837,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Equipment Category</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Kategori Alat</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
@@ -1116,11 +861,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                   />
                 </div>
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Type / Model</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Tipe / Model</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="text"
                     placeholder="320D3, PC200-10M0"
@@ -1134,11 +875,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
               {/* Physical Identifiers */}
               <div className="p-3 bg-slate-50 rounded border border-slate-200 grid grid-cols-3 gap-3">
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">License Plate</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Nomor Polisi (Plat)</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="text"
                     placeholder="B 9821 TQ"
@@ -1148,11 +885,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                   />
                 </div>
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Chassis Number</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Nomor Rangka</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="text"
                     placeholder="CAT320-VIN"
@@ -1174,17 +907,10 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
 
               {/* Legal Documents Inputs */}
               <div className="p-3 bg-indigo-50/50 rounded border border-indigo-200 space-y-3">
-<<<<<<< HEAD
                 <span className="font-bold text-indigo-900 block">Compliance Documents &amp; Initial Certification</span>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-slate-700 font-semibold mb-1">SIA Permit Number *</label>
-=======
-                <span className="font-bold text-indigo-900 block">Dokumen Legalitas &amp; Sertifikasi Awal</span>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-slate-700 font-semibold mb-1">Nomor Izin SIA Kemenaker *</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     <input
                       type="text"
                       required
@@ -1195,11 +921,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                     />
                   </div>
                   <div>
-<<<<<<< HEAD
                     <label className="block text-slate-700 font-semibold mb-1">SIA Expiry Date *</label>
-=======
-                    <label className="block text-slate-700 font-semibold mb-1">Masa Berlaku SIA *</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     <input
                       type="date"
                       required
@@ -1212,11 +934,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-<<<<<<< HEAD
                     <label className="block text-slate-700 font-semibold mb-1">STNK Number</label>
-=======
-                    <label className="block text-slate-700 font-semibold mb-1">Nomor STNK</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     <input
                       type="text"
                       value={formData.stnkNumber}
@@ -1225,11 +943,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                     />
                   </div>
                   <div>
-<<<<<<< HEAD
                     <label className="block text-slate-700 font-semibold mb-1">BPKB Number</label>
-=======
-                    <label className="block text-slate-700 font-semibold mb-1">Nomor BPKB</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     <input
                       type="text"
                       value={formData.bpkbNumber}
@@ -1243,11 +957,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
               {/* Commercial Valuation */}
               <div className="grid grid-cols-3 gap-3">
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Purchase Price (IDR)</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Harga Pembelian ($)</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="number"
                     value={formData.purchaseCost}
@@ -1256,11 +966,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                   />
                 </div>
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Daily Rental Rate (IDR)</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Tarif Sewa Harian ($)</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="number"
                     value={formData.dailyRentalRate}
@@ -1269,11 +975,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                   />
                 </div>
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Monthly Rental Rate (IDR)</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Tarif Sewa Bulanan ($)</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="number"
                     value={formData.monthlyRentalRate}
@@ -1284,29 +986,17 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
               </div>
 
               <div>
-<<<<<<< HEAD
                 <label className="block text-slate-700 font-semibold mb-1">Warehouse / Workshop / Site Location</label>
-=======
-                <label className="block text-slate-700 font-semibold mb-1">Penempatan Gudang / Workshop / Site</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 <select
                   value={formData.warehouseLocation}
                   onChange={(e) => setFormData({ ...formData, warehouseLocation: e.target.value })}
                   className="w-full p-2 border border-slate-300 rounded bg-white text-slate-800"
                 >
-<<<<<<< HEAD
                   <option value="Balikpapan Depot & Workshop">Balikpapan Depot &amp; Workshop</option>
                   <option value="Site Project Morowali">Site Project Morowali</option>
                   <option value="Site IKN Nusantara">Site IKN Nusantara</option>
                   <option value="Jakarta Central Depot">Jakarta Central Depot</option>
                   <option value="Surabaya Branch">Surabaya Branch</option>
-=======
-                  <option value="Depot & Workshop Balikpapan">Depot &amp; Workshop Balikpapan</option>
-                  <option value="Site Project Morowali">Site Project Morowali</option>
-                  <option value="Site IKN Nusantara">Site IKN Nusantara</option>
-                  <option value="Jakarta Central Depot">Jakarta Central Depot</option>
-                  <option value="Cabang Surabaya">Cabang Surabaya</option>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </select>
               </div>
 
@@ -1316,21 +1006,13 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                   onClick={() => setShowCreateModal(false)}
                   className="px-4 py-2 border border-slate-300 text-slate-700 rounded hover:bg-slate-50 cursor-pointer"
                 >
-<<<<<<< HEAD
                   Cancel
-=======
-                  Batal
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-slate-900 text-white rounded font-semibold hover:bg-slate-800 cursor-pointer"
                 >
-<<<<<<< HEAD
                   Save &amp; Generate Barcode Tag
-=======
-                  Simpan &amp; Generate Barcode Tag
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
               </div>
             </form>
@@ -1363,7 +1045,6 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
               {/* Asset Technical Specifications */}
               <div className="bg-slate-50 p-3.5 rounded border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
-<<<<<<< HEAD
                   <span className="text-slate-400 block text-[11px]">Current Status</span>
                   <span className="font-semibold text-slate-800">{selectedAssetHistory.asset.status}</span>
                 </div>
@@ -1373,17 +1054,6 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                 </div>
                 <div>
                   <span className="text-slate-400 block text-[11px]">SIA Number</span>
-=======
-                  <span className="text-slate-400 block text-[11px]">Status Saat Ini</span>
-                  <span className="font-semibold text-slate-800">{selectedAssetHistory.asset.status}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Kondisi Fisik</span>
-                  <span className="font-semibold text-slate-800">{selectedAssetHistory.asset.condition}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Nomor SIA</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <span className="font-semibold font-mono text-slate-800">{selectedAssetHistory.asset.legalDocs?.siaNumber || 'SIA-OK'}</span>
                 </div>
                 <div>
@@ -1396,11 +1066,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
               <div>
                 <h4 className="font-bold text-slate-800 uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
                   <Wrench className="w-3.5 h-3.5 text-slate-500" />
-<<<<<<< HEAD
                   Service &amp; Barcode Repair History ({selectedAssetHistory.workOrders?.length || 0})
-=======
-                  Riwayat Servis &amp; Perbaikan Barcode ({selectedAssetHistory.workOrders?.length || 0})
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </h4>
                 {selectedAssetHistory.workOrders?.length > 0 ? (
                   <div className="space-y-2">
@@ -1408,11 +1074,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                       <div key={wo.id} className="p-2.5 border border-slate-200 rounded bg-white">
                         <div className="flex justify-between items-center">
                           <span className="font-mono font-semibold text-slate-900">{wo.workOrderNumber}</span>
-<<<<<<< HEAD
                           <span className="font-bold font-mono text-slate-800">Cost: {formatRupiahAmount(wo.totalCost)}</span>
-=======
-                          <span className="font-bold font-mono text-slate-800">Biaya: ${wo.totalCost}</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         </div>
                         <div className="text-slate-700 mt-1 font-medium">{wo.title}</div>
                         <div className="text-slate-500 text-[11px] mt-0.5">{wo.description}</div>
@@ -1420,11 +1082,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                     ))}
                   </div>
                 ) : (
-<<<<<<< HEAD
                   <p className="text-slate-400 italic">No repair tickets recorded.</p>
-=======
-                  <p className="text-slate-400 italic">Belum ada tiket perbaikan tercatat.</p>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 )}
               </div>
 
@@ -1432,11 +1090,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
               <div>
                 <h4 className="font-bold text-slate-800 uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-<<<<<<< HEAD
                   Field Inspection Reports ({selectedAssetHistory.statusLogs?.length || 0})
-=======
-                  Laporan Pemeriksaan Lapangan ({selectedAssetHistory.statusLogs?.length || 0})
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </h4>
                 {selectedAssetHistory.statusLogs?.length > 0 ? (
                   <div className="space-y-2">
@@ -1444,13 +1098,8 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                       <div key={log.id} className="p-2.5 border border-slate-200 rounded bg-white flex justify-between items-center">
                         <div>
                           <div className="font-bold text-slate-900 flex items-center gap-2">
-<<<<<<< HEAD
                             <span>{log.status === 'WORKING' ? 'WORKING / NORMAL' : 'DAMAGED / BREAKDOWN'}</span>
                             <span className="text-[10px] text-slate-400 font-normal">by {log.submittedBy}</span>
-=======
-                            <span>{log.status === 'WORKING' ? 'BEKERJA / NORMAL' : 'RUSAK / BREAKDOWN'}</span>
-                            <span className="text-[10px] text-slate-400 font-normal">oleh {log.submittedBy}</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           </div>
                           <div className="text-slate-500 text-[11px]">{log.damageDescription || log.location}</div>
                         </div>
@@ -1461,11 +1110,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                     ))}
                   </div>
                 ) : (
-<<<<<<< HEAD
                   <p className="text-slate-400 italic">No daily inspection logs recorded.</p>
-=======
-                  <p className="text-slate-400 italic">Belum ada log pemeriksaan harian.</p>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 )}
               </div>
             </div>
@@ -1475,11 +1120,7 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, onRefresh }) => 
                 onClick={() => setSelectedAssetHistory(null)}
                 className="px-4 py-1.5 text-xs font-semibold text-white bg-slate-900 rounded hover:bg-slate-800 cursor-pointer"
               >
-<<<<<<< HEAD
                 Close
-=======
-                Tutup
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </button>
             </div>
           </div>

@@ -41,10 +41,7 @@ import { Sparkline, SparklinePoint } from './Sparkline.tsx';
 import { FleetGpsMap } from './FleetGpsMap.tsx';
 import { DocumentPreviewModal, SupportedDocType } from './DocumentPreviewModal.tsx';
 import { api } from '../services/api.ts';
-<<<<<<< HEAD
 import { formatRupiahAmount } from '../shared/currency.tsx';
-=======
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
 interface DashboardViewProps {
   metrics: {
@@ -329,35 +326,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </tr>
           <tr>
             <td><strong>Net Invoiced Revenue</strong></td>
-<<<<<<< HEAD
             <td class="num highlight">${formatRupiahAmount(displayedNetInvoiced)}</td>
-=======
-            <td class="num highlight">$${displayedNetInvoiced.toLocaleString()}</td>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             <td class="num positive">+${momRevenueGrowthPercent.toFixed(1)}%</td>
             <td>Operational commercial billings issued</td>
           </tr>
           <tr>
             <td><strong>Collected Cash Payments</strong></td>
-<<<<<<< HEAD
             <td class="num highlight">${formatRupiahAmount(displayedCollected)}</td>
-=======
-            <td class="num highlight">$${displayedCollected.toLocaleString()}</td>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             <td class="num positive">+${momPaymentGrowthPercent.toFixed(1)}%</td>
             <td>Verified bank and wire settlements</td>
           </tr>
           <tr>
             <td><strong>Outstanding AR Balance</strong></td>
-<<<<<<< HEAD
             <td class="num">${formatRupiahAmount(displayedOutstandingAR)}</td>
             <td class="num">-8.5%</td>
             <td>Overdue Aging: ${formatRupiahAmount(displayedOverdue)}</td>
-=======
-            <td class="num">$${displayedOutstandingAR.toLocaleString()}</td>
-            <td class="num">-8.5%</td>
-            <td>Overdue Aging: $${displayedOverdue.toLocaleString()}</td>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </tr>
           <tr>
             <td><strong>Rental Fleet Utilization</strong></td>
@@ -375,15 +358,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <tr class="table-header" style="background-color: #0369a1;">
             <th>Period Label</th>
             <th>Effective Date</th>
-<<<<<<< HEAD
             <th class="num">Net Invoiced Revenue (IDR)</th>
             <th class="num">Commercial Sales (IDR)</th>
             <th class="num">Equipment Leases (IDR)</th>
-=======
-            <th class="num">Net Invoiced Revenue ($)</th>
-            <th class="num">Commercial Sales ($)</th>
-            <th class="num">Equipment Leases ($)</th>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </tr>
           ${activeData
             .map(
@@ -391,15 +368,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <tr>
               <td><strong>${row.label}</strong></td>
               <td>${row.date}</td>
-<<<<<<< HEAD
               <td class="num highlight">${formatRupiahAmount(row.invoicedRevenue)}</td>
               <td class="num">${formatRupiahAmount(row.salesRevenue)}</td>
               <td class="num">${formatRupiahAmount(row.rentalRevenue)}</td>
-=======
-              <td class="num highlight">$${row.invoicedRevenue.toLocaleString()}</td>
-              <td class="num">$${row.salesRevenue.toLocaleString()}</td>
-              <td class="num">$${row.rentalRevenue.toLocaleString()}</td>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </tr>`
             )
             .join('')}
@@ -413,11 +384,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <tr class="table-header" style="background-color: #15803d;">
             <th>Period Label</th>
             <th>Effective Date</th>
-<<<<<<< HEAD
             <th class="num">Collected Payments (IDR)</th>
-=======
-            <th class="num">Collected Payments ($)</th>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             <th>Settlement Velocity</th>
           </tr>
           ${activeData
@@ -426,11 +393,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <tr>
               <td><strong>${row.label}</strong></td>
               <td>${row.date}</td>
-<<<<<<< HEAD
               <td class="num highlight">${formatRupiahAmount(row.collectedPayments)}</td>
-=======
-              <td class="num highlight">$${row.collectedPayments.toLocaleString()}</td>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               <td>100% Confirmed Multi-Invoice Allocation</td>
             </tr>`
             )
@@ -445,13 +408,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <tr class="table-header" style="background-color: #b45309;">
             <th>Period Label</th>
             <th>Effective Date</th>
-<<<<<<< HEAD
             <th class="num">Outstanding Balance (IDR)</th>
             <th class="num">Overdue Balance (IDR)</th>
-=======
-            <th class="num">Outstanding Balance ($)</th>
-            <th class="num">Overdue Balance ($)</th>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </tr>
           ${activeData
             .map(
@@ -459,13 +417,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <tr>
               <td><strong>${row.label}</strong></td>
               <td>${row.date}</td>
-<<<<<<< HEAD
               <td class="num highlight">${formatRupiahAmount(row.outstandingAR)}</td>
               <td class="num" style="color: #b91c1c;">${formatRupiahAmount(row.overdueAmount)}</td>
-=======
-              <td class="num highlight">$${row.outstandingAR.toLocaleString()}</td>
-              <td class="num" style="color: #b91c1c;">$${row.overdueAmount.toLocaleString()}</td>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </tr>`
             )
             .join('')}
@@ -501,11 +454,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     const safeDate = new Date().toISOString().slice(0, 10);
     exportExcelFromHtml(excelContent, `Apex_Commercial_Analytics_Charts_${safeDate}.xlsx`);
 
-<<<<<<< HEAD
     setExportNotice('Excel file downloaded successfully! All 4 chart datasets have been saved.');
-=======
-    setExportNotice('File Excel berhasil diunduh! Seluruh 4 dataset chart telah tersimpan.');
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     setTimeout(() => setExportNotice(null), 4000);
   };
 
@@ -523,7 +472,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     quickActions: { id: string; label: string; icon: any; action: () => void }[];
   }> = {
     EXECUTIVE: {
-<<<<<<< HEAD
       title: '1. Executive Control Center (Chief Executive Officer)',
       description: 'Access all operational and commercial features, including gross profit, cash flow, fleet utilization, and month-over-month revenue reports.',
       quickActions: [
@@ -540,24 +488,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       description: 'Full access to all features, user and access management, REST API Explorer, Swagger schema, automated test runner, and audit logs.',
       quickActions: [
         { id: 'userManagement', label: 'User Management (IT)', icon: Users, action: () => onNavigate('user-management') },
-=======
-      title: '1. Pusat Kendali Eksekutif (Direktur Utama)',
-      description: 'Akses seluruh fitur operasional & komersial. Laporan eksekutif laba kotor, arus kas, utilisasi armada, dan revenue MoM (Export PDF & Excel).',
-      quickActions: [
-        { id: 'reports', label: 'Executive Report & Laba', icon: TrendingUp, action: () => onNavigate('reports') },
-        { id: 'excelExport', label: 'Unduh Excel (All Charts)', icon: FileSpreadsheet, action: () => handleExportAllChartsToExcel() },
-        { id: 'printView', label: 'Print Laporan PDF', icon: Printer, action: () => window.print() },
-        { id: 'invoices', label: 'Invoicing & Saldo AR', icon: DollarSign, action: () => onNavigate('invoices') },
-        { id: 'assets', label: 'Status Armada Aset', icon: Boxes, action: () => onNavigate('assets') },
-        { id: 'rentals', label: 'Kontrak Sewa Aktif', icon: Calendar, action: () => onNavigate('rentals') },
-      ],
-    },
-    ADMIN_IT: {
-      title: '2. Administrator Admin (IT & System DevOps)',
-      description: 'Akses penuh ke semua fitur, Manajemen Pengguna & Hak Akses, REST API Explorer, Swagger schema, automated test suite runner, dan log audit.',
-      quickActions: [
-        { id: 'userManagement', label: 'Manajemen Pengguna (IT)', icon: Users, action: () => onNavigate('user-management') },
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         { id: 'apiExplorer', label: 'REST API & Swagger', icon: Terminal, action: () => onNavigate('api-explorer') },
         { id: 'testRunner', label: 'Automated Test Suite', icon: AlertTriangle, action: () => onNavigate('test-runner') },
         { id: 'settings', label: 'Audit Trail & Settings', icon: ShieldCheck, action: () => onNavigate('settings') },
@@ -565,7 +495,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       ],
     },
     SALES_MARKETING: {
-<<<<<<< HEAD
       title: '3. Sales & Marketing Workspace',
       description: 'Manage customer and project data, sales quotations, sales orders, and equipment allocations.',
       quickActions: [
@@ -584,31 +513,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         { id: 'assets', label: 'Asset Registration & Tagging', icon: Boxes, action: () => onNavigate('assets') },
         { id: 'legalDocs', label: 'Legal Documents (STNK/SIA)', icon: FileText, action: () => onNavigate('assets') },
         { id: 'deliveries', label: 'Delivery Order (DO)', icon: Truck, action: () => onNavigate('deliveries') },
-=======
-      title: '3. Ruang Kerja Sales & Marketing Support',
-      description: 'Mengolah seluruh data customer, data project atau client, penawaran harga (sales quotation), sales order, dan alokasi unit.',
-      quickActions: [
-        { id: 'quotation', label: 'Buat Penawaran (Quotation)', icon: FileText, action: () => onOpenQuickNew('quotation') },
-        { id: 'salesOrder', label: 'Direct Sales Order', icon: ArrowUpRight, action: () => onOpenQuickNew('salesOrder') },
-        { id: 'customers', label: 'Database Customer CRM', icon: Users, action: () => onNavigate('customers') },
-        { id: 'products', label: 'Katalog Produk & Aset', icon: Boxes, action: () => onNavigate('products') },
-        { id: 'salesView', label: 'Daftar Pesanan Sales', icon: Briefcase, action: () => onNavigate('sales') },
-      ],
-    },
-    ASSET_CONTROL: {
-      title: '4. Ruang Kerja Asset Control (Asset Management)',
-      description: 'Mengurus registrasi aset, peta aktual lokasi alat (GPS), delivery, penomoran unit, dan dokumen legalitas: STNK, BPKB, SIA kelaikan Disnaker.',
-      quickActions: [
-        { id: 'gpsMap', label: 'Peta Aktual Lokasi Alat (GPS)', icon: Truck, action: () => onNavigate('assets') },
-        { id: 'assets', label: 'Registrasi & Tagging Aset', icon: Boxes, action: () => onNavigate('assets') },
-        { id: 'legalDocs', label: 'Dokumen Legal (STNK/SIA)', icon: FileText, action: () => onNavigate('assets') },
-        { id: 'deliveries', label: 'Surat Jalan Delivery (DO)', icon: Truck, action: () => onNavigate('deliveries') },
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         { id: 'maintenance', label: 'Perawatan & Kalibrasi', icon: Wrench, action: () => onNavigate('maintenance') },
       ],
     },
     MANAGEMENT_OPERATION: {
-<<<<<<< HEAD
       title: '5. Operations Management Workspace (Field Operations)',
       description: 'Manage field equipment assignments and operator qualification license expiry.',
       quickActions: [
@@ -645,49 +553,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         { id: 'arTrace', label: 'Receivables Tracking', icon: Clock, action: () => onNavigate('invoices') },
         { id: 'arAging', label: 'Receivables Aging Report', icon: TrendingUp, action: () => onNavigate('reports') },
         { id: 'pmtCollect', label: 'Record Invoice Payment', icon: Banknote, action: () => onOpenQuickNew('payment') },
-=======
-      title: '5. Ruang Kerja Management Operation (Field Operation)',
-      description: 'Mengatur penugasan operator alat berat di lapangan dan mengelola masa berlaku dokumen kualifikasi operator (SIO Kemenaker).',
-      quickActions: [
-        { id: 'operatorMgt', label: 'Operator & Dokumen SIO', icon: Wrench, action: () => onNavigate('maintenance') },
-        { id: 'assetAssign', label: 'Armada & Penugasan Unit', icon: Boxes, action: () => onNavigate('assets') },
-        { id: 'fieldOrders', label: 'Perintah Kerja Lapangan', icon: Clock, action: () => onNavigate('maintenance') },
-        { id: 'fieldDelivery', label: 'Serah Terima Fisik (DO)', icon: Truck, action: () => onNavigate('deliveries') },
-      ],
-    },
-    PROCUREMENT: {
-      title: '6. Ruang Kerja Procurement (Pengadaan & Pembelian)',
-      description: 'Melakukan pembelanjaan aset baru, sparepart pengganti, pelumas mesin, PO vendor supplier, dan keperluan operasional kantor.',
-      quickActions: [
-        { id: 'poCreate', label: 'Purchase Order (PO) Baru', icon: PackageSearch, action: () => onNavigate('procurement') },
-        { id: 'vendorList', label: 'Daftar Vendor Supplier', icon: Users, action: () => onNavigate('procurement') },
-        { id: 'goodsReceive', label: 'Penerimaan Sparepart', icon: Boxes, action: () => onNavigate('procurement') },
-        { id: 'spareCatalog', label: 'Katalog Suku Cadang', icon: Briefcase, action: () => onNavigate('products') },
-      ],
-    },
-    FINANCE_ACCOUNTING_TAX: {
-      title: '7. Ruang Kerja Accounting Finance & Tax (FAT)',
-      description: 'Recording seluruh transaksi keuangan, jurnal data akun, perhitungan pajak komersial (PPN 11%, PPh 23), dan penerbitan faktur tagihan.',
-      quickActions: [
-        { id: 'invoiceNew', label: 'Terbitkan Faktur Tagihan', icon: CreditCard, action: () => onOpenQuickNew('invoice') },
-        { id: 'paymentNew', label: 'Catat Pembayaran Masuk', icon: Banknote, action: () => onOpenQuickNew('payment') },
-        { id: 'taxReport', label: 'Perhitungan Pajak (FAT)', icon: DollarSign, action: () => onNavigate('reports') },
-        { id: 'invoiceList', label: 'Daftar Faktur & Jurnal', icon: FileText, action: () => onNavigate('invoices') },
-      ],
-    },
-    AR_MANAGEMENT: {
-      title: '8. Ruang Kerja AR Management (Accounts Receivable)',
-      description: 'Tracing tagihan piutang, monitoring invoice outstanding, penagihan aging buckets (0-30, 31-60, 61-90, >90 hari), dan rekonsiliasi.',
-      quickActions: [
-        { id: 'arTrace', label: 'Tracing Tagihan Piutang', icon: Clock, action: () => onNavigate('invoices') },
-        { id: 'arAging', label: 'Laporan Aging Piutang', icon: TrendingUp, action: () => onNavigate('reports') },
-        { id: 'pmtCollect', label: 'Catat Pelunasan Tagihan', icon: Banknote, action: () => onOpenQuickNew('payment') },
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         { id: 'custAccount', label: 'Statement of Account', icon: Users, action: () => onNavigate('customers') },
       ],
     },
     OPERATOR_USER: {
-<<<<<<< HEAD
       title: '9. Field Operator Workspace (Equipment Status)',
       description: 'Scan equipment barcodes and report operational readiness or breakdowns.',
       quickActions: [
@@ -708,21 +577,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       description: 'Review submissions awaiting approval and view contracts.',
       quickActions: [
         { id: 'approvals', label: 'Approvals & Contracts', icon: CheckCircle2, action: () => onNavigate('manager-approvals') },
-=======
-      title: '9. Ruang Kerja Operator Lapangan (Status Alat)',
-      description: 'Pindai tag barcode pada unit alat berat fisik dan kirimkan status kesiapan kerja (Bekerja Normal vs Rusak / Breakdown).',
-      quickActions: [
-        { id: 'scanStatus', label: 'Scan & Cek Status Alat', icon: QrCode, action: () => onNavigate('operator-status') },
-      ],
-    },
-    TECHNICAL_SERVICE: {
-      title: '10. Ruang Kerja Technical Service & Bengkel Mekanik',
-      description: 'Pengerjaan tiket perbaikan dari laporan operator, scan barcode mulai/selesai servis, dan penggantian sparepart/jasa procurement.',
-      quickActions: [
-        { id: 'techDashboard', label: 'Dashboard & Scan Servis', icon: Wrench, action: () => onNavigate('technical-service') },
-        { id: 'workOrders', label: 'Riwayat Work Orders', icon: ShieldCheck, action: () => onNavigate('maintenance') },
-        { id: 'assetList', label: 'Kondisi Armada Alat', icon: Boxes, action: () => onNavigate('assets') },
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       ],
     },
   };
@@ -763,15 +617,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         list.push({
           id: q.quotationNumber || q.id,
           type: 'QUOTATION',
-<<<<<<< HEAD
           typeLabel: 'Quotation',
           badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
           party: q.customerName || 'PT Project Partner',
-=======
-          typeLabel: 'Surat Penawaran Harga (Quotation)',
-          badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
-          party: q.customerName || 'PT Client Mitra Proyek',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           date: q.date || q.issueDate || q.createdAt?.slice(0, 10) || '2026-10-15',
           amount: q.grandTotal || q.totalAmount || q.subtotal || 0,
           status: q.status || 'SENT',
@@ -787,21 +635,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         list.push({
           id: clientPoId,
           type: 'CLIENT_PO',
-<<<<<<< HEAD
           typeLabel: 'Customer Purchase Order',
           badgeColor: 'bg-sky-100 text-sky-900 border-sky-300',
           party: so.customerName || 'PT Project Partner',
           date: so.orderDate || so.createdAt?.slice(0, 10) || '2026-10-15',
           amount: so.grandTotal || so.totalAmount || 0,
           status: so.status === 'COMPLETED' ? 'FULFILLED' : 'CONFIRMED',
-=======
-          typeLabel: 'PO dari Client (Bukan PO Procurement)',
-          badgeColor: 'bg-sky-100 text-sky-900 border-sky-300',
-          party: so.customerName || 'PT Client Mitra Proyek',
-          date: so.orderDate || so.createdAt?.slice(0, 10) || '2026-10-15',
-          amount: so.grandTotal || so.totalAmount || 0,
-          status: so.status === 'COMPLETED' ? 'TERPENUHI (FULFILLED)' : 'DITERIMA (CONFIRMED)',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           raw: {
             ...so,
             id: clientPoId,
@@ -822,21 +661,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             list.push({
               id: clientPoId,
               type: 'CLIENT_PO',
-<<<<<<< HEAD
               typeLabel: 'Customer Purchase Order',
               badgeColor: 'bg-sky-100 text-sky-900 border-sky-300',
               party: q.customerName || 'PT Project Partner',
               date: q.approvalDate?.slice(0, 10) || q.date || '2026-10-10',
               amount: q.grandTotal || q.totalAmount || 0,
               status: 'CUSTOMER APPROVED',
-=======
-              typeLabel: 'PO dari Client (Bukan PO Procurement)',
-              badgeColor: 'bg-sky-100 text-sky-900 border-sky-300',
-              party: q.customerName || 'PT Client Mitra Proyek',
-              date: q.approvalDate?.slice(0, 10) || q.date || '2026-10-10',
-              amount: q.grandTotal || q.totalAmount || 0,
-              status: 'DISETUJUI KLIEN',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               raw: {
                 ...q,
                 id: clientPoId,
@@ -857,11 +687,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         list.push({
           id: so.orderNumber || so.id,
           type: 'SALES_ORDER',
-<<<<<<< HEAD
           typeLabel: 'Sales Order',
-=======
-          typeLabel: 'Surat Pesanan (Sales Order)',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           badgeColor: 'bg-blue-100 text-blue-900 border-blue-300',
           party: so.customerName || 'PT Client',
           date: so.orderDate || so.createdAt?.slice(0, 10) || '2026-10-15',
@@ -878,11 +704,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         list.push({
           id: rc.contractNumber || rc.id,
           type: 'RENTAL',
-<<<<<<< HEAD
           typeLabel: 'Rental Contract',
-=======
-          typeLabel: 'Perjanjian Kontrak Sewa (Rental)',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           badgeColor: 'bg-purple-100 text-purple-900 border-purple-300',
           party: rc.customerName || 'PT Client',
           date: rc.startDate || '2026-10-01',
@@ -899,11 +721,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         list.push({
           id: inv.invoiceNumber || inv.id,
           type: 'INVOICE',
-<<<<<<< HEAD
           typeLabel: 'Invoice',
-=======
-          typeLabel: 'Faktur Tagihan (Invoice)',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           badgeColor: 'bg-emerald-100 text-emerald-900 border-emerald-300',
           party: inv.customerName || 'PT Client',
           date: inv.issueDate || '2026-10-10',
@@ -921,15 +739,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         list.push({
           id: po.poNumber || po.id,
           type: 'PURCHASE_ORDER',
-<<<<<<< HEAD
           typeLabel: 'Procurement Purchase Order (Vendor PO)',
           badgeColor: 'bg-indigo-100 text-indigo-900 border-indigo-300',
           party: po.vendorName || 'Partner Supplier',
-=======
-          typeLabel: 'PO Tim Procurement (Vendor PO)',
-          badgeColor: 'bg-indigo-100 text-indigo-900 border-indigo-300',
-          party: po.vendorName || 'Supplier Mitra',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           date: po.orderDate || '2026-10-05',
           amount: po.grandTotal || po.subtotal || 0,
           status: po.status || 'ORDERED',
@@ -944,11 +756,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         list.push({
           id: del.deliveryNumber || del.id,
           type: 'DELIVERY',
-<<<<<<< HEAD
           typeLabel: 'Delivery Order',
-=======
-          typeLabel: 'Surat Jalan (Delivery Order)',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           badgeColor: 'bg-teal-100 text-teal-900 border-teal-300',
           party: del.customerName || 'PT Client',
           date: del.deliveryDate || '2026-10-12',
@@ -965,15 +773,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         list.push({
           id: ast.assetTag || ast.id,
           type: 'ASSET',
-<<<<<<< HEAD
           typeLabel: 'Equipment Registration & Compliance (SIA/STNK)',
           badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
           party: ast.name || 'Heavy Equipment',
-=======
-          typeLabel: 'Register & Kelaikan Alat (SIA/STNK)',
-          badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
-          party: ast.name || 'Alat Berat',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           date: ast.legalDocs?.siaExpiry || '2027-01-01',
           amount: ast.purchaseCost || 0,
           status: ast.status || 'AVAILABLE',
@@ -988,15 +790,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         list.push({
           id: opr.badgeNumber || opr.id,
           type: 'OPERATOR',
-<<<<<<< HEAD
           typeLabel: 'Operator K3 License (SIO)',
           badgeColor: 'bg-cyan-100 text-cyan-900 border-cyan-300',
           party: opr.name || 'Field Operator',
-=======
-          typeLabel: 'Lisensi Operator K3 (SIO)',
-          badgeColor: 'bg-cyan-100 text-cyan-900 border-cyan-300',
-          party: opr.name || 'Operator Lapangan',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           date: opr.sioExpiry || '2027-06-30',
           amount: 0,
           status: opr.status || 'ACTIVE',
@@ -1060,18 +856,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   // Dynamic Category Pills for Table in Dashboard
   const dashboardCategoryPills = useMemo(() => {
-<<<<<<< HEAD
     const pills: Array<{ id: string; label: string }> = [{ id: 'ALL', label: `All (${roleDashboardDocs.length})` }];
-=======
-    const pills: Array<{ id: string; label: string }> = [{ id: 'ALL', label: `Semua (${roleDashboardDocs.length})` }];
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     const counts: Record<string, number> = {};
     roleDashboardDocs.forEach((d) => {
       counts[d.type] = (counts[d.type] || 0) + 1;
     });
 
     const labelMap: Record<string, string> = {
-<<<<<<< HEAD
       QUOTATION: 'Quotation',
       CLIENT_PO: 'Customer Purchase Order',
       SALES_ORDER: 'Sales Order',
@@ -1081,17 +872,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       DELIVERY: 'Delivery Order',
       ASSET: 'Asset Registration (STNK/SIA)',
       OPERATOR: 'Operator SIO License',
-=======
-      QUOTATION: 'Quotation (Penawaran)',
-      CLIENT_PO: 'PO dari Client',
-      SALES_ORDER: 'Sales Order',
-      RENTAL: 'Kontrak Sewa',
-      INVOICE: 'Faktur Tagihan',
-      PURCHASE_ORDER: 'PO Tim Procurement',
-      DELIVERY: 'Surat Jalan DO',
-      ASSET: 'Register Alat (STNK/SIA)',
-      OPERATOR: 'Lisensi Operator SIO',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       WORK_ORDER: 'Work Orders Servis',
     };
 
@@ -1123,11 +903,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   // Dedicated Excel export for role-specific dashboard table
   const handleExportDashboardTableToExcel = () => {
     const timestamp = new Date().toISOString().slice(0, 10);
-<<<<<<< HEAD
     const filename = `Apex_Dashboard_Report_${userRole}_${timestamp}.xls`;
-=======
-    const filename = `Apex_Laporan_Dashboard_${userRole}_${timestamp}.xls`;
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
     let rowsHtml = filteredDashboardDocs
       .map(
@@ -1138,11 +914,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <td>${doc.typeLabel}</td>
           <td>${doc.party}</td>
           <td>${doc.date}</td>
-<<<<<<< HEAD
           <td style="text-align: right;">${doc.amount > 0 ? formatRupiahAmount(doc.amount) : '-'}</td>
-=======
-          <td style="text-align: right;">${doc.amount > 0 ? '$' + doc.amount.toLocaleString() : '-'}</td>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           <td>${doc.status}</td>
         </tr>
       `
@@ -1161,30 +933,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </style>
       </head>
       <body>
-<<<<<<< HEAD
         <h2>Apex Industrial Solutions - Dashboard Report Table (${userRole})</h2>
         <p>Dashboard Workspace: ${currentRoleWorkspace.title} | Downloaded: ${new Date().toLocaleString()}</p>
-=======
-        <h2>Apex Industrial Solutions - Tabel Laporan Dashboard (${userRole})</h2>
-        <p>Wewenang Dashboard: ${currentRoleWorkspace.title} | Tanggal Unduh: ${new Date().toLocaleString()}</p>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         <table border="1" cellpadding="6" cellspacing="0">
           <thead>
             <tr>
               <th>No</th>
-<<<<<<< HEAD
               <th>Document ID</th>
               <th>Document Type</th>
               <th>Customer / Related Party</th>
               <th>Date</th>
               <th>Transaction Value (IDR)</th>
-=======
-              <th>Nomor ID Dokumen</th>
-              <th>Tipe Dokumen</th>
-              <th>Pelanggan / Pihak Terkait</th>
-              <th>Tanggal</th>
-              <th>Nilai Transaksi ($)</th>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               <th>Status</th>
             </tr>
           </thead>
@@ -1198,11 +957,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
     exportExcelFromHtml(excelHtml, filename);
 
-<<<<<<< HEAD
     setExportNotice(`Dashboard report table exported successfully: ${filename}`);
-=======
-    setExportNotice(`Tabel Laporan Dashboard berhasil diexport: ${filename}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     setTimeout(() => setExportNotice(null), 4000);
   };
 
@@ -1229,11 +984,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             Menu Kerja:
           </span>
           <span className="text-xs font-semibold text-amber-300 bg-slate-800 border border-slate-700 px-2 py-1 rounded">
-<<<<<<< HEAD
             Tailored to your role permissions
-=======
-            Disesuaikan dengan Hak Akses Peran
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </span>
         </div>
       </div>
@@ -1250,19 +1001,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 Live GPS Telematics
               </span>
               <h3 className="text-sm font-bold text-white">
-<<<<<<< HEAD
                 Live Heavy Equipment Fleet Map (Asset Management Dashboard)
               </h3>
             </div>
             <p className="text-xs text-slate-300 mt-0.5">
               Monitor live GPS coordinates for excavators, dump trucks, bulldozers, and cranes in Morowali, Balikpapan, Nusantara, Weda Bay, Surabaya, Jakarta, and Timika.
-=======
-                Lokasi Peta Aktual Armada Alat Berat (Dashboard Asset Management)
-              </h3>
-            </div>
-            <p className="text-xs text-slate-300 mt-0.5">
-              Pantau koordinat GPS aktual armada excavator, dump truck, bulldozer, crane di Morowali, Balikpapan, IKN Nusantara, Weda Bay, Surabaya, Jakarta, dan Timika.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </p>
           </div>
         </div>
@@ -1274,11 +1017,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-indigo-900/80 hover:bg-indigo-800 border border-indigo-500/40 rounded shadow-xs cursor-pointer transition-colors"
           >
             <Compass className="w-3.5 h-3.5 text-amber-400" />
-<<<<<<< HEAD
             <span>{showDashboardMap ? 'Close Map' : 'Open Map'}</span>
-=======
-            <span>{showDashboardMap ? 'Tutup Peta' : 'Buka Peta di Sini'}</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </button>
 
           <button
@@ -1287,11 +1026,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-slate-900 bg-amber-400 hover:bg-amber-300 rounded shadow-xs cursor-pointer transition-colors shrink-0"
           >
             <Truck className="w-3.5 h-3.5 text-slate-900" />
-<<<<<<< HEAD
             <span>Full Asset Dashboard</span>
-=======
-            <span>Dashboard Aset Penuh</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             <ArrowUpRight className="w-3.5 h-3.5 text-slate-900" />
           </button>
         </div>
@@ -1303,21 +1038,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="flex items-center justify-between pb-2 border-b border-slate-100">
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-rose-600" />
-<<<<<<< HEAD
               <h4 className="font-bold text-slate-900 text-xs">Live Project Fleet Coordinates &amp; Telemetry</h4>
-=======
-              <h4 className="font-bold text-slate-900 text-xs">Peta Koordinat &amp; Telemetri Aktual Armada Proyek</h4>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </div>
             <button
               onClick={() => setShowDashboardMap(false)}
               className="text-xs text-slate-500 hover:text-slate-800 font-semibold cursor-pointer"
             >
-<<<<<<< HEAD
               Close Map [✕]
-=======
-              Tutup Peta [✕]
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </button>
           </div>
           <FleetGpsMap assets={dashboardAssets} />
@@ -1333,17 +1060,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
             <div>
               <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-<<<<<<< HEAD
                 <span>Date Range &amp; Metric Trends</span>
               </h3>
               <p className="text-[11px] text-slate-500">
                 Select a date range to filter all financial metrics and sparklines below.
-=======
-                <span>Filter Periode Tanggal &amp; Tren Metrik</span>
-              </h3>
-              <p className="text-[11px] text-slate-500">
-                Pilih rentang waktu untuk memfilter seluruh metrik keuangan dan grafik sparkline di bawah.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </p>
             </div>
           </div>
@@ -1353,11 +1073,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <button
               onClick={handleExportAllChartsToExcel}
               className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded shadow-xs transition-colors cursor-pointer"
-<<<<<<< HEAD
               title="Download all chart and metric data to an Excel spreadsheet (.xls)"
-=======
-              title="Unduh seluruh data grafik dan metrik ke spreadsheet Excel (.xls)"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             >
               <FileSpreadsheet className="w-4 h-4 text-emerald-700 shrink-0" />
               <span>Convert to Excel (All Charts)</span>
@@ -1369,7 +1085,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Preset Range Buttons & Custom Date Pickers */}
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex flex-wrap items-center gap-1.5">
-<<<<<<< HEAD
             <span className="text-slate-500 font-medium text-[11px] mr-1">Date Range:</span>
             {(['30D', '3M', '6M', 'YTD', 'ALL', 'CUSTOM'] as DateRangePreset[]).map((p) => {
               const labels: Record<DateRangePreset, string> = {
@@ -1379,17 +1094,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 'YTD': 'Year to Date (YTD)',
                 'ALL': 'All Time',
                 'CUSTOM': 'Custom Dates...',
-=======
-            <span className="text-slate-500 font-medium text-[11px] mr-1">Preset Rentang:</span>
-            {(['30D', '3M', '6M', 'YTD', 'ALL', 'CUSTOM'] as DateRangePreset[]).map((p) => {
-              const labels: Record<DateRangePreset, string> = {
-                '30D': '30 Hari Terakhir',
-                '3M': '3 Bulan',
-                '6M': '6 Bulan (Default)',
-                'YTD': 'Tahun Berjalan (YTD)',
-                'ALL': 'Semua Waktu',
-                'CUSTOM': 'Kustom Tanggal...',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               };
               const isSelected = preset === p;
               return (
@@ -1413,11 +1117,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="flex items-center gap-2 text-[11px] font-mono text-slate-600 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded">
             <Filter className="w-3 h-3 text-slate-400" />
             <span>
-<<<<<<< HEAD
               Active: <strong>{activeData[0]?.label || startDate}</strong> to <strong>{activeData[activeData.length - 1]?.label || endDate}</strong> ({activeData.length} months)
-=======
-              Aktif: <strong>{activeData[0]?.label || startDate}</strong> s/d <strong>{activeData[activeData.length - 1]?.label || endDate}</strong> ({activeData.length} bulan)
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </span>
           </div>
         </div>
@@ -1425,15 +1125,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Interactive Custom Date Range Inputs if CUSTOM preset selected */}
         {showCustomInputs && (
           <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-3 text-xs bg-slate-50/70 p-3 rounded">
-<<<<<<< HEAD
             <span className="font-semibold text-slate-700">Set Custom Range:</span>
             <div className="flex items-center gap-2">
               <label className="text-slate-500">Start:</label>
-=======
-            <span className="font-semibold text-slate-700">Tentukan Rentang Kustom:</span>
-            <div className="flex items-center gap-2">
-              <label className="text-slate-500">Mulai:</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               <input
                 type="date"
                 value={startDate}
@@ -1443,11 +1137,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-<<<<<<< HEAD
               <label className="text-slate-500">End:</label>
-=======
-              <label className="text-slate-500">Selesai:</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               <input
                 type="date"
                 value={endDate}
@@ -1457,11 +1147,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
 
             <span className="text-[11px] text-slate-400">
-<<<<<<< HEAD
               Sparklines and MoM metrics will update automatically.
-=======
-              Grafik sparkline dan metrik MoM akan langsung diperbarui secara otomatis.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </span>
           </div>
         )}
@@ -1477,11 +1163,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               onClick={() => setExportNotice(null)}
               className="text-emerald-700 hover:text-emerald-900 text-xs font-bold"
             >
-<<<<<<< HEAD
               Close
-=======
-              Tutup
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </button>
           </div>
         )}
@@ -1499,11 +1181,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
             <div className="mt-2 flex items-baseline justify-between gap-2">
               <div className="text-2xl font-bold tracking-tight text-slate-900 font-mono-numbers">
-<<<<<<< HEAD
                 {formatRupiahAmount(displayedNetInvoiced)}
-=======
-                ${displayedNetInvoiced.toLocaleString(undefined, { minimumFractionDigits: 2 })}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </div>
               <div
                 className={`flex items-center gap-1 font-mono-numbers text-xs font-bold px-2 py-0.5 rounded border ${
@@ -1511,11 +1189,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
                     : 'text-rose-700 bg-rose-50 border-rose-200'
                 }`}
-<<<<<<< HEAD
                 title={`Previous Month: ${formatRupiahAmount(priorRev)} → Current Month: ${formatRupiahAmount(currRev)}`}
-=======
-                title={`Bulan Sebelumnya: $${priorRev.toLocaleString()} → Bulan Berjalan: $${currRev.toLocaleString()}`}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               >
                 <TrendingUp className="w-3.5 h-3.5 shrink-0" />
                 <span>{momRevenueGrowthPercent >= 0 ? '+' : ''}{momRevenueGrowthPercent.toFixed(1)}%</span>
@@ -1525,13 +1199,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
             {/* Invoiced Revenue Breakdown */}
             <div className="mt-2 text-[11px] text-slate-500 flex items-center justify-between">
-<<<<<<< HEAD
               <span>Sales: {formatRupiahAmount(displayedSalesRevenue)}</span>
               <span>Leases: {formatRupiahAmount(displayedRentalRevenue)}</span>
-=======
-              <span>Sales: ${displayedSalesRevenue.toLocaleString()}</span>
-              <span>Leases: ${displayedRentalRevenue.toLocaleString()}</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </div>
 
             {/* Dedicated Month-over-Month Revenue Growth Metric Box */}
@@ -1542,11 +1211,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <div className="flex items-center gap-1.5 font-semibold text-emerald-700">
                 <span>{momRevenueGrowthPercent >= 0 ? '+' : ''}{momRevenueGrowthPercent.toFixed(1)}%</span>
                 <span className="text-[10px] text-slate-400 font-normal">
-<<<<<<< HEAD
                   ({momRevenueDiff >= 0 ? '+' : '-'}{formatRupiahAmount(Math.abs(momRevenueDiff))})
-=======
-                  ({momRevenueDiff >= 0 ? '+$' : '-$'}{Math.abs(momRevenueDiff).toLocaleString()})
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </span>
               </div>
             </div>
@@ -1578,11 +1243,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
             <div className="mt-2 flex items-baseline justify-between gap-2">
               <div className="text-2xl font-bold tracking-tight text-emerald-700 font-mono-numbers">
-<<<<<<< HEAD
                 {formatRupiahAmount(displayedCollected)}
-=======
-                ${displayedCollected.toLocaleString(undefined, { minimumFractionDigits: 2 })}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </div>
               <div className="flex items-center gap-1 font-mono-numbers text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
                 <span>+{momPaymentGrowthPercent.toFixed(1)}%</span>
@@ -1597,11 +1258,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div className="mt-1.5 text-[11px] text-slate-600 flex items-center justify-between font-mono-numbers pt-1.5 border-t border-slate-100">
               <span className="text-slate-500 font-sans">MoM Cash Velocity:</span>
               <span className="font-semibold text-emerald-700">
-<<<<<<< HEAD
                 +{momPaymentGrowthPercent.toFixed(1)}% (+{formatRupiahAmount(momPaymentDiff)})
-=======
-                +{momPaymentGrowthPercent.toFixed(1)}% (+${momPaymentDiff.toLocaleString()})
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </span>
             </div>
           </div>
@@ -1630,17 +1287,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <Clock className="w-4 h-4 text-amber-600" />
             </div>
             <div className="mt-2 text-2xl font-bold tracking-tight text-slate-900 font-mono-numbers">
-<<<<<<< HEAD
               {formatRupiahAmount(displayedOutstandingAR)}
             </div>
             <div className="mt-1 text-[11px] text-amber-700 font-medium">
               Overdue: {formatRupiahAmount(displayedOverdue)}
-=======
-              ${displayedOutstandingAR.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            </div>
-            <div className="mt-1 text-[11px] text-amber-700 font-medium">
-              Overdue: ${displayedOverdue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </div>
           </div>
 
@@ -1699,17 +1349,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="bg-white border border-slate-200 rounded-md p-4 shadow-xs">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-<<<<<<< HEAD
             Role-Based Quick Actions ({currentRoleWorkspace.title})
           </h3>
           <span className="text-[11px] text-slate-400 font-mono">
             {currentRoleWorkspace.quickActions.length} Available Actions
-=======
-            Aksi Kerja Cepat Sesuai Peran ({currentRoleWorkspace.title})
-          </h3>
-          <span className="text-[11px] text-slate-400 font-mono">
-            {currentRoleWorkspace.quickActions.length} Menu Akses
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </span>
         </div>
 
@@ -1733,11 +1376,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* ========================================================================= */}
       {/* TABEL LAPORAN RESMI SESUAI ROLE MASING-MASING DI DASHBOARD (Requirements 6 & 7) */}
       {/* ========================================================================= */}
-<<<<<<< HEAD
       <div data-print-area className="bg-white border border-slate-200 rounded-md p-4 shadow-xs space-y-4">
-=======
-      <div className="bg-white border border-slate-200 rounded-md p-4 shadow-xs space-y-4">
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded bg-indigo-50 border border-indigo-200 text-indigo-700">
@@ -1746,7 +1385,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-<<<<<<< HEAD
                   Official Reports &amp; Documents ({currentRoleWorkspace.title})
                 </h3>
                 <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 uppercase">
@@ -1755,35 +1393,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
               <p className="text-[11px] text-slate-500 mt-0.5">
                 Showing {filteredDashboardDocs.length} official records available to your dashboard role. Select a document ID to open the full record.
-=======
-                  Tabel Laporan &amp; Dokumen Resmi ({currentRoleWorkspace.title})
-                </h3>
-                <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 uppercase">
-                  Sesuai Hak Akses Peran
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                Menampilkan {filteredDashboardDocs.length} berkas resmi yang relevan dengan kewenangan operasional dashboard Anda. Klik ID dokumen untuk membuka tampilan lengkap.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </p>
             </div>
           </div>
 
           {/* Quick Actions for Table */}
-<<<<<<< HEAD
           <div className="no-print flex items-center gap-2 shrink-0">
-=======
-          <div className="flex items-center gap-2 shrink-0">
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             <button
               type="button"
               onClick={handleExportDashboardTableToExcel}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded shadow-2xs transition-colors cursor-pointer"
-<<<<<<< HEAD
               title="Export this role-based report table to Excel"
-=======
-              title="Export tabel laporan peran ini ke Excel"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             >
               <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-700" />
               <span>Export Excel</span>
@@ -1794,11 +1414,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               type="button"
               onClick={() => window.print()}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded shadow-2xs transition-colors cursor-pointer"
-<<<<<<< HEAD
               title="Print this report table or save it as a PDF"
-=======
-              title="Cetak tabel laporan ke printer atau simpan sebagai PDF"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             >
               <Printer className="w-3.5 h-3.5 text-slate-600" />
               <span>Print PDF</span>
@@ -1808,26 +1424,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               type="button"
               onClick={() => onNavigate('reports')}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded shadow-2xs transition-colors cursor-pointer"
-<<<<<<< HEAD
               title="Open the full Reports Center"
             >
               <span>Full Reports Center</span>
-=======
-              title="Buka Pusat Laporan Lengkap"
-            >
-              <span>Pusat Laporan Lengkap</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
 
         {/* Search & Dynamic Filter Category Pills */}
-<<<<<<< HEAD
         <div className="no-print space-y-2.5">
-=======
-        <div className="space-y-2.5">
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -1835,33 +1441,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 type="text"
                 value={tableSearchTerm}
                 onChange={(e) => setTableSearchTerm(e.target.value)}
-<<<<<<< HEAD
                 placeholder="Search by document ID, client, equipment, or status..."
-=======
-                placeholder="Cari ID dokumen, nama klien, unit alat atau status..."
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 className="w-full pl-9 pr-3 py-1.5 border border-slate-300 rounded text-xs outline-none focus:border-slate-800 font-mono"
               />
             </div>
 
             <div className="text-[11px] text-slate-500 font-mono bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded flex items-center gap-1.5 shrink-0">
               <Filter className="w-3.5 h-3.5 text-slate-400" />
-<<<<<<< HEAD
               <span>Showing: <strong>{filteredDashboardDocs.length}</strong> of <strong>{roleDashboardDocs.length}</strong> records</span>
-=======
-              <span>Menampilkan: <strong>{filteredDashboardDocs.length}</strong> dari <strong>{roleDashboardDocs.length}</strong> data</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </div>
           </div>
 
           {/* Dynamic Category Filter Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 text-xs">
             <span className="text-[11px] font-semibold text-slate-500 shrink-0 mr-1">
-<<<<<<< HEAD
               Filter by Type:
-=======
-              Filter Jenis:
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </span>
             {dashboardCategoryPills.map((pill) => (
               <button
@@ -1887,7 +1481,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <thead>
                 <tr className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 text-[11px] uppercase tracking-wider">
                   <th className="py-2 px-3 text-center w-10">No</th>
-<<<<<<< HEAD
                   <th className="py-2 px-3">Document ID</th>
                   <th className="py-2 px-3">Document Type</th>
                   <th className="py-2 px-3">Client / Related Party</th>
@@ -1895,26 +1488,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <th className="py-2 px-3 text-right">Amount (IDR)</th>
                   <th className="py-2 px-3 text-center">Status</th>
                   <th className="py-2 px-3 text-right w-24">Actions</th>
-=======
-                  <th className="py-2 px-3">Nomor ID Dokumen (Klik ID)</th>
-                  <th className="py-2 px-3">Tipe Dokumen Resmi</th>
-                  <th className="py-2 px-3">Klien / Pihak Terkait</th>
-                  <th className="py-2 px-3">Tanggal Terbit</th>
-                  <th className="py-2 px-3 text-right">Nilai ($)</th>
-                  <th className="py-2 px-3 text-center">Status</th>
-                  <th className="py-2 px-3 text-right w-24">Aksi</th>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
                 {filteredDashboardDocs.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-8 text-center text-slate-400">
-<<<<<<< HEAD
                       No official documents match the search filter "{tableSearchTerm}".
-=======
-                      Tidak ada dokumen resmi yang sesuai dengan filter pencarian "{tableSearchTerm}".
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </td>
                   </tr>
                 ) : (
@@ -1928,11 +1508,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           type="button"
                           onClick={() => setPreviewModalDoc({ type: doc.type, data: doc.raw })}
                           className="font-mono font-bold text-indigo-700 hover:text-indigo-900 hover:underline flex items-center gap-1.5 cursor-pointer text-left"
-<<<<<<< HEAD
                           title="Open the full official document preview"
-=======
-                          title="Klik untuk membuka pratinjau dokumen resmi lengkap"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         >
                           <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
                           <span>{doc.id}</span>
@@ -1950,11 +1526,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         {doc.date}
                       </td>
                       <td className="py-2.5 px-3 font-mono font-semibold text-right text-slate-900">
-<<<<<<< HEAD
                         {doc.amount > 0 ? formatRupiahAmount(doc.amount) : '-'}
-=======
-                        {doc.amount > 0 ? `$${doc.amount.toLocaleString()}` : '-'}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </td>
                       <td className="py-2.5 px-3 text-center">
                         <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-200">
@@ -1966,17 +1538,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           type="button"
                           onClick={() => setPreviewModalDoc({ type: doc.type, data: doc.raw })}
                           className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded cursor-pointer transition-colors"
-<<<<<<< HEAD
                           title="View document preview"
                         >
                           <Eye className="w-3 h-3 text-indigo-600" />
                           <span>View</span>
-=======
-                          title="Lihat Pratinjau Dokumen"
-                        >
-                          <Eye className="w-3 h-3 text-indigo-600" />
-                          <span>Lihat</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         </button>
                       </td>
                     </tr>
@@ -1987,21 +1552,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
           {filteredDashboardDocs.length > 15 && (
             <div className="p-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
-<<<<<<< HEAD
               <span>Showing 15 of {filteredDashboardDocs.length} records. Open the Reports Center for the full audit.</span>
-=======
-              <span>Menampilkan 15 dari {filteredDashboardDocs.length} berkas. Buka Pusat Laporan untuk audit lengkap.</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               <button
                 type="button"
                 onClick={() => onNavigate('reports')}
                 className="font-semibold text-indigo-700 hover:text-indigo-900 cursor-pointer"
               >
-<<<<<<< HEAD
                 View All {filteredDashboardDocs.length} Records &rarr;
-=======
-                Lihat Seluruh {filteredDashboardDocs.length} Berkas &rarr;
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </button>
             </div>
           )}
@@ -2016,17 +1573,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">
-<<<<<<< HEAD
                   Operational Workflow &amp; Document Status
                 </h3>
                 <p className="text-[11px] text-slate-500 mt-0.5">
                   Displays modules relevant to your account's responsibilities and permissions.
-=======
-                  Alur Kerja Operasional &amp; Status Dokumen
-                </h3>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Menampilkan modul yang relevan dengan tugas dan wewenang akun Anda.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </p>
               </div>
               <span className="text-xs text-slate-500 font-mono">Real-Time Sync</span>
@@ -2047,11 +1597,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     Quotations → Customer Acceptance → Order Allocation
                   </p>
                   <div className="mt-2 text-xs font-mono font-medium text-slate-900">
-<<<<<<< HEAD
                     {formatRupiahAmount(displayedSalesRevenue)} booked
-=======
-                    ${displayedSalesRevenue.toLocaleString()} booked
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                 </div>
               )}
@@ -2089,11 +1635,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     Billing → Multi-Invoice Allocation → AR Aging
                   </p>
                   <div className="mt-2 text-xs font-mono font-medium text-slate-900">
-<<<<<<< HEAD
                     {formatRupiahAmount(displayedCollected)} collected
-=======
-                    ${displayedCollected.toLocaleString()} collected
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                 </div>
               )}
@@ -2105,19 +1647,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   className="p-3 border border-amber-200 rounded hover:border-amber-300 cursor-pointer bg-amber-50/40 transition-colors col-span-2"
                 >
                   <div className="text-xs font-semibold text-amber-900 flex items-center justify-between">
-<<<<<<< HEAD
                     <span>Heavy Equipment Legal &amp; Compliance Documents</span>
                     <ArrowUpRight className="w-3.5 h-3.5 text-amber-600" />
                   </div>
                   <p className="mt-1 text-xs text-amber-800">
                     Track STNK, BPKB, Equipment Permits (SIA), chassis/engine numbers, and K3 inspection expiry dates.
-=======
-                    <span>Legalitas Alat Berat &amp; Dokumen Kelaikan</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-amber-600" />
-                  </div>
-                  <p className="mt-1 text-xs text-amber-800">
-                    Tracking STNK, BPKB, Surat Ijin Alat (SIA), nomor rangka/mesin, dan masa berlaku uji berkala K3.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </p>
                   <div className="mt-2 text-xs font-mono font-medium text-amber-950">
                     Armada alat berat terverifikasi &amp; berdokumen legal
@@ -2132,7 +1666,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   className="p-3 border border-indigo-200 rounded hover:border-indigo-300 cursor-pointer bg-indigo-50/40 transition-colors col-span-2"
                 >
                   <div className="text-xs font-semibold text-indigo-900 flex items-center justify-between">
-<<<<<<< HEAD
                     <span>Operator Qualifications &amp; SIO Certificates</span>
                     <ArrowUpRight className="w-3.5 h-3.5 text-indigo-600" />
                   </div>
@@ -2141,16 +1674,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   </p>
                   <div className="mt-2 text-xs font-mono font-medium text-indigo-950">
                     Certified operators ready for field deployment
-=======
-                    <span>Kualifikasi Operator &amp; Sertifikat SIO</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-indigo-600" />
-                  </div>
-                  <p className="mt-1 text-xs text-indigo-800">
-                    Manajemen personil operator alat berat, validasi SIO Kelas 1/2/3 Kemenaker, dan penugasan proyek.
-                  </p>
-                  <div className="mt-2 text-xs font-mono font-medium text-indigo-950">
-                    Operator bersertifikat &amp; siap mobilisasi lapangan
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                 </div>
               )}
@@ -2162,7 +1685,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   className="p-3 border border-emerald-200 rounded hover:border-emerald-300 cursor-pointer bg-emerald-50/40 transition-colors col-span-2"
                 >
                   <div className="text-xs font-semibold text-emerald-900 flex items-center justify-between">
-<<<<<<< HEAD
                     <span>Asset Procurement &amp; Spare Parts Purchasing</span>
                     <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
                   </div>
@@ -2171,16 +1693,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   </p>
                   <div className="mt-2 text-xs font-mono font-medium text-emerald-950">
                     Integrated office procurement and depot operations workflow
-=======
-                    <span>Pengadaan Aset &amp; Pembelanjaan Sparepart</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
-                  </div>
-                  <p className="mt-1 text-xs text-emerald-800">
-                    Purchase Order (PO) vendor, pelumas hidrolik, filter maintenance kit, dan penerimaan barang gudang.
-                  </p>
-                  <div className="mt-2 text-xs font-mono font-medium text-emerald-950">
-                    Alur pengadaan kantor &amp; operasional depot terintegrasi
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                 </div>
               )}
@@ -2192,7 +1704,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   className="p-3 border border-sky-200 rounded hover:border-sky-300 cursor-pointer bg-sky-50/40 transition-colors col-span-2"
                 >
                   <div className="text-xs font-semibold text-sky-900 flex items-center justify-between">
-<<<<<<< HEAD
                     <span>Invoice Tracking &amp; AR Aging Buckets</span>
                     <ArrowUpRight className="w-3.5 h-3.5 text-sky-600" />
                   </div>
@@ -2201,16 +1712,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   </p>
                   <div className="mt-2 text-xs font-mono font-medium text-sky-950">
                     Overdue monitored: {formatRupiahAmount(displayedOverdue)}
-=======
-                    <span>Tracing Tagihan &amp; AR Aging Buckets</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-sky-600" />
-                  </div>
-                  <p className="mt-1 text-xs text-sky-800">
-                    Monitoring jatuh tempo piutang 0-30, 31-60, 61-90, dan &gt;90 hari serta penerbitan statement of account.
-                  </p>
-                  <div className="mt-2 text-xs font-mono font-medium text-sky-950">
-                    Overdue terpantau: ${displayedOverdue.toLocaleString()}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                 </div>
               )}

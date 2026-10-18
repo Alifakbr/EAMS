@@ -2,22 +2,12 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Camera, CameraOff, FlipHorizontal, Flashlight, ImagePlus, X, AlertCircle, Loader2 } from 'lucide-react';
 
 /**
-<<<<<<< HEAD
  * QR/barcode scanner using the device's camera.
  *
  * - Uses the browser's built-in BarcodeDetector when available; otherwise loads ZXing lazily.
  * - Defaults to the rear camera on phones; camera switching and flashlight are available when supported.
  * - If the camera is unavailable (insecure HTTP, permission denied, or no camera), users can take or upload a barcode photo.
  * - Stops all camera streams when closed or unmounted.
-=======
- * Scanner QR/Barcode memakai kamera ASLI perangkat.
- *
- * - Memakai BarcodeDetector bawaan browser bila ada (cepat), jika tidak memakai ZXing (dimuat lazy).
- * - Kamera belakang jadi default di HP; bisa ganti kamera & nyalakan senter bila didukung.
- * - Jika kamera tidak bisa dipakai (HTTP non-aman, izin ditolak, tidak ada kamera), tersedia
- *   cadangan "Foto Barcode" (membuka kamera/galeri lewat input file) + input manual di halaman induk.
- * - Semua stream dihentikan saat ditutup / unmount (lampu kamera mati).
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
  */
 
 interface BarcodeScannerProps {
@@ -26,11 +16,7 @@ interface BarcodeScannerProps {
   hint?: string;
 }
 
-<<<<<<< HEAD
 /** Extract an asset tag from QR content (e.g. a URL or longer text). */
-=======
-/** Ambil tag aset dari isi QR (mis. URL atau teks panjang). */
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 export function normalizeScan(raw: string): string {
   const text = raw.trim();
   const m = /AST-[A-Z0-9-]+/i.exec(text);
@@ -83,7 +69,6 @@ async function createDetector(): Promise<Detector> {
 function describeCameraError(err: any): string {
   const name = err?.name || '';
   if (!window.isSecureContext) {
-<<<<<<< HEAD
     return 'Camera access requires a secure connection (HTTPS) or localhost. Open the app using https:// or use the "Scan Barcode from Photo" button below.';
   }
   if (name === 'NotAllowedError' || name === 'SecurityError') {
@@ -96,20 +81,6 @@ function describeCameraError(err: any): string {
     return 'The camera is in use by another app. Close the app or browser tab using it, then try again.';
   }
   return `Unable to open the camera (${name || 'unknown error'}). Use "Scan Barcode from Photo" or enter the code manually.`;
-=======
-    return 'Kamera hanya dapat dipakai lewat koneksi aman (HTTPS) atau localhost. Buka aplikasi dengan https:// atau gunakan tombol "Foto Barcode" di bawah.';
-  }
-  if (name === 'NotAllowedError' || name === 'SecurityError') {
-    return 'Izin kamera ditolak. Ketuk ikon gembok/kamera di bilah alamat browser → izinkan Kamera → muat ulang halaman. Atau gunakan "Foto Barcode".';
-  }
-  if (name === 'NotFoundError' || name === 'OverconstrainedError') {
-    return 'Kamera tidak ditemukan di perangkat ini. Gunakan "Foto Barcode" atau ketik kode secara manual.';
-  }
-  if (name === 'NotReadableError' || name === 'AbortError') {
-    return 'Kamera sedang dipakai aplikasi lain. Tutup aplikasi/tab yang memakai kamera lalu coba lagi.';
-  }
-  return `Kamera tidak dapat dibuka (${name || 'error tidak dikenal'}). Gunakan "Foto Barcode" atau ketik kode secara manual.`;
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 }
 
 export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onDetected, onClose, hint }) => {
@@ -150,11 +121,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onDetected, onCl
     return true;
   }, []);
 
-<<<<<<< HEAD
   // Start the camera
-=======
-  // Mulai kamera
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   useEffect(() => {
     let cancelled = false;
     let rafId = 0;
@@ -198,11 +165,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onDetected, onCl
         video.muted = true;
         await video.play();
 
-<<<<<<< HEAD
         // Camera labels become available after permission is granted.
-=======
-        // Daftar kamera (label baru tersedia setelah izin diberikan)
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         try {
           const all = await navigator.mediaDevices.enumerateDevices();
           if (!cancelled) setDevices(all.filter((d) => d.kind === 'videoinput'));
@@ -266,11 +229,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onDetected, onCl
     setDeviceId(devices[(idx + 1) % devices.length].deviceId);
   };
 
-<<<<<<< HEAD
   // Fallback: scan a barcode photo (also works over HTTP or when camera permission is denied).
-=======
-  // Cadangan: foto barcode (jalan juga di HTTP / saat izin kamera ditolak)
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   const handlePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -283,15 +242,9 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onDetected, onCl
       const code = await detectorRef.current(bmp, canvasRef.current!);
       bmp.close?.();
       if (code) handleHit(code);
-<<<<<<< HEAD
       else setPhotoMsg('Could not read a barcode from the image. Move closer, ensure there is enough light and the image is in focus, then try again.');
     } catch {
       setPhotoMsg('Could not process the image. Try again or enter the code manually.');
-=======
-      else setPhotoMsg('Barcode tidak terbaca pada foto. Dekatkan kamera, pastikan terang & tidak blur, lalu coba lagi.');
-    } catch {
-      setPhotoMsg('Foto tidak dapat diproses. Coba lagi atau ketik kode secara manual.');
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     } finally {
       setPhotoBusy(false);
     }
@@ -313,11 +266,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onDetected, onCl
         {status === 'starting' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-slate-300 text-xs">
             <Loader2 className="w-6 h-6 animate-spin" />
-<<<<<<< HEAD
             Opening camera… allow camera access if your browser prompts you.
-=======
-            Membuka kamera… izinkan akses kamera bila diminta browser.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </div>
         )}
 
@@ -330,30 +279,18 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onDetected, onCl
 
         <div className="absolute top-2 right-2 flex items-center gap-1.5">
           {torchSupported && status === 'scanning' && (
-<<<<<<< HEAD
             <button type="button" onClick={toggleTorch} title="Flashlight"
-=======
-            <button type="button" onClick={toggleTorch} title="Senter"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               className={`p-2 rounded-full cursor-pointer ${torchOn ? 'bg-amber-400 text-slate-900' : 'bg-black/55 text-white'}`}>
               <Flashlight className="w-4 h-4" />
             </button>
           )}
           {devices.length > 1 && (
-<<<<<<< HEAD
             <button type="button" onClick={switchCamera} title="Switch camera"
-=======
-            <button type="button" onClick={switchCamera} title="Ganti kamera"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               className="p-2 rounded-full bg-black/55 text-white cursor-pointer">
               <FlipHorizontal className="w-4 h-4" />
             </button>
           )}
-<<<<<<< HEAD
           <button type="button" onClick={onClose} title="Close camera"
-=======
-          <button type="button" onClick={onClose} title="Tutup kamera"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             className="p-2 rounded-full bg-black/55 text-white cursor-pointer">
             <X className="w-4 h-4" />
           </button>
@@ -361,30 +298,18 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onDetected, onCl
       </div>
 
       <p className="text-center text-[11px] text-emerald-300 font-mono">
-<<<<<<< HEAD
         {status === 'scanning' ? (hint || 'Point the camera at the equipment QR code / barcode') : ' '}
-=======
-        {status === 'scanning' ? (hint || 'Arahkan kamera ke QR / Barcode pada alat') : ' '}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       </p>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
         <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-[11px] font-semibold cursor-pointer">
           {photoBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImagePlus className="w-3.5 h-3.5" />}
-<<<<<<< HEAD
           Scan Barcode Photo (Camera / Gallery)
-=======
-          Foto Barcode (kamera / galeri)
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           <input type="file" accept="image/*" capture="environment" onChange={handlePhoto} className="hidden" />
         </label>
         <button type="button" onClick={onClose}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-rose-600/80 hover:bg-rose-600 text-[11px] font-semibold cursor-pointer">
-<<<<<<< HEAD
           <Camera className="w-3.5 h-3.5" /> Close Camera
-=======
-          <Camera className="w-3.5 h-3.5" /> Tutup Kamera
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         </button>
       </div>
 

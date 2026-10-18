@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { Payment, Customer, Invoice, PaymentMethod } from '../types/index.ts';
 import { api } from '../services/api.ts';
-<<<<<<< HEAD
 import { formatRupiahAmount } from '../shared/currency.tsx';
-=======
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 import {
   Banknote,
   Plus,
@@ -160,11 +157,7 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({
                     {pmt.allocations.length > 0 ? (
                       pmt.allocations.map((a, idx) => (
                         <div key={idx} className="font-mono text-[11px] text-slate-700">
-<<<<<<< HEAD
                           {a.invoiceNumber}: <span className="font-semibold">{formatRupiahAmount(a.allocatedAmount)}</span>
-=======
-                          {a.invoiceNumber}: <span className="font-semibold">${a.allocatedAmount.toFixed(2)}</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         </div>
                       ))
                     ) : (
@@ -172,26 +165,15 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({
                     )}
                   </td>
                   <td className="py-3 px-4 text-right font-mono-numbers font-bold text-emerald-700">
-<<<<<<< HEAD
                     {formatRupiahAmount(pmt.amount)}
-=======
-                    ${pmt.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </td>
                   <td className="py-3 px-4 text-right font-mono-numbers">
                     {pmt.unallocatedAmount > 0 ? (
                       <span className="font-semibold text-amber-700">
-<<<<<<< HEAD
                         {formatRupiahAmount(pmt.unallocatedAmount)}
                       </span>
                     ) : (
                       <span className="text-slate-400">Rp0</span>
-=======
-                        ${pmt.unallocatedAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                      </span>
-                    ) : (
-                      <span className="text-slate-400">$0.00</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     )}
                   </td>
                   <td className="py-3 px-4 text-center">
@@ -261,11 +243,7 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({
                 <div>
                   <span className="text-[10px] uppercase font-bold text-slate-500 block">Total Confirmed Payment</span>
                   <div className="text-2xl font-bold font-mono-numbers text-emerald-700 mt-1">
-<<<<<<< HEAD
                     {formatRupiahAmount(selectedPreviewPayment.amount)}
-=======
-                    ${selectedPreviewPayment.amount.toFixed(2)}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                 </div>
                 <div className="text-right text-xs">
@@ -296,11 +274,7 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({
                       <tr key={idx}>
                         <td className="py-2 px-3 font-semibold">{a.invoiceNumber}</td>
                         <td className="py-2 px-3 text-right font-bold text-slate-900">
-<<<<<<< HEAD
                           {formatRupiahAmount(a.allocatedAmount)}
-=======
-                          ${a.allocatedAmount.toFixed(2)}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         </td>
                       </tr>
                     ))}
@@ -354,11 +328,7 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({
                 >
                   {customers.map((c) => (
                     <option key={c.id} value={c.id}>
-<<<<<<< HEAD
                       {c.name} (Outstanding: {formatRupiahAmount(c.outstandingBalance)})
-=======
-                      {c.name} (Outstanding: ${c.outstandingBalance.toFixed(2)})
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </option>
                   ))}
                 </select>
@@ -366,11 +336,7 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-600 font-semibold mb-1">Total Payment Received (IDR) *</label>
-=======
-                  <label className="block text-slate-600 font-semibold mb-1">Total Payment Received ($) *</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="number"
                     step="0.01"
@@ -435,20 +401,12 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({
                         <div>
                           <div className="font-mono font-bold text-slate-900">{inv.invoiceNumber}</div>
                           <div className="text-[10px] text-slate-500">
-<<<<<<< HEAD
                             Due: {inv.dueDate} · Balance Due: <span className="font-mono font-semibold text-amber-700">{formatRupiahAmount(inv.outstandingBalance)}</span>
-=======
-                            Due: {inv.dueDate} · Balance Due: <span className="font-mono font-semibold text-amber-700">${inv.outstandingBalance.toFixed(2)}</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           </div>
                         </div>
 
                         <div className="flex items-center gap-2">
-<<<<<<< HEAD
                           <span className="text-slate-400 text-[11px]">Rp</span>
-=======
-                          <span className="text-slate-400 text-[11px]">$</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                           <input
                             type="number"
                             step="0.01"

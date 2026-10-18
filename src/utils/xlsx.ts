@@ -77,11 +77,7 @@ const normalize = (c: Cell): { v: string | number | null; bold: boolean } => {
   return { v: c ?? null, bold: false };
 };
 
-<<<<<<< HEAD
 export function buildXlsx(rows: Cell[][], sheetName = 'Report'): Uint8Array {
-=======
-export function buildXlsx(rows: Cell[][], sheetName = 'Laporan'): Uint8Array {
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   const widths: number[] = [];
   const rowXml = rows.map((row, r) => {
     const cells = row.map((raw, c) => {
@@ -100,11 +96,7 @@ export function buildXlsx(rows: Cell[][], sheetName = 'Laporan'): Uint8Array {
   const cols = widths.length
     ? `<cols>${widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols>`
     : '';
-<<<<<<< HEAD
   const safeName = xmlEsc(sheetName.replace(/[\\/?*[\]:]/g, ' ').slice(0, 31) || 'Report');
-=======
-  const safeName = xmlEsc(sheetName.replace(/[\\/?*[\]:]/g, ' ').slice(0, 31) || 'Laporan');
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
   const files = [
     { name: '[Content_Types].xml', text: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>` },

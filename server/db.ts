@@ -71,7 +71,6 @@ export interface DatabaseState {
   statusLogs: AssetDailyStatusLog[];
   attendanceLogs: OperatorAttendanceLog[];
   notifications: AppNotification[];
-<<<<<<< HEAD
   drafts: UserFormDraft[];
 }
 
@@ -81,16 +80,10 @@ export interface UserFormDraft {
   formKey: string;
   data: Record<string, unknown>;
   updatedAt: string;
-=======
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 }
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const DATA_FILE = path.join(DATA_DIR, 'eams_db.json');
-<<<<<<< HEAD
-=======
-
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 export class EamsDatabase {
   private state: DatabaseState;
   private isTransactionActive = false;
@@ -101,7 +94,6 @@ export class EamsDatabase {
   }
 
   private loadInitialState(): DatabaseState {
-<<<<<<< HEAD
     if (fs.existsSync(DATA_FILE)) {
       try {
         const raw = fs.readFileSync(DATA_FILE, 'utf-8');
@@ -147,49 +139,6 @@ export class EamsDatabase {
       } catch (error) {
         throw new Error(`Unable to safely load ${DATA_FILE}; refusing to start with replacement seed data.`, { cause: error });
       }
-=======
-    try {
-      if (fs.existsSync(DATA_FILE)) {
-        const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-        const parsed = JSON.parse(raw);
-        if (parsed.assets && parsed.customers && parsed.products) {
-          const fresh = this.generateSeedData();
-          // JANGAN timpa akun yang sudah ada — sebelumnya setiap restart menghapus perubahan manajemen akun.
-          if (!Array.isArray(parsed.users) || parsed.users.length === 0) {
-            parsed.users = fresh.users;
-          }
-          if (!parsed.operators || parsed.operators.length === 0) {
-            parsed.operators = fresh.operators;
-          }
-          if (!parsed.statusLogs) {
-            parsed.statusLogs = fresh.statusLogs;
-          }
-          if (!parsed.attendanceLogs) {
-            parsed.attendanceLogs = fresh.attendanceLogs;
-          }
-          if (!parsed.notifications || parsed.notifications.length === 0) {
-            parsed.notifications = fresh.notifications;
-          }
-          fresh.assets.forEach((fa) => {
-            if (!parsed.assets.some((pa: Asset) => pa.id === fa.id || pa.assetTag === fa.assetTag)) {
-              parsed.assets.unshift(fa);
-            }
-          });
-          parsed.assets.forEach((a: Asset) => {
-            const seedA = fresh.assets.find((sa) => sa.id === a.id);
-            if (seedA?.legalDocs && !a.legalDocs) {
-              a.legalDocs = seedA.legalDocs;
-            }
-            if (seedA?.gpsLocation) {
-              a.gpsLocation = seedA.gpsLocation;
-            }
-          });
-          return parsed;
-        }
-      }
-    } catch {
-      // Fallback to fresh seed
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
     return this.generateSeedData();
   }
@@ -278,7 +227,6 @@ export class EamsDatabase {
   public getStatusLogs(): AssetDailyStatusLog[] { return this.state.statusLogs || []; }
   public getAttendanceLogs(): OperatorAttendanceLog[] { return this.state.attendanceLogs || []; }
   public getNotifications(): AppNotification[] { return this.state.notifications || []; }
-<<<<<<< HEAD
   public getFormDraft(userId: string, formKey: string): UserFormDraft | undefined {
     return (this.state.drafts || []).find((draft) => draft.userId === userId && draft.formKey === formKey);
   }
@@ -300,8 +248,6 @@ export class EamsDatabase {
     this.state.drafts = this.state.drafts.filter((draft) => draft.userId !== userId || draft.formKey !== formKey);
     this.save();
   }
-=======
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   public addNotification(notification: AppNotification): void {
     if (!this.state.notifications) {
       this.state.notifications = [];
@@ -320,11 +266,7 @@ export class EamsDatabase {
       companyPhone: '+1 (800) 555-APEX',
       companyEmail: 'operations@apex-industrial.com',
       taxRegistrationNumber: 'US-TX-883920194',
-<<<<<<< HEAD
       defaultCurrency: 'IDR',
-=======
-      defaultCurrency: 'USD',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       defaultTaxRatePercent: 8.25,
       quotationPrefix: 'QT-2026-',
       salesOrderPrefix: 'SO-2026-',
@@ -341,15 +283,9 @@ export class EamsDatabase {
         name: 'Marcus Sterling',
         email: 'marcus@apex-industrial.com',
         role: 'EXECUTIVE',
-<<<<<<< HEAD
         department: 'Executive Leadership',
         employeeBadge: 'EXEC-001',
         assignedBranch: 'Jakarta Head Office',
-=======
-        department: 'Executive Leadership (Direktur Utama)',
-        employeeBadge: 'EXEC-001',
-        assignedBranch: 'Kantor Pusat Jakarta',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'ACTIVE',
         phone: '0811-9876-001',
       },
@@ -360,11 +296,7 @@ export class EamsDatabase {
         role: 'ADMIN_IT',
         department: 'IT Systems & Infrastructure (Admin IT)',
         employeeBadge: 'IT-002',
-<<<<<<< HEAD
         assignedBranch: 'Jakarta Head Office',
-=======
-        assignedBranch: 'Kantor Pusat Jakarta',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'ACTIVE',
         phone: '0812-3456-002',
       },
@@ -375,11 +307,7 @@ export class EamsDatabase {
         role: 'SALES_MARKETING',
         department: 'Commercial Sales & Marketing Support',
         employeeBadge: 'SLS-003',
-<<<<<<< HEAD
         assignedBranch: 'Jakarta Head Office',
-=======
-        assignedBranch: 'Kantor Pusat Jakarta',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'ACTIVE',
         phone: '0813-5566-003',
       },
@@ -390,11 +318,7 @@ export class EamsDatabase {
         role: 'ASSET_CONTROL',
         department: 'Asset Control & Heavy Equipment Legal Docs',
         employeeBadge: 'AST-004',
-<<<<<<< HEAD
         assignedBranch: 'Balikpapan Depot & Workshop',
-=======
-        assignedBranch: 'Depot & Workshop Balikpapan',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'ACTIVE',
         phone: '0814-7788-004',
       },
@@ -416,11 +340,7 @@ export class EamsDatabase {
         role: 'PROCUREMENT',
         department: 'Procurement & Purchasing',
         employeeBadge: 'PRC-006',
-<<<<<<< HEAD
         assignedBranch: 'Jakarta Head Office',
-=======
-        assignedBranch: 'Kantor Pusat Jakarta',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'ACTIVE',
         phone: '0816-1122-006',
       },
@@ -431,11 +351,7 @@ export class EamsDatabase {
         role: 'FINANCE_ACCOUNTING_TAX',
         department: 'Accounting, Finance & Tax (FAT)',
         employeeBadge: 'FAT-007',
-<<<<<<< HEAD
         assignedBranch: 'Jakarta Head Office',
-=======
-        assignedBranch: 'Kantor Pusat Jakarta',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'ACTIVE',
         phone: '0817-3344-007',
       },
@@ -446,11 +362,7 @@ export class EamsDatabase {
         role: 'AR_MANAGEMENT',
         department: 'Accounts Receivable (AR) Management',
         employeeBadge: 'ARM-008',
-<<<<<<< HEAD
         assignedBranch: 'Jakarta Head Office',
-=======
-        assignedBranch: 'Kantor Pusat Jakarta',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'ACTIVE',
         phone: '0818-5566-008',
       },
@@ -459,11 +371,7 @@ export class EamsDatabase {
         name: 'Agus Santoso',
         email: 'agus.operator@apex-industrial.com',
         role: 'OPERATOR_USER',
-<<<<<<< HEAD
         department: 'Heavy Equipment & Field Operations',
-=======
-        department: 'Operator Alat Berat & Pengguna Lapangan',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         employeeBadge: 'OPR-009',
         assignedBranch: 'Site Project Morowali',
         status: 'ACTIVE',
@@ -476,11 +384,7 @@ export class EamsDatabase {
         role: 'TECHNICAL_SERVICE',
         department: 'Technical Service, Workshop & Maintenance',
         employeeBadge: 'TECH-010',
-<<<<<<< HEAD
         assignedBranch: 'Balikpapan Depot & Workshop',
-=======
-        assignedBranch: 'Depot & Workshop Balikpapan',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'ACTIVE',
         phone: '0819-7788-010',
       },
@@ -502,11 +406,7 @@ export class EamsDatabase {
         creditLimit: 250000,
         outstandingBalance: 32475,
         paymentTermsDays: 30,
-<<<<<<< HEAD
         currency: 'IDR',
-=======
-        currency: 'USD',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'ACTIVE',
         notes: 'Preferred commercial tier client with multi-year master service agreement.',
         createdAt: '2025-03-15T09:00:00Z',
@@ -525,11 +425,7 @@ export class EamsDatabase {
         creditLimit: 500000,
         outstandingBalance: 14600,
         paymentTermsDays: 45,
-<<<<<<< HEAD
         currency: 'IDR',
-=======
-        currency: 'USD',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'ACTIVE',
         notes: 'Strict HSE and safety verification required prior to any delivery.',
         createdAt: '2025-06-10T14:30:00Z',
@@ -548,11 +444,7 @@ export class EamsDatabase {
         creditLimit: 150000,
         outstandingBalance: 0,
         paymentTermsDays: 30,
-<<<<<<< HEAD
         currency: 'IDR',
-=======
-        currency: 'USD',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'ACTIVE',
         notes: 'Continuous renter of heavy electric forklifts and pallet stackers.',
         createdAt: '2025-08-22T11:15:00Z',
@@ -571,11 +463,7 @@ export class EamsDatabase {
         creditLimit: 50000,
         outstandingBalance: 4200,
         paymentTermsDays: 15,
-<<<<<<< HEAD
         currency: 'IDR',
-=======
-        currency: 'USD',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'ACTIVE',
         createdAt: '2026-01-10T10:00:00Z',
       },
@@ -624,11 +512,7 @@ export class EamsDatabase {
           longitude: 121.353,
           siteName: 'Site Tambang Nikel & Smelter Morowali',
           cityName: 'Morowali',
-<<<<<<< HEAD
           provinceName: 'Central Sulawesi',
-=======
-          provinceName: 'Sulawesi Tengah',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           lastGpsPing: '2026-10-15T08:15:00Z',
           speedKmh: 0,
           ignitionOn: true,
@@ -674,15 +558,9 @@ export class EamsDatabase {
         gpsLocation: {
           latitude: -0.974,
           longitude: 116.702,
-<<<<<<< HEAD
           siteName: 'Pulau Balang Bridge & Logistics Port Project',
           cityName: 'Sepaku, IKN Nusantara',
           provinceName: 'East Kalimantan',
-=======
-          siteName: 'Proyek Jembatan Pulau Balang & Dermaga Logistik',
-          cityName: 'Sepaku, IKN Nusantara',
-          provinceName: 'Kalimantan Timur',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           lastGpsPing: '2026-10-15T08:20:00Z',
           speedKmh: 0,
           ignitionOn: true,
@@ -719,11 +597,7 @@ export class EamsDatabase {
           longitude: 112.731,
           siteName: 'Kawasan Industri Maspion & Dermaga Petrokimia',
           cityName: 'Gresik / Surabaya',
-<<<<<<< HEAD
           provinceName: 'East Java',
-=======
-          provinceName: 'Jawa Timur',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           lastGpsPing: '2026-10-15T08:10:00Z',
           speedKmh: 0,
           ignitionOn: true,
@@ -756,11 +630,7 @@ export class EamsDatabase {
           latitude: -6.175,
           longitude: 106.945,
           siteName: 'Central Equipment Yard Cakung & Head Office',
-<<<<<<< HEAD
           cityName: 'East Jakarta',
-=======
-          cityName: 'Jakarta Timur',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           provinceName: 'DKI Jakarta',
           lastGpsPing: '2026-10-15T08:30:00Z',
           speedKmh: 12,
@@ -777,11 +647,7 @@ export class EamsDatabase {
         model: 'XAS 188',
         status: 'IN_MAINTENANCE',
         condition: 'NEEDS_REPAIR',
-<<<<<<< HEAD
         warehouseLocation: 'Balikpapan Depot & Workshop',
-=======
-        warehouseLocation: 'Depot & Workshop Balikpapan',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         purchaseCost: 38000,
         currentBookValue: 34200,
         depreciationRateAnnual: 10,
@@ -792,7 +658,6 @@ export class EamsDatabase {
         monthlyRentalRate: 2800,
         sellPrice: 42000,
         specs: { FreeAirDelivery: '11.1 m³/min', Pressure: '7-12 bar', Engine: 'Deutz 4-Cylinder' },
-<<<<<<< HEAD
         notes: 'Undergoing technical service by the workshop mechanics.',
         gpsLocation: {
           latitude: -1.269,
@@ -800,15 +665,6 @@ export class EamsDatabase {
           siteName: 'Main Depot & Kariangau Workshop',
           cityName: 'Balikpapan',
           provinceName: 'East Kalimantan',
-=======
-        notes: 'Sedang dalam pengerjaan teknis servis oleh tim mekanik bengkel.',
-        gpsLocation: {
-          latitude: -1.269,
-          longitude: 116.831,
-          siteName: 'Depot Utama & Workshop Kariangau',
-          cityName: 'Balikpapan',
-          provinceName: 'Kalimantan Timur',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           lastGpsPing: '2026-10-15T08:05:00Z',
           speedKmh: 0,
           ignitionOn: false,
@@ -838,7 +694,6 @@ export class EamsDatabase {
         monthlyRentalRate: 14500,
         sellPrice: 210000,
         specs: { OperatingWeight: '22,120 kg', EnginePower: '165 HP', BucketCapacity: '1.2 m³' },
-<<<<<<< HEAD
         notes: 'Mining and land development operations in the Weda Bay area.',
         gpsLocation: {
           latitude: 0.472,
@@ -846,15 +701,6 @@ export class EamsDatabase {
           siteName: 'Industrial Park & Nickel Mine Site',
           cityName: 'Weda Bay, Central Halmahera',
           provinceName: 'North Maluku',
-=======
-        notes: 'Operasi di area tambang dan pematangan lahan Weda Bay.',
-        gpsLocation: {
-          latitude: 0.472,
-          longitude: 127.915,
-          siteName: 'Site Industrial Park & Tambang Nikel',
-          cityName: 'Weda Bay, Halmahera Tengah',
-          provinceName: 'Maluku Utara',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           lastGpsPing: '2026-10-15T08:25:00Z',
           speedKmh: 4,
           ignitionOn: true,
@@ -1314,11 +1160,7 @@ export class EamsDatabase {
         issueDate: '2026-01-20',
         dueDate: '2026-02-19',
         paymentTermsDays: 30,
-<<<<<<< HEAD
         currency: 'IDR',
-=======
-        currency: 'USD',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'PAID',
         items: [
           {
@@ -1366,11 +1208,7 @@ export class EamsDatabase {
         issueDate: '2026-01-10',
         dueDate: '2026-02-24',
         paymentTermsDays: 45,
-<<<<<<< HEAD
         currency: 'IDR',
-=======
-        currency: 'USD',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'PARTIALLY_PAID',
         items: [
           {
@@ -1418,11 +1256,7 @@ export class EamsDatabase {
         issueDate: '2026-02-12',
         dueDate: '2026-03-14',
         paymentTermsDays: 30,
-<<<<<<< HEAD
         currency: 'IDR',
-=======
-        currency: 'USD',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         status: 'ISSUED',
         items: [
           {
@@ -1457,11 +1291,7 @@ export class EamsDatabase {
         customerName: 'Horizon Infrastructure & Contracting',
         paymentDate: '2026-01-26',
         amount: 83263.25,
-<<<<<<< HEAD
         currency: 'IDR',
-=======
-        currency: 'USD',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         method: 'BANK_TRANSFER',
         referenceNumber: 'WIRE-CHASE-9921048',
         status: 'CONFIRMED',
@@ -1484,11 +1314,7 @@ export class EamsDatabase {
         customerName: 'Vertex Energy Systems Ltd',
         paymentDate: '2026-01-12',
         amount: 5000,
-<<<<<<< HEAD
         currency: 'IDR',
-=======
-        currency: 'USD',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         method: 'BANK_TRANSFER',
         referenceNumber: 'ACH-WELLS-338210',
         status: 'CONFIRMED',
@@ -1517,11 +1343,7 @@ export class EamsDatabase {
         taxId: 'DE-VAT-8910248',
         address: { street: 'Industriestrasse 44', city: 'Munich', state: 'Bavaria', postalCode: '80331', country: 'Germany' },
         paymentTerms: 60,
-<<<<<<< HEAD
         currency: 'IDR',
-=======
-        currency: 'USD',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'OEM Equipment Manufacturer',
       },
       {
@@ -1534,11 +1356,7 @@ export class EamsDatabase {
         taxId: 'US-EIN-76-229104',
         address: { street: '3100 Ship Channel Way', city: 'Houston', state: 'TX', postalCode: '77029', country: 'United States' },
         paymentTerms: 30,
-<<<<<<< HEAD
         currency: 'IDR',
-=======
-        currency: 'USD',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'Consumables & Parts',
       },
     ];
@@ -1599,13 +1417,8 @@ export class EamsDatabase {
         assetId: 'AST-1003',
         assetTag: 'AST-1003',
         assetName: 'Atlas Copco XAS 188 Portable Diesel Air Compressor',
-<<<<<<< HEAD
         title: 'Overheating & Oil Filter Clogged with Mining Dust',
         description: 'Reported by operator Agus Santoso from Morowali Site: Engine temperature reached 105C and the oil pressure indicator turned on.',
-=======
-        title: 'Overheating & Filter Oli Tersumbat Debu Tambang',
-        description: 'Dilaporkan oleh operator Agus Santoso dari Site Morowali: Temperatur mesin mencapai 105C, indikator tekanan oli menyala.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         priority: 'HIGH',
         type: 'FIELD_BREAKDOWN',
         assignedTechnician: 'Dani Prasetyo (Head of Technical Service)',
@@ -1624,13 +1437,8 @@ export class EamsDatabase {
         assetId: 'AST-1006',
         assetTag: 'AST-1006',
         assetName: 'Bobcat S76 Skid-Steer Loader with Hydraulic Grapple',
-<<<<<<< HEAD
         title: 'Main Hydraulic Pump Seal Kit Replacement & Calibration',
         description: 'Hydraulic oil is leaking at the swivel joint connection. Disassembly and seal replacement are in progress.',
-=======
-        title: 'Penggantian Seal Kit Pompa Hidrolik Utama & Kalibrasi',
-        description: 'Minyak hidrolik merembes pada sambungan swivel swivel joint. Sedang dilakukan pembongkaran dan penggantian seal.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         priority: 'CRITICAL',
         type: 'CORRECTIVE',
         assignedTechnician: 'Dani Prasetyo',
@@ -1641,11 +1449,7 @@ export class EamsDatabase {
         totalCost: 930,
         downtimeHours: 8,
         status: 'IN_PROGRESS',
-<<<<<<< HEAD
         resolutionNotes: 'Old O-ring removed and OEM seal kit installed. Awaiting 3,000 PSI hydraulic pressure test.',
-=======
-        resolutionNotes: 'O-ring lama dilepas, seal kit OEM telah dipasang. Menunggu uji tekanan hidrolik 3.000 PSI.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         sparePartsUsed: [
           {
             productId: 'PRD-004',
@@ -1657,11 +1461,7 @@ export class EamsDatabase {
           },
           {
             productId: 'PRD-006',
-<<<<<<< HEAD
             productName: 'Hydraulic Pump Calibration & Flushing Service',
-=======
-            productName: 'Jasa Uji Kalibrasi & Flushing Pompa Hidrolik',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             itemType: 'SERVICE',
             quantity: 1,
             unitCost: 200,
@@ -1675,19 +1475,11 @@ export class EamsDatabase {
         assetId: 'AST-10024',
         assetTag: 'AST-10024',
         assetName: 'Caterpillar 320D3 Hydraulic Excavator 20-Ton',
-<<<<<<< HEAD
         title: '2,500-Hour Scheduled Maintenance & Diesel Filter Replacement',
         description: 'Routine preventive maintenance: replace the engine oil filter and fuel-water separator, and lubricate the swing bearing.',
         priority: 'MEDIUM',
         type: 'PREVENTIVE',
         assignedTechnician: 'Derrick Vance (Senior Mechanic)',
-=======
-        title: 'Perawatan Berkala 2.500 Jam & Penggantian Filter Solar',
-        description: 'Preventive maintenance rutin: ganti filter oli mesin, fuel water separator, dan pelumasan swing bearing.',
-        priority: 'MEDIUM',
-        type: 'PREVENTIVE',
-        assignedTechnician: 'Derrick Vance (Mekanik Senior)',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         scheduledDate: '2026-10-13',
         startedDate: '2026-10-13T09:00:00Z',
         completedDate: '2026-10-14T15:30:00Z',
@@ -1696,11 +1488,7 @@ export class EamsDatabase {
         totalCost: 650,
         downtimeHours: 6.5,
         status: 'COMPLETED',
-<<<<<<< HEAD
         resolutionNotes: 'All filters replaced. Operational test normal with smooth engine vibration and sound. Ready for operation.',
-=======
-        resolutionNotes: 'Semua filter diganti baru, uji operasional normal, getaran dan suara mesin halus. Kelaikan siap kerja.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         sparePartsUsed: [
           {
             productId: 'PRD-005',
@@ -1769,15 +1557,9 @@ export class EamsDatabase {
         equipmentSpecialization: 'Hydraulic Excavator 20T-40T',
         assignedAssetId: 'AST-1004',
         assignedAssetName: 'Komatsu PC210LC-11 Hydraulic Crawler Excavator',
-<<<<<<< HEAD
         currentProjectLocation: 'Cibitung-Cilincing Toll Road Project - KM 18',
         hireDate: '2022-03-01',
         notes: 'Active Kemenaker certification; passed the 2025 periodic K3 assessment.',
-=======
-        currentProjectLocation: 'Proyek Tol Cibitung - Cilincing KM 18',
-        hireDate: '2022-03-01',
-        notes: 'Sertifikasi Kemenaker aktif, lulus uji K3 berkala 2025.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       },
       {
         id: 'OPR-02',
@@ -1792,15 +1574,9 @@ export class EamsDatabase {
         equipmentSpecialization: 'Mobile Crane & Rough Terrain Crane 50T',
         assignedAssetId: null,
         assignedAssetName: null,
-<<<<<<< HEAD
         currentProjectLocation: 'Cakung Main Depot, East Jakarta',
         hireDate: '2021-06-15',
         notes: 'Ready for assignment to a new project or monthly rental mobilization.',
-=======
-        currentProjectLocation: 'Depot Utama Cakung Jakarta Timur',
-        hireDate: '2021-06-15',
-        notes: 'Siap penugasan proyek baru atau mobilisasi sewa bulanan.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       },
       {
         id: 'OPR-03',
@@ -1815,15 +1591,9 @@ export class EamsDatabase {
         equipmentSpecialization: 'Electric & Diesel Warehouse Forklift 3T-10T',
         assignedAssetId: 'AST-1002',
         assignedAssetName: 'Yale ERC-080 Heavy Electric Warehouse Forklift',
-<<<<<<< HEAD
         currentProjectLocation: 'Modern Logistics Warehouse, Fort Worth Dock C',
         hireDate: '2023-01-10',
         notes: 'Skilled in warehouse racking operations and lithium-ion battery handling.',
-=======
-        currentProjectLocation: 'Gudang Logistik Modern Fort Worth Dock C',
-        hireDate: '2023-01-10',
-        notes: 'Terampil penanganan racking warehouse dan baterai lithium-ion.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       },
       {
         id: 'OPR-04',
@@ -1838,15 +1608,9 @@ export class EamsDatabase {
         equipmentSpecialization: 'Crawler Bulldozer & Wheel Loader Heavy',
         assignedAssetId: null,
         assignedAssetName: null,
-<<<<<<< HEAD
         currentProjectLocation: 'Surabaya Depot',
         hireDate: '2020-09-01',
         notes: 'On annual leave through October 25, 2026.',
-=======
-        currentProjectLocation: 'Depot Surabaya',
-        hireDate: '2020-09-01',
-        notes: 'Cuti tahunan hingga 25 Oktober 2026.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       },
     ];
 
@@ -1863,11 +1627,7 @@ export class EamsDatabase {
         hourMeter: 2450.5,
         location: 'Site Morowali Blok B-4',
         damageCategory: 'NONE',
-<<<<<<< HEAD
         damageDescription: 'Unit operating normally; bucket pin lubrication and hydraulic fluid level are stable.',
-=======
-        damageDescription: 'Unit normal, pelumasan pin bucket & level hidrolik stabil.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       },
       {
         id: 'LOG-STAT-002',
@@ -1881,11 +1641,7 @@ export class EamsDatabase {
         hourMeter: 3120.0,
         location: 'IKN Nusantara Dermaga Logistik',
         damageCategory: 'NONE',
-<<<<<<< HEAD
         damageDescription: 'Safety limit switch and SLI (Safe Load Indicator) are calibrated correctly.',
-=======
-        damageDescription: 'Safety limit switch & SLI (Safe Load Indicator) terkalibrasi baik.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       },
       {
         id: 'LOG-STAT-003',
@@ -1900,11 +1656,7 @@ export class EamsDatabase {
         location: 'Site Morowali Workshop',
         damageCategory: 'ENGINE',
         damageSeverity: 'MEDIUM',
-<<<<<<< HEAD
         damageDescription: 'Overheating at 105C; the oil filter is clogged with mine dust.',
-=======
-        damageDescription: 'Overheating temperatur 105C, filter oli tersumbat debu tambang.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         workOrderIdCreated: 'WO-2026-004',
       },
     ];
@@ -1921,22 +1673,14 @@ export class EamsDatabase {
         assetName: 'Caterpillar 320D3 Hydraulic Excavator 20-Ton',
         customerId: 'CUST-001',
         customerName: 'Horizon Infrastructure & Contracting',
-<<<<<<< HEAD
         projectName: 'Cibitung-Cilincing Toll Road Project - KM 18',
-=======
-        projectName: 'Proyek Tol Cibitung - Cilincing KM 18',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         checkInTime: '07:00:00',
         checkInHourMeter: 2442.0,
         checkOutTime: '16:30:00',
         checkOutHourMeter: 2450.5,
         workingHours: 8.5,
         status: 'CHECKED_OUT',
-<<<<<<< HEAD
         notes: 'Normal drainage channel excavation operations in clear weather.',
-=======
-        notes: 'Operasi galian saluran drainase normal, cuaca cerah.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         verifiedForBilling: true,
       },
       {
@@ -1950,19 +1694,11 @@ export class EamsDatabase {
         assetName: 'Caterpillar 320D3 Hydraulic Excavator 20-Ton',
         customerId: 'CUST-001',
         customerName: 'Horizon Infrastructure & Contracting',
-<<<<<<< HEAD
         projectName: 'Cibitung-Cilincing Toll Road Project - KM 18',
         checkInTime: '07:00:00',
         checkInHourMeter: 2450.5,
         status: 'CHECKED_IN',
         notes: 'Morning check-in; equipment ready for shift 1 operations.',
-=======
-        projectName: 'Proyek Tol Cibitung - Cilincing KM 18',
-        checkInTime: '07:00:00',
-        checkInHourMeter: 2450.5,
-        status: 'CHECKED_IN',
-        notes: 'Absen pagi, unit siap operasional shift 1.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         verifiedForBilling: false,
       },
       {
@@ -1983,11 +1719,7 @@ export class EamsDatabase {
         checkOutHourMeter: 3120.0,
         workingHours: 8.0,
         status: 'CHECKED_OUT',
-<<<<<<< HEAD
         notes: 'Pier 4 girder beam erection; load test passed safely.',
-=======
-        notes: 'Erection balok girder pier 4, uji beban aman.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         verifiedForBilling: true,
       },
       {
@@ -2009,11 +1741,7 @@ export class EamsDatabase {
         workingHours: 2.2,
         status: 'BREAKDOWN_REPORTED',
         breakdownReportId: 'WO-2026-001',
-<<<<<<< HEAD
         notes: 'Engine stopped unexpectedly after 2 hours of operation; referred to Technical Service.',
-=======
-        notes: 'Mesin mati mendadak setelah 2 jam operasi, dialihkan ke Technical Service.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         verifiedForBilling: false,
       },
     ];
@@ -2022,17 +1750,10 @@ export class EamsDatabase {
       {
         id: 'NTF-2026-001',
         timestamp: '2026-10-15T08:25:00Z',
-<<<<<<< HEAD
         sourceDepartment: 'Field Operations',
         sourceUserName: 'Agus Santoso (Equipment Operator)',
         title: 'Field Equipment Breakdown Report',
         message: 'Atlas Copco Compressor [AST-1003] at Morowali Site was reported to have stopped unexpectedly after 2 hours of operation. Emergency repair ticket WO-2026-001 was created automatically and forwarded to Technical Service.',
-=======
-        sourceDepartment: 'Operasional Lapangan',
-        sourceUserName: 'Agus Santoso (Operator Alat)',
-        title: 'Laporan Kerusakan Unit Lapangan (Mogok)',
-        message: 'Unit Kompresor Atlas Copco [AST-1003] di Site Morowali dilaporkan mati mendadak setelah 2 jam operasi. Tiket perbaikan darurat WO-2026-001 otomatis dibuat dan diteruskan ke tim Technical Service.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'MAINTENANCE',
         severity: 'CRITICAL',
         targetRoles: ['TECHNICAL_SERVICE', 'EXECUTIVE', 'ADMIN_IT', 'MANAGEMENT_OPERATION', 'ASSET_CONTROL'],
@@ -2044,17 +1765,10 @@ export class EamsDatabase {
       {
         id: 'NTF-2026-002',
         timestamp: '2026-10-15T07:45:00Z',
-<<<<<<< HEAD
         sourceDepartment: 'Technical Service (Workshop)',
         sourceUserName: 'Dani Prasetyo (Head Mechanic)',
         title: 'Service Started & Spare Parts Replacement',
         message: 'A mechanic scanned the CAT 320D Excavator [AST-10024] barcode and started replacing the hydraulic O-ring seal kit from procurement stock. Equipment status changed to In Service.',
-=======
-        sourceDepartment: 'Technical Service (Bengkel)',
-        sourceUserName: 'Dani Prasetyo (Kepala Mekanik)',
-        title: 'Mulai Pengerjaan Servis & Penggantian Sparepart',
-        message: 'Mekanik telah memindai barcode unit Excavator CAT 320D [AST-10024] dan memulai penggantian O-Ring Seal Kit hidrolik dari stok pengadaan. Status alat dialihkan menjadi Sedang Diservis.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'OPERATIONAL',
         severity: 'INFO',
         targetRoles: ['EXECUTIVE', 'ADMIN_IT', 'MANAGEMENT_OPERATION', 'ASSET_CONTROL'],
@@ -2068,13 +1782,8 @@ export class EamsDatabase {
         timestamp: '2026-10-15T07:15:00Z',
         sourceDepartment: 'Sales & Marketing',
         sourceUserName: 'Elena Rostova (Commercial Lead)',
-<<<<<<< HEAD
         title: 'Quotation Approved & Sales Order Issued',
         message: 'Equipment rental quotation QT-2026-0042 for PT Freeport Indonesia was approved by the customer (Lump Sum + Mobilization/Demobilization Fee). Sales Order SO-2026-0089 was created automatically and is ready for mobilization.',
-=======
-        title: 'Quotation Disetujui & Sales Order Diterbitkan',
-        message: 'Penawaran sewa alat QT-2026-0042 untuk PT Freeport Indonesia telah disetujui klien (Termin Lumpsum + Mob/Demob Fee). Sales Order SO-2026-0089 otomatis dibuat dan siap mobilisasi.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'COMMERCIAL',
         severity: 'SUCCESS',
         targetRoles: ['SALES_MARKETING', 'EXECUTIVE', 'ADMIN_IT', 'ASSET_CONTROL', 'FINANCE_ACCOUNTING_TAX', 'MANAGEMENT_OPERATION'],
@@ -2086,17 +1795,10 @@ export class EamsDatabase {
       {
         id: 'NTF-2026-004',
         timestamp: '2026-10-15T06:50:00Z',
-<<<<<<< HEAD
         sourceDepartment: 'Procurement',
         sourceUserName: 'Dewi Lestari (Procurement Manager)',
         title: 'Purchase Order Approved & Bill Sent to Finance',
         message: 'Purchase Order PO-2026-0038 for hydraulic filters and engine oil valued at IDR 14,500 from PT United Tractors Tbk was approved. The vendor bill with NET 30 terms has been sent to Finance.',
-=======
-        sourceDepartment: 'Pengadaan (Procurement)',
-        sourceUserName: 'Dewi Lestari (Procurement Manager)',
-        title: 'Purchase Order Disetujui & Tagihan Masuk ke FAT',
-        message: 'PO-2026-0038 pengadaan sparepart filter hidrolik & oli mesin senilai $14,500 ke PT United Tractors Tbk telah disetujui. Tagihan vendor dengan termin NET 30 telah masuk ke tim FAT Finance.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'FINANCIAL',
         severity: 'INFO',
         targetRoles: ['PROCUREMENT', 'FINANCE_ACCOUNTING_TAX', 'EXECUTIVE', 'ADMIN_IT'],
@@ -2108,17 +1810,10 @@ export class EamsDatabase {
       {
         id: 'NTF-2026-005',
         timestamp: '2026-10-15T06:20:00Z',
-<<<<<<< HEAD
         sourceDepartment: 'Field Operations',
         sourceUserName: 'Agus Santoso (Equipment Operator)',
         title: 'Shift Timesheet Complete: Ready for Billing',
         message: 'Operator check-out for CAT 320D Excavator [AST-10024] was recorded with 8.5 operating hours (HM 2450.5 to 2459.0). Data verified for PT Morowali Mining customer monthly billing attachment.',
-=======
-        sourceDepartment: 'Operasional Lapangan',
-        sourceUserName: 'Agus Santoso (Operator Alat)',
-        title: 'Timesheet Summary Selesai Shift: Siap Billing',
-        message: 'Absen pulang operator pada unit Excavator CAT 320D [AST-10024] telah tercatat dengan total 8.5 Jam Operasi (HM 2450.5 ke 2459.0). Data diverifikasi untuk lampiran tagihan bulanan pelanggan PT Morowali Mining.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'OPERATIONAL',
         severity: 'SUCCESS',
         targetRoles: ['MANAGEMENT_OPERATION', 'FINANCE_ACCOUNTING_TAX', 'AR_MANAGEMENT', 'EXECUTIVE'],
@@ -2132,13 +1827,8 @@ export class EamsDatabase {
         timestamp: '2026-10-15T05:40:00Z',
         sourceDepartment: 'Accounting Finance & Tax (FAT)',
         sourceUserName: 'Sarah Jenkins (Finance Lead)',
-<<<<<<< HEAD
         title: 'Invoice Payment Received & Cash Balance Increased',
         message: 'A payment of IDR 35,000 from PT Freeport Indonesia for Invoice INV-2026-0021 was verified via Bank Mandiri transfer. The company cash balance increased and customer receivables decreased.',
-=======
-        title: 'Pelunasan Invoice Diterima & Kas Bertambah',
-        message: 'Pembayaran sebesar $35,000 dari PT Freeport Indonesia untuk Faktur INV-2026-0021 telah berhasil diverifikasi via transfer Bank Mandiri. Saldo kas perusahaan bertambah dan piutang klien berkurang.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'FINANCIAL',
         severity: 'SUCCESS',
         targetRoles: ['FINANCE_ACCOUNTING_TAX', 'AR_MANAGEMENT', 'SALES_MARKETING', 'EXECUTIVE'],
@@ -2150,17 +1840,10 @@ export class EamsDatabase {
       {
         id: 'NTF-2026-007',
         timestamp: '2026-10-14T16:30:00Z',
-<<<<<<< HEAD
         sourceDepartment: 'Asset Control (Equipment Compliance)',
         sourceUserName: 'Bambang Pratama (Asset Control)',
         title: 'Warning: Equipment Permit (SIA) Expiring Soon',
         message: 'The Kemenaker Equipment Permit (SIA) for Kobelco 250T Crane [AST-10088] expires in 14 days. Please schedule a K3 safety inspection with the local labor office.',
-=======
-        sourceDepartment: 'Asset Control (Legalitas Alat)',
-        sourceUserName: 'Bambang Pratama (Asset Control)',
-        title: 'Peringatan: Masa Berlaku SIA Alat Segera Habis',
-        message: 'Surat Ijin Alat (SIA) Kemenaker untuk unit Crane Kobelco 250T [AST-10088] tersisa 14 hari sebelum kedaluwarsa. Mohon jadwalkan uji riksa keselamatan kerja (K3) dengan Disnaker setempat.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'LEGAL',
         severity: 'WARNING',
         targetRoles: ['ASSET_CONTROL', 'MANAGEMENT_OPERATION', 'EXECUTIVE', 'ADMIN_IT'],
@@ -2172,17 +1855,10 @@ export class EamsDatabase {
       {
         id: 'NTF-2026-008',
         timestamp: '2026-10-14T14:10:00Z',
-<<<<<<< HEAD
         sourceDepartment: 'AR Management (Receivables)',
         sourceUserName: 'Reza Ramadhan (AR Specialist)',
         title: 'Overdue Receivable (45 Days Past Due)',
         message: 'Invoice INV-2026-0105 valued at IDR 85,000 for PT Vale Indonesia is 45 days past due. A first warning letter has been issued and new orders are temporarily on hold.',
-=======
-        sourceDepartment: 'AR Management (Piutang)',
-        sourceUserName: 'Reza Ramadhan (AR Specialist)',
-        title: 'Tagihan Piutang Menunggak (Overdue 45 Hari)',
-        message: 'Invoice INV-2026-0105 senilai $85,000 atas nama PT Vale Indonesia telah melewati jatuh tempo 45 hari. Surat peringatan (SP-1) telah diterbitkan dan pesanan baru ditahan sementara.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'FINANCIAL',
         severity: 'WARNING',
         targetRoles: ['AR_MANAGEMENT', 'FINANCE_ACCOUNTING_TAX', 'EXECUTIVE', 'SALES_MARKETING'],
@@ -2195,15 +1871,9 @@ export class EamsDatabase {
         id: 'NTF-2026-009',
         timestamp: '2026-10-14T11:20:00Z',
         sourceDepartment: 'Logistik & Delivery',
-<<<<<<< HEAD
         sourceUserName: 'Hadi Suryanto (Delivery Coordinator)',
         title: 'Heavy Equipment Handover Complete (DO Confirmed)',
         message: 'Delivery Order DO-2026-0089 for Hyster 5T Forklift was received and digitally signed by PT Nusa Halmahera at Weda Bay Site. The equipment is now officially RENTED.',
-=======
-        sourceUserName: 'Hadi Suryanto (Koordinator Ekspedisi)',
-        title: 'Serah Terima Alat Berat Selesai (DO Terkonfirmasi)',
-        message: 'Surat Jalan DO-2026-0089 untuk unit Forklift Hyster 5T telah diterima dan ditandatangani secara digital oleh PT Nusa Halmahera di Site Weda Bay. Unit resmi aktif dalam status RENTED.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'OPERATIONAL',
         severity: 'SUCCESS',
         targetRoles: ['ASSET_CONTROL', 'SALES_MARKETING', 'MANAGEMENT_OPERATION', 'FINANCE_ACCOUNTING_TAX'],
@@ -2217,13 +1887,8 @@ export class EamsDatabase {
         timestamp: '2026-10-14T09:00:00Z',
         sourceDepartment: 'Divisi IT & Infrastruktur',
         sourceUserName: 'Hendra Wijaya (IT Administrator)',
-<<<<<<< HEAD
         title: 'User Account Password Reset Successfully',
         message: 'The password for technician Dani Prasetyo (dani.tech@apex-industrial.com) was reset by the IT Administrator. Temporary login credentials were securely updated.',
-=======
-        title: 'Reset Password Akun Pengguna Berhasil',
-        message: 'Password akun untuk teknisi Dani Prasetyo (dani.tech@apex-industrial.com) berhasil di-reset oleh Administrator IT. Kredensial login sementara telah diperbarui dengan aman.',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         category: 'SYSTEM',
         severity: 'INFO',
         targetRoles: ['ADMIN_IT', 'TECHNICAL_SERVICE', 'EXECUTIVE'],
@@ -2255,10 +1920,7 @@ export class EamsDatabase {
       statusLogs,
       attendanceLogs,
       notifications,
-<<<<<<< HEAD
       drafts: [],
-=======
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     };
   }
 }

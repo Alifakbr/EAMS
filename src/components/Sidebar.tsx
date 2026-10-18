@@ -52,7 +52,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const allSections = [
     {
-<<<<<<< HEAD
       label: 'FIELD OPERATOR STATUS',
       items: [
         { id: 'operator-status', label: 'Field Equipment Scan & Attendance', icon: QrCode },
@@ -68,29 +67,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'TECHNICAL SERVICE & WORKSHOP',
       items: [
         { id: 'technical-service', label: 'Service Dashboard & Scanner', icon: Wrench, badge: counts?.pendingWorkOrders },
-=======
-      label: 'STATUS OPERATOR LAPANGAN',
-      items: [
-        { id: 'operator-status', label: 'Scan & Absen Alat Lapangan', icon: QrCode },
-      ],
-    },
-    {
-      label: 'TECHNICAL SERVICE & BENGKEL',
-      items: [
-        { id: 'technical-service', label: 'Dashboard & Scan Servis', icon: Wrench, badge: counts?.pendingWorkOrders },
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       ],
     },
     {
       label: 'EXECUTIVE & REPORTING',
       items: [
-<<<<<<< HEAD
         { id: 'reports', label: 'Reports & Official Documents', icon: BarChart3 },
         { id: 'dashboard', label: 'Operations Dashboard', icon: LayoutDashboard },
-=======
-        { id: 'reports', label: 'Laporan & Dokumen Resmi', icon: BarChart3 },
-        { id: 'dashboard', label: 'Dashboard Operasional', icon: LayoutDashboard },
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       ],
     },
     {
@@ -103,11 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       ],
     },
     {
-<<<<<<< HEAD
       label: 'RENTALS & FLEET',
-=======
-      label: 'RENTAL & ARMADA SEWA',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       items: [
         { id: 'rentals', label: 'Rental Contracts', icon: CalendarDays, badge: counts?.activeRentals },
       ],
@@ -122,27 +101,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       label: 'ASSET CONTROL & OPERATIONS',
       items: [
-<<<<<<< HEAD
         { id: 'assets', label: 'Heavy Equipment & Compliance (SIA)', icon: Cpu },
         { id: 'products', label: 'Product & Spare Parts Catalog', icon: Boxes },
         { id: 'maintenance', label: 'Operator Licenses & Maintenance', icon: Wrench, badge: counts?.pendingWorkOrders },
         { id: 'procurement', label: 'Procurement & Vendor POs', icon: PackageSearch },
-=======
-        { id: 'assets', label: 'Alat Berat & Legalitas (SIA)', icon: Cpu },
-        { id: 'products', label: 'Katalog Produk & Sparepart', icon: Boxes },
-        { id: 'maintenance', label: 'Operator SIO & Perawatan', icon: Wrench, badge: counts?.pendingWorkOrders },
-        { id: 'procurement', label: 'Pengadaan & PO Vendor', icon: PackageSearch },
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       ],
     },
     {
       label: 'ADMIN IT & INFRASTRUCTURE',
       items: [
-<<<<<<< HEAD
         { id: 'user-management', label: 'User Management (IT)', icon: Users },
-=======
-        { id: 'user-management', label: 'Manajemen Pengguna (IT)', icon: Users },
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         { id: 'api-explorer', label: 'REST API & Swagger', icon: Terminal },
         { id: 'test-runner', label: 'Automated Test Suite', icon: CheckCircle2 },
         { id: 'settings', label: 'Settings & Audit Log', icon: Settings },
@@ -159,11 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     .filter((sec) => sec.items.length > 0);
 
   const roleBadgeLabels: Record<UserRole, string> = {
-<<<<<<< HEAD
     EXECUTIVE: 'Executive Director',
-=======
-    EXECUTIVE: 'Executive Direktur',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     ADMIN_IT: 'Admin IT (Full)',
     SALES_MARKETING: 'Sales & CRM',
     ASSET_CONTROL: 'Asset Control',
@@ -171,14 +135,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     PROCUREMENT: 'Procurement',
     FINANCE_ACCOUNTING_TAX: 'FAT & Tax',
     AR_MANAGEMENT: 'AR Tracing',
-<<<<<<< HEAD
     OPERATOR_USER: 'Field Operator',
     TECHNICAL_SERVICE: 'Technical Service',
     MANAGER: 'Manager',
-=======
-    OPERATOR_USER: 'Operator Lapangan',
-    TECHNICAL_SERVICE: 'Technical Service',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   };
 
   return (
@@ -194,11 +153,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <aside
         className={`bg-slate-900 text-slate-300 flex flex-col shrink-0 min-h-[calc(100vh-53px)] border-r border-slate-800 no-print select-none transition-all duration-200 ${
           isOpenOnMobile
-<<<<<<< HEAD
             ? 'fixed inset-y-0 left-0 z-50 w-[min(18rem,calc(100vw-2rem))] min-h-dvh shadow-2xl flex'
-=======
-            ? 'fixed inset-y-0 left-0 z-50 w-72 shadow-2xl flex'
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             : 'hidden lg:flex lg:w-64'
         }`}
       >
@@ -244,11 +199,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         onSelectTab(item.id);
                         if (onCloseMobile) onCloseMobile();
                       }}
-<<<<<<< HEAD
                       className={`w-full min-h-10 flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors text-left cursor-pointer ${
-=======
-                      className={`w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded transition-colors whitespace-nowrap text-left cursor-pointer ${
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         isActive
                           ? 'bg-slate-800 text-white font-semibold shadow-xs'
                           : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
@@ -273,10 +224,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         <div className="p-3 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
           <span className="font-semibold text-slate-300">Apex Commercial</span>
-<<<<<<< HEAD
-=======
-          <span className="font-mono text-slate-500">v2.4 Enterprise</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         </div>
       </aside>
     </>

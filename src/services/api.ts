@@ -75,7 +75,6 @@ export interface SessionInfo {
   modules: ModuleId[];
 }
 
-<<<<<<< HEAD
 export interface ManagerApprovalItem {
   type: 'quotation' | 'sales' | 'rental' | 'invoice' | 'procurement' | 'delivery' | 'maintenance';
   id: string;
@@ -101,9 +100,6 @@ export const api = {
       `/manager/approvals/${type}/${encodeURIComponent(id)}/${decision}`,
       { method: 'POST' }
     ),
-=======
-export const api = {
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   // Customers
   getCustomers: (search?: string, status?: string) => {
     const q = new URLSearchParams();

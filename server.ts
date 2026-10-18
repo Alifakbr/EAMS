@@ -1,16 +1,10 @@
-<<<<<<< HEAD
 import 'dotenv/config';
-=======
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { apiRouter } from './server/routes.ts';
 import { ensureUserCredentials, securityHeaders, DEMO_MODE } from './server/auth.ts';
-<<<<<<< HEAD
 import { db } from './server/db.ts';
-=======
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,26 +39,15 @@ async function startServer() {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-<<<<<<< HEAD
   // Public information for the login and landing pages (no sensitive data).
-=======
-  // Info publik untuk halaman login/landing (tidak berisi data sensitif).
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   app.get('/api/public-config', (_req, res) => {
     res.json({ demoMode: DEMO_MODE });
   });
 
-<<<<<<< HEAD
   // Unknown API endpoints must return JSON 404 responses, not the SPA index.
   app.use('/api', (_req, res, next) => {
     if (res.headersSent) return next();
     res.status(404).json({ error: 'Endpoint not found' });
-=======
-  // Endpoint API yang tidak dikenal harus 404 JSON, bukan jatuh ke index.html.
-  app.use('/api', (_req, res, next) => {
-    if (res.headersSent) return next();
-    res.status(404).json({ error: 'Endpoint tidak ditemukan' });
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   });
 
   if (!isProd) {

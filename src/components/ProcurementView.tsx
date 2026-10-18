@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { Vendor, PurchaseOrder, VendorBill, Product, ProcurementItemType } from '../types/index.ts';
 import { api } from '../services/api.ts';
-<<<<<<< HEAD
 import { formatRupiahAmount } from '../shared/currency.tsx';
-=======
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
 import {
   PackageSearch,
   Plus,
@@ -56,11 +53,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
   // Purchase Order State
   const [showPoModal, setShowPoModal] = useState(false);
   const [vendorId, setVendorId] = useState(vendors[0]?.id || '');
-<<<<<<< HEAD
   const [poNotes, setPoNotes] = useState('Procurement of spare parts and operational services');
-=======
-  const [poNotes, setPoNotes] = useState('Pengadaan komponen suku cadang dan jasa operasional');
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   const [paymentTerms, setPaymentTerms] = useState('Net 30 Hari');
   const [expectedDate, setExpectedDate] = useState(
     new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0]
@@ -87,11 +80,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
   const [vTaxId, setVTaxId] = useState('');
   const [vCategory, setVCategory] = useState('Heavy Equipment Spare Parts & Logistics');
   const [vTerms, setVTerms] = useState('30');
-<<<<<<< HEAD
   const [vStreet, setVStreet] = useState('Industrial Warehouse Street, Block C No. 12');
-=======
-  const [vStreet, setVStreet] = useState('Jl. Industri Pergudangan Blok C No. 12');
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
   const [vCity, setVCity] = useState('Jakarta Timur');
 
   const [loadingAction, setLoadingAction] = useState(false);
@@ -104,11 +93,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
       ...poItems,
       {
         productId: firstProd?.id || `PRD-CUSTOM-${Date.now().toString().slice(-4)}`,
-<<<<<<< HEAD
         productName: firstProd?.name || 'New Procurement Item',
-=======
-        productName: firstProd?.name || 'Item Pengadaan Baru',
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         itemType: 'GOODS',
         quantity: 1,
         unitCost: firstProd?.purchaseCost || 100,
@@ -151,11 +136,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
   const handleCreatePo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!vendorId) {
-<<<<<<< HEAD
       alert('Please select a vendor first.');
-=======
-      alert('Pilih vendor supplier terlebih dahulu.');
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       return;
     }
 
@@ -169,21 +150,11 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
         items: poItems,
       });
 
-<<<<<<< HEAD
       alert('Purchase Order (PO) submitted and awaiting Manager approval. The vendor bill will be created after approval.');
       setShowPoModal(false);
       onRefresh();
     } catch (err: any) {
       alert(`Failed to create PO: ${err.message}`);
-=======
-      alert(
-        'Purchase Order (PO) berhasil dibuat! Tagihan Vendor (Accounts Payable) langsung terintegrasi secara otomatis ke Tim Finance.'
-      );
-      setShowPoModal(false);
-      onRefresh();
-    } catch (err: any) {
-      alert(`Gagal membuat PO: ${err.message}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     } finally {
       setLoadingAction(false);
     }
@@ -191,7 +162,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
   // Delete / Cancel PO
   const handleDeletePo = async (poId: string) => {
-<<<<<<< HEAD
     if (!confirm('Are you sure you want to cancel and delete this Purchase Order?')) return;
     try {
       await api.deletePurchaseOrder(poId);
@@ -199,15 +169,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
       onRefresh();
     } catch (err: any) {
       alert(`Failed to delete PO: ${err.message}`);
-=======
-    if (!confirm('Apakah Anda yakin ingin membatalkan dan menghapus Purchase Order ini?')) return;
-    try {
-      await api.deletePurchaseOrder(poId);
-      alert('Purchase Order berhasil dibatalkan dan dihapus.');
-      onRefresh();
-    } catch (err: any) {
-      alert(`Gagal menghapus PO: ${err.message}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
   };
 
@@ -215,17 +176,10 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
   const handleReceiveGoods = async (po: PurchaseOrder) => {
     try {
       await api.receivePurchaseOrder(po.id);
-<<<<<<< HEAD
       alert(`Items/services from PO ${po.poNumber} received successfully! Warehouse stock has been updated and the bill is ready for Finance.`);
       onRefresh();
     } catch (err: any) {
       alert(`Failed to receive delivery: ${err.message}`);
-=======
-      alert(`Barang/Jasa dari PO ${po.poNumber} berhasil diterima! Stok gudang telah bertambah dan tagihan siap diproses Finance.`);
-      onRefresh();
-    } catch (err: any) {
-      alert(`Gagal menerima pengiriman: ${err.message}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
   };
 
@@ -233,11 +187,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
   const handleRegisterVendor = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!vName.trim()) {
-<<<<<<< HEAD
       alert('Vendor name is required.');
-=======
-      alert('Nama vendor wajib diisi.');
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       return;
     }
 
@@ -260,11 +210,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
         },
       });
 
-<<<<<<< HEAD
       alert(`Vendor "${vName}" registered successfully!`);
-=======
-      alert(`Vendor "${vName}" berhasil didaftarkan ke sistem rekanan!`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
       setShowAddVendorModal(false);
       setVName('');
       setVContact('');
@@ -272,11 +218,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
       setVPhone('');
       onRefresh();
     } catch (err: any) {
-<<<<<<< HEAD
       alert(`Failed to register vendor: ${err.message}`);
-=======
-      alert(`Gagal mendaftarkan vendor: ${err.message}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     } finally {
       setLoadingAction(false);
     }
@@ -284,7 +226,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
   // Delete Vendor
   const handleDeleteVendor = async (id: string, name: string) => {
-<<<<<<< HEAD
     if (!confirm(`Are you sure you want to remove vendor "${name}" from the vendor directory?`)) return;
     try {
       await api.deleteVendor(id);
@@ -292,21 +233,11 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
       onRefresh();
     } catch (err: any) {
       alert(`Failed to delete vendor: ${err.message}`);
-=======
-    if (!confirm(`Apakah Anda yakin ingin menghapus vendor "${name}" dari daftar rekanan?`)) return;
-    try {
-      await api.deleteVendor(id);
-      alert(`Vendor "${name}" berhasil dihapus.`);
-      onRefresh();
-    } catch (err: any) {
-      alert(`Gagal menghapus vendor: ${err.message}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
   };
 
   // Settle / Pay Vendor Bill (Finance Integration)
   const handlePayBill = async (billId: string) => {
-<<<<<<< HEAD
     if (!confirm('Process this vendor bill payment through the Finance bank/cash account?')) return;
     try {
       await api.payVendorBill(billId);
@@ -314,15 +245,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
       onRefresh();
     } catch (err: any) {
       alert(`Failed to process payment: ${err.message}`);
-=======
-    if (!confirm('Proses pembayaran tagihan vendor ini melalui akun Bank/Kas Finance?')) return;
-    try {
-      await api.payVendorBill(billId);
-      alert('Tagihan vendor berhasil dibayarkan dan diselesaikan oleh Tim Finance!');
-      onRefresh();
-    } catch (err: any) {
-      alert(`Gagal memproses pembayaran: ${err.message}`);
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
     }
   };
 
@@ -333,11 +255,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
         <div className="flex items-center gap-2">
           <PackageSearch className="w-5 h-5 text-slate-700" />
           <h2 className="text-base font-bold text-slate-900">
-<<<<<<< HEAD
             Procurement, Vendor Purchasing &amp; Finance Billing Integration
-=======
-            Procurement, Pengadaan Vendor &amp; Integrasi Tagihan Finance
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </h2>
         </div>
 
@@ -347,11 +265,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded transition-colors cursor-pointer"
           >
             <Building2 className="w-4 h-4 text-slate-600" />
-<<<<<<< HEAD
             + Register New Vendor
-=======
-            + Daftarkan Vendor Baru
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </button>
 
           <button
@@ -359,11 +273,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded transition-colors shadow-2xs cursor-pointer"
           >
             <Plus className="w-4 h-4 text-amber-400" />
-<<<<<<< HEAD
             Create Purchase Order (PO)
-=======
-            Buat Purchase Order (PO)
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
           </button>
         </div>
       </div>
@@ -391,11 +301,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
           }`}
         >
           <Building className="w-4 h-4 text-emerald-600" />
-<<<<<<< HEAD
           Vendor Directory ({vendors.length})
-=======
-          Daftar Rekanan Vendor ({vendors.length})
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         </button>
 
         <button
@@ -407,11 +313,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
           }`}
         >
           <CreditCard className="w-4 h-4 text-amber-600" />
-<<<<<<< HEAD
           Finance Bills ({vendorBills.length})
-=======
-          Tagihan Terintegrasi Tim Finance ({vendorBills.length})
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
         </button>
       </div>
 
@@ -430,11 +332,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                       type="button"
                       onClick={() => setSelectedPoPreview(po)}
                       className="font-mono font-bold text-xs bg-slate-900 text-amber-400 hover:bg-slate-800 hover:text-amber-300 px-2 py-0.5 rounded cursor-pointer transition-colors"
-<<<<<<< HEAD
                       title="Open the official purchase order"
-=======
-                      title="Klik untuk membuka view data dokumen Purchase Order resmi"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     >
                       {po.poNumber}
                     </button>
@@ -445,11 +343,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                           : 'bg-blue-100 text-blue-800 border border-blue-300'
                       }`}
                     >
-<<<<<<< HEAD
                       {po.status === 'GOODS_RECEIVED' ? 'RECEIVED (STOCK UPDATED)' : 'APPROVED / PENDING'}
-=======
-                      {po.status === 'GOODS_RECEIVED' ? 'DITERIMA (STOK BERTAMBAH)' : 'DISETUJUI / MENUNGGU'}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </span>
                   </div>
 
@@ -464,7 +358,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
                   {/* PO Items Summary */}
                   <div className="bg-slate-50 p-2.5 rounded border border-slate-200 text-xs space-y-1">
-<<<<<<< HEAD
                     <div className="text-[10px] uppercase font-bold text-slate-400">Items &amp; Services:</div>
                     {po.items.map((item, idx) => (
                       <div key={idx} className="flex justify-between text-slate-700 text-[11px]">
@@ -477,20 +370,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                     <div className="pt-1.5 border-t border-slate-200 flex justify-between font-bold text-slate-900 text-xs">
                       <span>Grand Total (Including Tax):</span>
                       <span className="font-mono text-emerald-700">{formatRupiahAmount(po.grandTotal)}</span>
-=======
-                    <div className="text-[10px] uppercase font-bold text-slate-400">Rincian Barang &amp; Jasa:</div>
-                    {po.items.map((item, idx) => (
-                      <div key={idx} className="flex justify-between text-slate-700 text-[11px]">
-                        <span>
-                          {item.quantity}x [{item.itemType || 'BARANG'}] {item.productName}
-                        </span>
-                        <span className="font-mono font-semibold">${item.totalCost.toFixed(2)}</span>
-                      </div>
-                    ))}
-                    <div className="pt-1.5 border-t border-slate-200 flex justify-between font-bold text-slate-900 text-xs">
-                      <span>Grand Total (Inc. Pajak):</span>
-                      <span className="font-mono text-emerald-700">${po.grandTotal.toFixed(2)}</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </div>
                   </div>
                 </div>
@@ -502,11 +381,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                       className="px-2 py-1 text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded flex items-center gap-1 cursor-pointer"
                     >
                       <Printer className="w-3 h-3" />
-<<<<<<< HEAD
                       Print PO
-=======
-                      Cetak PO
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </button>
 
                     {po.status !== 'GOODS_RECEIVED' && (
@@ -515,11 +390,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                         className="px-2 py-1 text-[11px] font-semibold text-rose-600 hover:bg-rose-50 rounded flex items-center gap-1 cursor-pointer"
                       >
                         <Trash2 className="w-3 h-3" />
-<<<<<<< HEAD
                         Delete
-=======
-                        Hapus
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </button>
                     )}
                   </div>
@@ -530,11 +401,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                       className="px-2.5 py-1 text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded flex items-center gap-1 shadow-2xs cursor-pointer"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
-<<<<<<< HEAD
                       Receive Items &amp; Services
-=======
-                      Terima Barang &amp; Jasa
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </button>
                   )}
                 </div>
@@ -549,15 +416,9 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
         <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-xs space-y-3">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100">
             <div>
-<<<<<<< HEAD
               <h3 className="text-sm font-bold text-slate-900">Vendor &amp; Supplier Directory</h3>
               <p className="text-xs text-slate-500">
                 Central directory of vendors for spare parts, heavy equipment, lubricants, and technical services.
-=======
-              <h3 className="text-sm font-bold text-slate-900">Daftar Rekanan Vendor &amp; Supplier</h3>
-              <p className="text-xs text-slate-500">
-                Pusat data mitra supplier suku cadang, armada alat berat, pelumas, dan penyedia jasa teknis.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </p>
             </div>
             <button
@@ -565,11 +426,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
               className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded flex items-center gap-1.5 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5 text-amber-400" />
-<<<<<<< HEAD
               Register New Vendor
-=======
-              Daftarkan Vendor Baru
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </button>
           </div>
 
@@ -577,7 +434,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
             <table className="w-full text-left text-xs border border-slate-200 rounded">
               <thead className="bg-slate-100 text-slate-700 font-semibold uppercase text-[10px]">
                 <tr>
-<<<<<<< HEAD
                   <th className="p-2.5">Vendor Code &amp; Name</th>
                   <th className="p-2.5">Vendor Category</th>
                   <th className="p-2.5">Contact Person &amp; Phone</th>
@@ -585,15 +441,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                   <th className="p-2.5">Company Tax ID</th>
                   <th className="p-2.5">Payment Term</th>
                   <th className="p-2.5 text-center">Actions</th>
-=======
-                  <th className="p-2.5">Kode &amp; Nama Vendor</th>
-                  <th className="p-2.5">Kategori Rekanan</th>
-                  <th className="p-2.5">Kontak Person &amp; Telp</th>
-                  <th className="p-2.5">Email Resmi</th>
-                  <th className="p-2.5">NPWP Perusahaan</th>
-                  <th className="p-2.5">Payment Term</th>
-                  <th className="p-2.5 text-center">Aksi</th>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -619,11 +466,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                       <button
                         onClick={() => handleDeleteVendor(v.id, v.name)}
                         className="p-1 text-slate-400 hover:text-rose-600 rounded transition-colors cursor-pointer"
-<<<<<<< HEAD
                         title="Delete Vendor"
-=======
-                        title="Hapus Vendor"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -643,7 +486,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
             <div>
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-emerald-600" />
-<<<<<<< HEAD
                 Vendor Bills (Accounts Payable) for Finance
               </h3>
               <p className="text-xs text-slate-500">
@@ -652,16 +494,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
             </div>
             <span className="text-xs font-mono font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded">
               {vendorBills.length} Bills
-=======
-                Integrasi Tagihan Vendor (Accounts Payable) ke Tim Finance
-              </h3>
-              <p className="text-xs text-slate-500">
-                Setiap Purchase Order otomatis mengirimkan voucher tagihan ke Tim Finance &amp; Tax untuk diverifikasi dan dibayarkan sesuai payment term.
-              </p>
-            </div>
-            <span className="text-xs font-mono font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded">
-              {vendorBills.length} Tagihan Terdaftar
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
             </span>
           </div>
 
@@ -669,7 +501,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
             <table className="w-full text-left text-xs border border-slate-200 rounded">
               <thead className="bg-slate-100 text-slate-700 font-semibold uppercase text-[10px]">
                 <tr>
-<<<<<<< HEAD
                   <th className="p-2.5">Bill Number</th>
                   <th className="p-2.5">PO Reference</th>
                   <th className="p-2.5">Vendor Name</th>
@@ -678,16 +509,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                   <th className="p-2.5 text-right">Bill Amount</th>
                   <th className="p-2.5 text-center">Payment Status</th>
                   <th className="p-2.5 text-center">Finance Actions</th>
-=======
-                  <th className="p-2.5">Nomor Tagihan Bill</th>
-                  <th className="p-2.5">Rujukan PO</th>
-                  <th className="p-2.5">Nama Vendor</th>
-                  <th className="p-2.5">Tgl Tagihan</th>
-                  <th className="p-2.5">Jatuh Tempo</th>
-                  <th className="p-2.5 text-right">Nominal Tagihan</th>
-                  <th className="p-2.5 text-center">Status Pembayaran</th>
-                  <th className="p-2.5 text-center">Aksi Finance</th>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -699,11 +520,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                     <td className="p-2.5 font-mono text-slate-600">{b.billDate}</td>
                     <td className="p-2.5 font-mono text-slate-600">{b.dueDate}</td>
                     <td className="p-2.5 text-right font-mono font-bold text-slate-900">
-<<<<<<< HEAD
                       {formatRupiahAmount(b.amount)}
-=======
-                      ${b.amount.toFixed(2)}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </td>
                     <td className="p-2.5 text-center">
                       <span
@@ -713,11 +530,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                             : 'bg-amber-100 text-amber-800 border border-amber-300'
                         }`}
                       >
-<<<<<<< HEAD
                         {b.status === 'PAID' ? 'PAID' : 'UNPAID'}
-=======
-                        {b.status === 'PAID' ? 'LUNAS (PAID)' : 'BELUM DIBAYAR (UNPAID)'}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                       </span>
                     </td>
                     <td className="p-2.5 text-center">
@@ -726,19 +539,11 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                           onClick={() => handlePayBill(b.id)}
                           className="px-2.5 py-1 text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded cursor-pointer"
                         >
-<<<<<<< HEAD
                           Pay Bill
                         </button>
                       ) : (
                         <span className="text-emerald-700 font-semibold text-[11px] flex items-center justify-center gap-1">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Complete
-=======
-                          Bayar Tagihan
-                        </button>
-                      ) : (
-                        <span className="text-emerald-700 font-semibold text-[11px] flex items-center justify-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Selesai
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         </span>
                       )}
                     </td>
@@ -756,15 +561,9 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
           <div className="bg-white rounded-lg shadow-xl border border-slate-200 max-w-3xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <div>
-<<<<<<< HEAD
                 <h3 className="font-bold text-slate-900 text-base">Create Purchase Order (PO)</h3>
                 <p className="text-xs text-slate-500">
                   Add goods or services, calculate tax automatically, and integrate directly with Finance.
-=======
-                <h3 className="font-bold text-slate-900 text-base">Buat Purchase Order (PO) Baru</h3>
-                <p className="text-xs text-slate-500">
-                  Tambahkan barang/jasa yang akan dibeli, kalkulasi pajak otomatis, dan integrasikan langsung ke tim Finance.
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </p>
               </div>
               <button onClick={() => setShowPoModal(false)} className="text-slate-400 hover:text-slate-700">
@@ -775,11 +574,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
             <form onSubmit={handleCreatePo} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Select Vendor *</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Pilih Vendor Rekanan *</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <select
                     value={vendorId}
                     onChange={(e) => setVendorId(e.target.value)}
@@ -794,11 +589,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 </div>
 
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Payment Terms *</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Syarat Pembayaran (Payment Term) *</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <select
                     value={paymentTerms}
                     onChange={(e) => setPaymentTerms(e.target.value)}
@@ -813,11 +604,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 </div>
 
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Target Delivery Date</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Target Tanggal Pengiriman</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="date"
                     value={expectedDate}
@@ -831,11 +618,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
               <div className="border border-slate-200 rounded-md p-3 bg-slate-50 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-slate-800 uppercase text-[11px]">
-<<<<<<< HEAD
                     Items &amp; Services to Purchase
-=======
-                    Daftar Barang &amp; Jasa Yang Akan Dibeli
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </span>
                   <button
                     type="button"
@@ -843,11 +626,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                     className="px-2.5 py-1 text-xs font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 border border-indigo-200 rounded flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
-<<<<<<< HEAD
                     + Add Purchase Item
-=======
-                    + Tambah Baris Pembelian
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </button>
                 </div>
 
@@ -855,32 +634,19 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                   {poItems.map((item, idx) => (
                     <div key={idx} className="bg-white p-2.5 rounded border border-slate-200 grid grid-cols-12 gap-2 items-end">
                       <div className="col-span-2">
-<<<<<<< HEAD
                         <label className="block text-[10px] text-slate-400 font-semibold">Type</label>
-=======
-                        <label className="block text-[10px] text-slate-400 font-semibold">Tipe</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         <select
                           value={item.itemType}
                           onChange={(e) => handleItemFieldChange(idx, 'itemType', e.target.value)}
                           className="w-full p-1.5 border border-slate-300 rounded text-xs outline-none font-semibold text-slate-800"
                         >
-<<<<<<< HEAD
                           <option value="GOODS">GOODS</option>
                           <option value="SERVICE">SERVICE</option>
-=======
-                          <option value="GOODS">BARANG</option>
-                          <option value="SERVICE">JASA</option>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         </select>
                       </div>
 
                       <div className="col-span-4">
-<<<<<<< HEAD
                         <label className="block text-[10px] text-slate-400 font-semibold">Item / Spare Part Name</label>
-=======
-                        <label className="block text-[10px] text-slate-400 font-semibold">Nama Item / Suku Cadang</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         <input
                           type="text"
                           value={item.productName}
@@ -890,11 +656,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                       </div>
 
                       <div className="col-span-2">
-<<<<<<< HEAD
                         <label className="block text-[10px] text-slate-400 font-semibold">Quantity</label>
-=======
-                        <label className="block text-[10px] text-slate-400 font-semibold">Banyaknya / Qty</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         <input
                           type="number"
                           min="1"
@@ -905,11 +667,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                       </div>
 
                       <div className="col-span-2">
-<<<<<<< HEAD
                         <label className="block text-[10px] text-slate-400 font-semibold">Unit Price (IDR)</label>
-=======
-                        <label className="block text-[10px] text-slate-400 font-semibold">Harga Satuan ($)</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         <input
                           type="number"
                           value={item.unitCost}
@@ -919,11 +677,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                       </div>
 
                       <div className="col-span-1">
-<<<<<<< HEAD
                         <label className="block text-[10px] text-slate-400 font-semibold">Tax %</label>
-=======
-                        <label className="block text-[10px] text-slate-400 font-semibold">Pajak %</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         <input
                           type="number"
                           value={item.taxRatePercent}
@@ -937,11 +691,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                           type="button"
                           onClick={() => handleRemoveItemRow(idx)}
                           className="p-1 text-slate-400 hover:text-rose-600 rounded cursor-pointer"
-<<<<<<< HEAD
                           title="Delete item row"
-=======
-                          title="Hapus baris item"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -954,7 +704,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 <div className="flex justify-end pt-2">
                   <div className="w-64 space-y-1 text-xs">
                     <div className="flex justify-between text-slate-600">
-<<<<<<< HEAD
                       <span>Purchase Subtotal:</span>
                       <span className="font-mono">{formatRupiahAmount(calculatedSubtotal)}</span>
                     </div>
@@ -965,29 +714,13 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                     <div className="flex justify-between pt-1 border-t border-slate-300 font-bold text-slate-900 text-sm">
                       <span>Grand Total (Including Tax):</span>
                       <span className="font-mono text-emerald-700">{formatRupiahAmount(calculatedGrandTotal)}</span>
-=======
-                      <span>Subtotal Belanja:</span>
-                      <span className="font-mono">${calculatedSubtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-slate-600">
-                      <span>PPN Termasuk:</span>
-                      <span className="font-mono">${calculatedTax.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between pt-1 border-t border-slate-300 font-bold text-slate-900 text-sm">
-                      <span>Grand Total (Inc. Pajak):</span>
-                      <span className="font-mono text-emerald-700">${calculatedGrandTotal.toFixed(2)}</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </div>
                   </div>
                 </div>
               </div>
 
               <div>
-<<<<<<< HEAD
                 <label className="block text-slate-700 font-semibold mb-1">Additional PO Notes</label>
-=======
-                <label className="block text-slate-700 font-semibold mb-1">Catatan Tambahan PO</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 <textarea
                   rows={2}
                   value={poNotes}
@@ -1002,11 +735,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                   onClick={() => setShowPoModal(false)}
                   className="px-3.5 py-1.5 text-slate-600 hover:bg-slate-100 rounded font-semibold cursor-pointer"
                 >
-<<<<<<< HEAD
                   Cancel
-=======
-                  Batal
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
                 <button
                   type="submit"
@@ -1014,11 +743,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                   className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded font-bold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {loadingAction ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4 text-amber-400" />}
-<<<<<<< HEAD
                   Issue Purchase Order &amp; Send to Finance
-=======
-                  Terbitkan Purchase Order &amp; Kirim ke Finance
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
               </div>
             </form>
@@ -1033,11 +758,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-emerald-600" />
-<<<<<<< HEAD
                 Register New Vendor / Supplier
-=======
-                Daftarkan Nama Vendor / Supplier Baru
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
               </h3>
               <button onClick={() => setShowAddVendorModal(false)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
@@ -1046,17 +767,10 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
             <form onSubmit={handleRegisterVendor} className="space-y-3 text-xs">
               <div>
-<<<<<<< HEAD
                 <label className="block text-slate-700 font-semibold mb-1">Vendor Company Name *</label>
                 <input
                   type="text"
                   placeholder="e.g., PT Trakindo Utama Parts, PT Komatsu Mitra Sejahtera"
-=======
-                <label className="block text-slate-700 font-semibold mb-1">Nama Perusahaan Vendor *</label>
-                <input
-                  type="text"
-                  placeholder="cth: PT Trakindo Utama Parts, PT Komatsu Mitra Sejahtera"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   value={vName}
                   onChange={(e) => setVName(e.target.value)}
                   className="w-full p-2 border border-slate-300 rounded outline-none"
@@ -1066,38 +780,22 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Vendor Category</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Kategori Rekanan</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <select
                     value={vCategory}
                     onChange={(e) => setVCategory(e.target.value)}
                     className="w-full p-2 border border-slate-300 rounded outline-none"
                   >
-<<<<<<< HEAD
                     <option value="Heavy Equipment Spare Parts">Heavy Equipment Spare Parts</option>
                     <option value="Heavy Machinery Supplier">Heavy Equipment Supplier</option>
                     <option value="Technical Services & Calibration">Service &amp; Calibration</option>
                     <option value="Lubricants & Consumables">Oils, Lubricants &amp; Fuel</option>
                     <option value="Office & General Supplies">Office &amp; General Supplies</option>
-=======
-                    <option value="Heavy Equipment Spare Parts">Suku Cadang Alat Berat</option>
-                    <option value="Heavy Machinery Supplier">Penyedia Unit Alat Berat</option>
-                    <option value="Technical Services & Calibration">Jasa Servis &amp; Kalibrasi</option>
-                    <option value="Lubricants & Consumables">Oli, Pelumas &amp; Bahan Bakar</option>
-                    <option value="Office & General Supplies">Pengadaan Umum / Kantor</option>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </select>
                 </div>
 
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Payment Terms (Days)</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Payment Term (Hari)</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="number"
                     value={vTerms}
@@ -1110,11 +808,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Contact Person</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Kontak Person (PIC)</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="text"
                     value={vContact}
@@ -1125,11 +819,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 </div>
 
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Phone Number</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Nomor Telepon</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="text"
                     value={vPhone}
@@ -1142,11 +832,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Company Email</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">Email Perusahaan</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="email"
                     value={vEmail}
@@ -1157,11 +843,7 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 </div>
 
                 <div>
-<<<<<<< HEAD
                   <label className="block text-slate-700 font-semibold mb-1">Company Tax ID (NPWP)</label>
-=======
-                  <label className="block text-slate-700 font-semibold mb-1">NPWP / Tax ID</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <input
                     type="text"
                     value={vTaxId}
@@ -1173,20 +855,12 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
               </div>
 
               <div>
-<<<<<<< HEAD
                 <label className="block text-slate-700 font-semibold mb-1">Office / Warehouse Address</label>
-=======
-                <label className="block text-slate-700 font-semibold mb-1">Alamat Kantor / Pergudangan</label>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 <input
                   type="text"
                   value={vStreet}
                   onChange={(e) => setVStreet(e.target.value)}
-<<<<<<< HEAD
                   placeholder="Pulogadung Industrial Estate, Block C"
-=======
-                  placeholder="Kawasan Industri Pulogadung Blok C"
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   className="w-full p-2 border border-slate-300 rounded outline-none"
                 />
               </div>
@@ -1197,22 +871,14 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                   onClick={() => setShowAddVendorModal(false)}
                   className="px-3.5 py-1.5 text-slate-600 hover:bg-slate-100 rounded font-semibold cursor-pointer"
                 >
-<<<<<<< HEAD
                   Cancel
-=======
-                  Batal
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
                 <button
                   type="submit"
                   disabled={loadingAction}
                   className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded font-bold cursor-pointer disabled:opacity-50"
                 >
-<<<<<<< HEAD
                   Save Vendor
-=======
-                  Simpan Vendor
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                 </button>
               </div>
             </form>
@@ -1239,7 +905,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
             <div className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded border border-slate-200 font-mono">
                 <div>
-<<<<<<< HEAD
                   <span className="text-slate-400 block text-[10px]">PO Number:</span>
                   <span className="font-bold text-slate-900">{selectedPoPreview.poNumber}</span>
                 </div>
@@ -1253,21 +918,6 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                 </div>
                 <div>
                   <span className="text-slate-400 block text-[10px]">Payment Terms:</span>
-=======
-                  <span className="text-slate-400 block text-[10px]">Nomor PO:</span>
-                  <span className="font-bold text-slate-900">{selectedPoPreview.poNumber}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px]">Tanggal Pemesanan:</span>
-                  <span className="font-bold text-slate-900">{selectedPoPreview.orderDate}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px]">Vendor Supplier:</span>
-                  <span className="font-bold text-slate-900">{selectedPoPreview.vendorName}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px]">Syarat Pembayaran:</span>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   <span className="font-bold text-slate-900">{selectedPoPreview.paymentTerms || 'Net 30'}</span>
                 </div>
               </div>
@@ -1275,17 +925,10 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
               <table className="w-full text-left text-xs border border-slate-200 rounded">
                 <thead className="bg-slate-100 text-slate-700 font-semibold uppercase text-[10px]">
                   <tr>
-<<<<<<< HEAD
                     <th className="p-2">Item Description</th>
                     <th className="p-2">Type</th>
                     <th className="p-2 text-right">Qty</th>
                     <th className="p-2 text-right">Unit Price</th>
-=======
-                    <th className="p-2">Item Deskripsi</th>
-                    <th className="p-2">Tipe</th>
-                    <th className="p-2 text-right">Qty</th>
-                    <th className="p-2 text-right">Harga Satuan</th>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     <th className="p-2 text-right">Total</th>
                   </tr>
                 </thead>
@@ -1293,17 +936,10 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
                   {selectedPoPreview.items.map((it, idx) => (
                     <tr key={idx}>
                       <td className="p-2 font-medium">{it.productName}</td>
-<<<<<<< HEAD
                       <td className="p-2 text-[10px]">{it.itemType || 'GOODS'}</td>
                       <td className="p-2 text-right font-mono">{it.quantity}</td>
                       <td className="p-2 text-right font-mono">{formatRupiahAmount(it.unitCost)}</td>
                       <td className="p-2 text-right font-mono font-bold">{formatRupiahAmount(it.totalCost)}</td>
-=======
-                      <td className="p-2 text-[10px]">{it.itemType || 'BARANG'}</td>
-                      <td className="p-2 text-right font-mono">{it.quantity}</td>
-                      <td className="p-2 text-right font-mono">${it.unitCost.toFixed(2)}</td>
-                      <td className="p-2 text-right font-mono font-bold">${it.totalCost.toFixed(2)}</td>
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                     </tr>
                   ))}
                 </tbody>
@@ -1311,17 +947,10 @@ export const ProcurementView: React.FC<ProcurementViewProps> = ({
 
               <div className="flex justify-end pt-2">
                 <div className="text-right space-y-1 font-mono">
-<<<<<<< HEAD
                   <div className="text-slate-600">Subtotal: {formatRupiahAmount(selectedPoPreview.subtotal)}</div>
                   <div className="text-slate-600">VAT (11%): {formatRupiahAmount(selectedPoPreview.taxAmount)}</div>
                   <div className="text-base font-bold text-slate-900 pt-1 border-t border-slate-300">
                     Grand Total: {formatRupiahAmount(selectedPoPreview.grandTotal)}
-=======
-                  <div className="text-slate-600">Subtotal: ${selectedPoPreview.subtotal.toFixed(2)}</div>
-                  <div className="text-slate-600">PPN (11%): ${selectedPoPreview.taxAmount.toFixed(2)}</div>
-                  <div className="text-base font-bold text-slate-900 pt-1 border-t border-slate-300">
-                    Grand Total: ${selectedPoPreview.grandTotal.toFixed(2)}
->>>>>>> 2e64693bfb1fbb36a821a7a7248b397ac785b443
                   </div>
                 </div>
               </div>
