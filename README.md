@@ -47,3 +47,12 @@ Jangan commit `.env` atau data database. File `.env` diabaikan Git; gunakan `.en
 - IT Settings provides full backup plus selective export/import of supported JSON-backed collections and a test-only operational-data clearing button that preserves user credentials and settings.
 - User Management contains a GRC Access Control review tab.
 - The database remains JSON-backed (`data/eams_db.json`), not a SQL table store. See `docs/USER_GUIDE.md`, `docs/BACKUP_RESTORE.md`, and `docs/API_WORKFLOW_REVISION.md`.
+
+
+## Equipment Rental Rate Calculator
+
+- Akses melalui **Quotations → Rate Calculator**.
+- Menghitung standard/reference monthly, daily, hourly, lumpsum, serta reference hourly Sabtu/Minggu.
+- Kalender kontrak mendukung tanggal mulai/akhir, opsi hari kerja Sabtu/Minggu, dan daftar tanggal libur.
+- Hasil dapat diterapkan ke item pertama quotation yang sedang dibuat. Rate basis hourly/daily/monthly harus tetap dijelaskan dalam terms/remarks karena model quotation saat ini belum menyimpan unit rate yang lebih granular.
+- Multiplier belum disimpan secara persisten dan belum ada endpoint calculator khusus.
