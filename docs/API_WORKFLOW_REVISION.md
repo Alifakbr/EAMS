@@ -41,3 +41,15 @@ For the full flow diagrams and operator notes, see [REVISI_EAMS_2026-10.md](REVI
 | GET | `/api/v1/notifications` | Synchronizes and returns compliance reminders, including SIA, STNK, BPKB expiry when configured, inspection due dates and operator SIO. |
 
 All routes inherit session authentication and ACL middleware; migration/reset routes additionally require the `ADMIN_IT` role. The app stores data in a JSON-backed database state, not relational SQL tables, so “table” in these endpoints means a top-level collection in `data/eams_db.json`.
+
+
+## Equipment Rental Rate Calculator
+
+Rate calculator saat ini dijalankan di frontend pada komponen `src/components/RentalRateCalculator.tsx` dan terintegrasi dengan `QuotationsView`. Tidak ada endpoint API baru dan tidak ada multiplier yang disimpan ke database oleh calculator ini. Hasil diterapkan ke baris pertama quotation yang sedang dibuat melalui state UI.
+
+Jika diperlukan integrasi server-side di tahap berikutnya, rancangan endpoint yang disarankan adalah:
+- `GET /system/rental-rate-settings` — mengambil konfigurasi multiplier yang hanya dapat diubah role berwenang.
+- `PUT /system/rental-rate-settings` — memperbarui multiplier dan basis default dengan validasi server-side.
+- `POST /rental-rate/calculate` — menerima kontrak dan kalender, lalu mengembalikan standard/reference rates serta ringkasan kalender.
+
+Endpoint tersebut adalah rekomendasi lanjutan dan **belum diimplementasikan** pada versi ini.
