@@ -1,5 +1,6 @@
 import { exportExcelFromHtml } from '../utils/download.ts';
 import React, { useState } from 'react';
+import { RentalRateCalculator } from './RentalRateCalculator.tsx';
 import { Quotation, Customer, Product, Asset, UserRole, RentalRateModel, CommercialTransactionType } from '../types/index.ts';
 import { api } from '../services/api.ts';
 import { formatRupiahAmount } from '../shared/currency.tsx';
@@ -20,6 +21,7 @@ import {
   Tag,
   Clock,
   Layers,
+  Calculator,
   Sparkles,
   Link as LinkIcon,
 } from 'lucide-react';
@@ -62,6 +64,7 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
 }) => {
   const availableAssets = assets.filter((asset) => asset.status === 'AVAILABLE');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showRateCalculator, setShowRateCalculator] = useState(false);
   const [selectedPreviewQuote, setSelectedPreviewQuote] = useState<Quotation | null>(null);
   const [transactionType, setTransactionType] = useState<CommercialTransactionType>('RENTAL');
 
@@ -274,6 +277,9 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
         </div>
 
         <div className="no-print flex items-center gap-2 flex-wrap">
+          <button type="button" onClick={() => setShowRateCalculator(true)} className="inline-flex items-center gap-1.5 rounded border border-indigo-300 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-800 hover:bg-indigo-100 cursor-pointer" title="Calculate standard and reference rental rates">
+            <Calculator className="h-3.5 w-3.5" /> Rate Calculator
+          </button>
           <button
             type="button"
             onClick={() => {
@@ -933,6 +939,14 @@ export const QuotationsView: React.FC<QuotationsViewProps> = ({
             </div>
           </div>
         </div>
+      )}
+      {showRateCalculator && (
+        <RentalRateCalculator
+          onClose={() => setShowRateCalculator(false)}
+          onApplyRate={(rate, rateModel) => {
+            setItems((current) => current.map((item, index) => index === 0 ? { ...item, rentalRate: rate, rateModel } : item));
+          }}
+        />
       )}
     </div>
   );
