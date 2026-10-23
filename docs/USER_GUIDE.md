@@ -152,3 +152,37 @@ Use **Print Map (PDF)** from the GPS Fleet Map panel and choose A4 landscape. En
 ## GRC Access Control
 
 Open **User Management (IT) → GRC Access Control** to review the role permission matrix and access-review checklist. This is a review/reporting tab; it does not itself change permissions. Apply role changes in User Management and validate endpoint enforcement after changes.
+
+
+## Equipment Rental Rate Calculator
+
+Pada menu **Rental Offers & Sales Quotations**, pilih **Rate Calculator** untuk menghitung standard rate, reference rate, kalender kontrak, dan multiplier sebelum menerapkan angka ke quotation.
+
+### Input dan rumus
+
+- **Monthly contract value**: nilai rental bulanan per unit sebagai dasar kalkulasi.
+- **Rate days / month**: denominator untuk daily rate; ini adalah basis kontrak dan tidak otomatis sama dengan jumlah hari kalender.
+- **Contract hours / month**: denominator untuk hourly rate.
+- **Working hours / day**: digunakan untuk menghitung scheduled hours dari kalender.
+- **Contract months**: digunakan untuk menghitung lumpsum total.
+- **Quantity**: dipakai untuk menampilkan indikasi total kuantitas; rate hasil kalkulator tetap rate per unit.
+- **Multipliers**: reference monthly/daily/hourly/lumpsum serta hourly multiplier Sabtu dan Minggu.
+
+Rumus yang digunakan:
+
+- Daily standard = monthly contract value / rate days per month.
+- Hourly standard = monthly contract value / contract hours per month.
+- Lumpsum standard = monthly contract value × contract months.
+- Reference rate = standard rate × multiplier.
+- Reference Saturday/Sunday hourly = standard hourly × multiplier Sabtu/Minggu.
+
+Kalender menghitung tanggal mulai dan akhir secara inklusif. Hari kerja Senin–Jumat dihitung otomatis, Sabtu dan Minggu hanya dihitung bila opsi terkait aktif, dan tanggal yang dimasukkan ke daftar hari libur dikecualikan. Scheduled hours = billable days × working hours per day.
+
+### Terapkan ke quotation
+
+1. Buka **Quotations** dan pilih **Rate Calculator**.
+2. Masukkan nilai kontrak, basis hari/jam/bulan, multiplier, periode, dan hari libur bila diperlukan.
+3. Pilih rate basis dan apakah yang diterapkan adalah Standard atau Reference.
+4. Klik **Apply rate to first quotation item**. Nilai diterapkan ke baris pertama pada form quotation yang sedang dibuat.
+
+**Penting:** Calculator adalah alat pricing/referensi. Model quotation yang ada hanya membedakan `REGULAR` dan `LUMPSUM`, belum menyimpan satuan rate terpisah untuk hourly/daily/monthly. Pastikan basis rate dijelaskan dalam terms/remarks quotation. Nilai kalender tidak otomatis mengubah jumlah tagihan, dan calculator tidak otomatis mengubah tipe penagihan invoice. Multiplier saat ini merupakan input form, belum tersimpan sebagai konfigurasi persisten di database.
