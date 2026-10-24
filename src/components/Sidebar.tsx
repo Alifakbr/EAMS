@@ -64,7 +64,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'manager-approvals', label: 'Approvals & Contracts', icon: CheckCircle2 },
         { id: 'contract-management', label: 'Contract Management', icon: FileCheck },
-        { id: 'contract-management', label: 'Contract Management', icon: FileCheck },
       ],
     },
     {
@@ -101,7 +100,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'invoices', label: 'Invoices & Billing', icon: CreditCard, badge: counts?.openInvoices },
         { id: 'payments', label: 'Payments & Settlement', icon: Banknote },
         { id: 'finance-overview', label: 'Finance Transaction Overview', icon: Wallet },
-        { id: 'finance-overview', label: 'Finance Transaction Overview', icon: Wallet },
       ],
     },
     {
@@ -124,11 +122,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
   ];
 
-  // Filter sections so that only allowed items for the role are displayed
+  // Deduplicate module IDs globally before rendering. This prevents accidental duplicate
+  // sidebar entries even if a future edit repeats an item in another section.
+  const seenModuleIds = new Set<string>();
   const sections = allSections
     .map((sec) => ({
       ...sec,
-      items: sec.items.filter((item) => allowedTabs.includes(item.id)),
+      items: sec.items.filter((item) => {
+        if (!allowedTabs.includes(item.id) || seenModuleIds.has(item.id)) return false;
+        seenModuleIds.add(item.id);
+        return true;
+      }),
     }))
     .filter((sec) => sec.items.length > 0);
 
@@ -212,7 +216,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-amber-400' : 'text-slate-400'}`} />
+                        <Icon aria-hidden="true" className={`!w-4 !h-4 shrink-0 flex-none ${isActive ? 'text-amber-400' : 'text-slate-400'}`} strokeWidth={1.8} />
                         <span className="truncate">{item.label}</span>
                       </div>
                       {item.badge !== undefined && item.badge > 0 && (

@@ -74,3 +74,10 @@ Verification: `npm run lint` passed after code changes. `npm run build` could no
 - Removed duplicate Edit/Delete action group in Commercial Customer Database.
 - Updated `docs/00_PROJECT_MAP_AND_NEXT_PROMPT.md` and added `docs/REVISION_2026-10-24_QR_CUSTOMER_FINANCE_CONTRACTS.md` to map the affected code and clearly list unfinished Contract Management and consolidated Finance ledger work.
 - Contract Management persistent uploads/reminders and a unified cash-in/cash-out ledger are explicitly recorded as not complete; do not represent these as implemented.
+
+
+## 2026-10-24 — Sidebar & Multiple SIA
+- Removed repeated sidebar entries and added a global duplicate-module guard.
+- Standardized sidebar icon dimensions.
+- Preserved existing multi-SIA records when opening Compliance Documents; added per-record issuer editing and required number/expiry validation.
+- Details: `docs/REVISION_2026-10-24_SIDEBAR_SIA.md`.

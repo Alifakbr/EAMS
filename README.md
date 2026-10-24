@@ -89,3 +89,7 @@ See `docs/00_PROJECT_MAP_AND_NEXT_PROMPT.md` first for the source map, then `doc
 ## Latest local review revision (24 Oct 2026)
 
 Read `docs/00_PROJECT_MAP_AND_NEXT_PROMPT.md` first, then `docs/REVISION_2026-10-24_APPROVAL_FINANCE_DISPATCH.md` and the earlier revision history documents listed there. This revision removes Work Orders from Manager Approvals, removes the Sales Order `ALLOCATED` state (legacy values normalize to `CONFIRMED`), adds Finance date/category/source/status filters and Excel-compatible CSV export with clearly labeled tax simulation, blocks SO dispatch without contract reference + PDF, and records the first successful operator scan as the system-stamped equipment mobilization start. Limitations and mandatory local tests are documented in the revision log.
+
+
+## Latest local review revision
+For the latest sidebar and multiple-SIA changes, read `docs/00_PROJECT_MAP_AND_NEXT_PROMPT.md` first, then `docs/REVISION_2026-10-24_SIDEBAR_SIA.md`. No GitHub branch or commit was created for this local review package.

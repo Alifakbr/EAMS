@@ -1,6 +1,6 @@
 # EAMS Project Map — Read First
 
-Read this file before any subsequent AI task. Then read `docs/REVISION_2026-10-24_QR_CUSTOMER_FINANCE_CONTRACTS.md`, `docs/USER_GUIDE.md`, `docs/SECURITY_AND_ACCESS.md`, `docs/API_WORKFLOW_REVISION.md`, and `README.md`.
+Read this file before any subsequent AI task. Then read the latest revision log `docs/REVISION_2026-10-24_SIDEBAR_SIA.md`, followed by `docs/REVISION_2026-10-24_APPROVAL_FINANCE_DISPATCH.md`, prior revision logs, `docs/USER_GUIDE.md`, `docs/SECURITY_AND_ACCESS.md`, `docs/API_WORKFLOW_REVISION.md`, and `README.md`.
 
 ## Architecture
 - React + TypeScript frontend: `src/App.tsx`, `src/components/`
@@ -28,3 +28,7 @@ Before any next change, read `REVISION_2026-10-24_CONTRACT_MANAGEMENT_FINANCE_OV
 
 ## Latest revision log (2026-10-24 — approvals, finance filters, dispatch controls)
 Read `docs/REVISION_2026-10-24_APPROVAL_FINANCE_DISPATCH.md` after this map. It records the latest request, code map, and limitations. Main changes: Work Orders no longer enter Manager Approvals; legacy `ALLOCATED` Sales Order status was removed from the TypeScript status union and normalized to `CONFIRMED`; Finance Overview now supports category/source/status/date filtering and Excel-compatible CSV export with optional tax simulation; dispatch API requires SO contract reference + PDF; operator attendance scan is blocked when the matched SO lacks contract compliance and first successful scan stamps equipment mobilization date. Build/API/manual hardware testing must still be run locally.
+
+
+## Latest revision log (2026-10-24 — sidebar and multiple SIA)
+Read `docs/REVISION_2026-10-24_SIDEBAR_SIA.md` first after this map. It documents global sidebar module-ID deduplication, consistent icon sizing, and preservation/validation of multiple SIA certificates in Compliance Documents. Main files: `src/components/Sidebar.tsx`, `src/components/AssetsView.tsx`, and `src/types/index.ts`.

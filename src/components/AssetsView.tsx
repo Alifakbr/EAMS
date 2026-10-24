@@ -264,21 +264,21 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, customers, onRef
 
   const handleOpenDocsModal = (asset: Asset) => {
     setManagingDocsAsset(asset);
-    setDocsModalData(
-      asset.legalDocs || {
-        plateNumber: '',
-        chassisNumber: '',
-        engineNumber: '',
-        hourMeter: 0,
-        stnkNumber: '',
-        stnkExpiry: '2028-12-31',
-        bpkbNumber: '',
-        siaNumber: '',
-        siaExpiry: '2028-12-31',
-        siaIssuer: 'Kemenaker RI',
-        documentStatus: 'VALID',
-      }
-    );
+    setDocsModalData({
+      ...(asset.legalDocs || {}),
+      plateNumber: asset.legalDocs?.plateNumber || '',
+      chassisNumber: asset.legalDocs?.chassisNumber || '',
+      engineNumber: asset.legalDocs?.engineNumber || '',
+      hourMeter: asset.legalDocs?.hourMeter || 0,
+      stnkNumber: asset.legalDocs?.stnkNumber || '',
+      stnkExpiry: asset.legalDocs?.stnkExpiry || '2028-12-31',
+      bpkbNumber: asset.legalDocs?.bpkbNumber || '',
+      siaNumber: asset.legalDocs?.siaNumber || '',
+      siaExpiry: asset.legalDocs?.siaExpiry || '2028-12-31',
+      siaIssuer: asset.legalDocs?.siaIssuer || 'Kemenaker RI',
+      siaDocuments: asset.legalDocs?.siaDocuments || [],
+      documentStatus: asset.legalDocs?.documentStatus || 'VALID',
+    });
     setStnkFilePreview(asset.legalDocs?.stnkFileUrl || null);
     setBpkbFilePreview(asset.legalDocs?.bpkbFileUrl || null);
     setSiaFilePreview(asset.legalDocs?.siaFileUrl || null);
@@ -287,6 +287,9 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, customers, onRef
   const handleSaveDocs = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!managingDocsAsset) return;
+
+    const invalidSia = (docsModalData.siaDocuments || []).find((doc) => !doc.number.trim() || !doc.expiryDate);
+    if (invalidSia) { alert('Lengkapi nomor sertifikat dan tanggal kedaluwarsa untuk setiap dokumen SIA tambahan.'); return; }
 
     setSavingDocs(true);
     try {
@@ -793,6 +796,10 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, customers, onRef
                           <div className="md:col-span-3">
                             <label className="block text-[10px] font-semibold text-slate-500 mb-1">Expiry date</label>
                             <input type="date" value={doc.expiryDate || ''} onChange={(event) => setDocsModalData((current) => ({ ...current, siaDocuments: (current.siaDocuments || []).map((item, i) => i === index ? { ...item, expiryDate: event.target.value } : item) }))} className="w-full min-w-0 rounded border border-slate-300 p-2 text-xs" />
+                          </div>
+                          <div className="md:col-span-3 min-w-0">
+                            <label className="block text-[10px] font-semibold text-slate-500 mb-1">Issuing authority</label>
+                            <input value={doc.issuer || ''} onChange={(event) => setDocsModalData((current) => ({ ...current, siaDocuments: (current.siaDocuments || []).map((item, i) => i === index ? { ...item, issuer: event.target.value } : item) }))} className="w-full min-w-0 rounded border border-slate-300 p-2 text-xs" placeholder="Kemenaker / Disnaker" />
                           </div>
                           <div className="md:col-span-3 min-w-0">
                             <span className="block text-[10px] font-semibold text-slate-500 mb-1">File</span>
