@@ -167,7 +167,7 @@ export const SalesOrdersView: React.FC<SalesOrdersViewProps> = ({
               <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
                 <th className="py-2.5 px-4">Order # / PO Ref</th>
                 <th className="py-2.5 px-4">Customer &amp; Site</th>
-                <th className="py-2.5 px-4">Allocated Equipment</th>
+                <th className="py-2.5 px-4">Assigned Equipment</th>
                 <th className="py-2.5 px-4">Delivery Date</th>
                 <th className="py-2.5 px-4 text-right">Order Value</th>
                 <th className="py-2.5 px-4 text-center">Status</th>
@@ -285,7 +285,7 @@ export const SalesOrdersView: React.FC<SalesOrdersViewProps> = ({
                         className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded ${
                           order.status === 'COMPLETED' || order.status === 'DELIVERED'
                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : order.status === 'ALLOCATED' || order.status === 'CONFIRMED'
+                            : order.status === 'CONFIRMED'
                             ? 'bg-blue-50 text-blue-700 border border-blue-200'
                             : order.status === 'CANCELLED'
                             ? 'bg-rose-50 text-rose-700 border border-rose-200'
@@ -426,7 +426,7 @@ export const SalesOrdersView: React.FC<SalesOrdersViewProps> = ({
                     ))}
                 </select>
                 <span className="text-[10px] text-slate-400 mt-1 block">
-                  Only AVAILABLE assets can be allocated. Once allocated, asset is locked from other rentals or sales.
+                  Only AVAILABLE assets can be assigned. Once assigned, the asset is reserved against conflicting rentals or sales.
                 </span>
               </div>
 

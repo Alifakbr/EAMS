@@ -329,7 +329,7 @@ export interface Quotation {
   linkedSalesOrderNumber?: string;
 }
 
-export type SalesOrderStatus = 'PENDING' | 'CONFIRMED' | 'ALLOCATED' | 'DELIVERING' | 'DELIVERED' | 'COMPLETED' | 'CANCELLED';
+export type SalesOrderStatus = 'PENDING' | 'CONFIRMED' | 'DELIVERING' | 'DELIVERED' | 'COMPLETED' | 'CANCELLED';
 
 export interface SalesOrderItem extends QuotationItem {
   allocatedAssetTag?: string;

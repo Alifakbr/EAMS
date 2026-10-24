@@ -68,7 +68,7 @@ apiRouter.delete('/drafts/:key', (req: Request, res: Response) => {
   res.json({ message: 'Draft deleted successfully.' });
 });
 
-type ApprovalType = 'quotation' | 'sales' | 'rental' | 'invoice' | 'procurement' | 'delivery' | 'maintenance';
+type ApprovalType = 'quotation' | 'sales' | 'rental' | 'invoice' | 'procurement' | 'delivery';
 const APPROVAL_LABELS: Record<ApprovalType, string> = {
   quotation: 'Quotation',
   sales: 'Sales Order',
@@ -76,7 +76,6 @@ const APPROVAL_LABELS: Record<ApprovalType, string> = {
   invoice: 'Invoice',
   procurement: 'Purchase Order',
   delivery: 'Delivery',
-  maintenance: 'Work Order',
 };
 
 apiRouter.get('/manager/approvals', (_req: Request, res: Response) => {
@@ -104,10 +103,6 @@ apiRouter.get('/manager/approvals', (_req: Request, res: Response) => {
     ...db.getDeliveries().filter((item) => item.status === 'PENDING_APPROVAL').map((item) => ({
       type: 'delivery' as const, id: item.id, reference: item.deliveryNumber, customer: item.customerName,
       status: item.status, amount: 0, submittedAt: item.dispatchDate, data: item,
-    })),
-    ...db.getWorkOrders().filter((item) => item.status === 'PENDING_APPROVAL').map((item) => ({
-      type: 'maintenance' as const, id: item.id, reference: item.workOrderNumber, customer: item.assetName,
-      status: item.status, amount: item.totalCost, submittedAt: item.scheduledDate, data: item,
     })),
   ].sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
   res.json({ data: records, total: records.length });
@@ -216,16 +211,6 @@ apiRouter.post('/manager/approvals/:type/:id/:decision', (req: Request, res: Res
         currentStatus = item.status;
         if (currentStatus !== 'PENDING_APPROVAL') throw new Error('Delivery is no longer awaiting approval.');
         item.status = approved ? 'IN_TRANSIT' : 'CANCELLED';
-        return item;
-      }
-      if (type === 'maintenance') {
-        const item = db.getWorkOrders().find((row) => row.id === id);
-        if (!item) throw new Error('Work order not found.');
-        currentStatus = item.status;
-        if (currentStatus !== 'PENDING_APPROVAL') throw new Error('Work order is no longer awaiting approval.');
-        item.status = approved ? 'SCHEDULED' : 'CANCELLED';
-        const asset = db.getAssets().find((row) => row.id === item.assetId);
-        if (asset && approved) asset.status = 'IN_MAINTENANCE';
         return item;
       }
       throw new Error('Unknown submission type.');
@@ -1559,8 +1544,14 @@ apiRouter.post('/sales-orders/:id/contract-attachment', (req: Request, res: Resp
   res.json({ message: 'Contract PDF attached successfully.', data: order });
 });
 
-apiRouter.get('/sales-orders', (req: Request, res: Response) => {
+apiRouter.get('/sales-orders', (_req: Request, res: Response) => {
   const orders = db.getSalesOrders();
+  // Backward-compatible normalization for records saved before ALLOCATED was removed.
+  let migrated = false;
+  for (const order of orders) {
+    if ((order.status as string) === 'ALLOCATED') { order.status = 'CONFIRMED'; migrated = true; }
+  }
+  if (migrated) db.save();
   res.json({ data: orders, total: orders.length });
 });
 
@@ -1714,7 +1705,7 @@ apiRouter.post('/sales-orders/:id/book-rental', (req: Request, res: Response) =>
   const order = db.getSalesOrders().find((item) => item.id === req.params.id);
   if (!order) return res.status(404).json({ error: 'Sales Order not found.' });
   if (order.transactionType !== 'RENTAL') return res.status(409).json({ error: 'Only rental Sales Orders can be booked as rental contracts.' });
-  if (order.status !== 'CONFIRMED' && order.status !== 'ALLOCATED') {
+  if (order.status !== 'CONFIRMED') {
     return res.status(409).json({ error: 'Sales Order must be approved before Asset Control can book the rental.' });
   }
   if (order.rentalContractId) return res.status(409).json({ error: 'This Sales Order already has a rental contract.' });
@@ -1786,7 +1777,7 @@ apiRouter.post('/sales-orders/:id/book-rental', (req: Request, res: Response) =>
         notes: order.remarks || `Booked from Sales Order ${order.orderNumber}.`,
       };
       order.rentalContractId = contract.id;
-      order.status = 'ALLOCATED';
+      order.status = 'CONFIRMED';
       db.getRentals().unshift(contract);
       db.logAudit(actorName(req), 'RENTAL_BOOKED_FROM_SO', 'RENTAL_CONTRACT', contract.id, `Booked ${contract.contractNumber} from Sales Order ${order.orderNumber}.`);
       db.addNotification({
@@ -2095,6 +2086,9 @@ apiRouter.post('/deliveries', (req: Request, res: Response) => {
       if (!order) return res.status(404).json({ error: 'Source Sales Order not found' });
       if (order.status === 'PENDING' || order.status === 'CANCELLED') {
         return res.status(409).json({ error: 'The sales order must be approved by a Manager before creating a delivery.' });
+      }
+      if (!order.contractReferenceNumber?.trim() || !order.contractAttachmentDataUrl) {
+        return res.status(409).json({ error: `Dispatch blocked: Sales Order ${order.orderNumber} must have a contract reference number and uploaded contract PDF in Contract Management before dispatch.` });
       }
       if (order.transactionType !== 'RENTAL') {
         const unpaidAsset = order.items.find((line) => {
@@ -2476,7 +2470,7 @@ const finalizePaidAssetSale = (invoice: Invoice, actor: string) => {
   }
 
   if (markedSold > 0) {
-    order.status = 'ALLOCATED';
+    order.status = 'CONFIRMED';
     order.paidAmount = invoice.paidAmount;
     db.addNotification({
       id: `NTF-ASSET-PAID-${invoice.id}`,
@@ -3013,6 +3007,10 @@ apiRouter.post('/operators/attendance/check-in', (req: Request, res: Response) =
 
   const opName = actorName(req);
   const op = db.getOperators().find((o) => o.name.toLowerCase() === opName.toLowerCase() || o.id === operatorId);
+  const linkedOrder = db.getSalesOrders().find((order) => order.items.some((line) => line.allocatedAssetTag === asset.assetTag) && order.status !== 'CANCELLED' && order.status !== 'COMPLETED');
+  if (linkedOrder && (!linkedOrder.contractReferenceNumber?.trim() || !linkedOrder.contractAttachmentDataUrl)) {
+    return res.status(409).json({ error: `Scan blocked: equipment ${asset.assetTag} is linked to Sales Order ${linkedOrder.orderNumber} without a complete contract PDF/reference. Contact Asset Control.` });
+  }
 
   const newLog = db.transaction(() => {
     const logId = `ATT-${Date.now().toString().slice(-6)}`;
@@ -3039,6 +3037,12 @@ apiRouter.post('/operators/attendance/check-in', (req: Request, res: Response) =
     };
 
     db.getAttendanceLogs().unshift(att);
+    // Operational start is system-stamped at the first successful operator scan, not manually planned.
+    if (linkedOrder) {
+      const line = linkedOrder.items.find((item) => item.allocatedAssetTag === asset.assetTag);
+      if (line && !line.mobilizationDate) line.mobilizationDate = new Date().toISOString();
+      db.logAudit(opName, 'EQUIPMENT_OPERATION_STARTED', 'SALES_ORDER', linkedOrder.id, `System recorded first operator scan for ${asset.assetTag} at ${new Date().toISOString()}.`);
+    }
     if (hourMeter && asset.legalDocs) {
       asset.legalDocs.hourMeter = Number(hourMeter);
     }
@@ -3316,8 +3320,8 @@ apiRouter.post('/technical-service/scan-start', (req: Request, res: Response) =>
   if (!wo) {
     return res.status(404).json({ error: `Repair ticket for barcode ${barcode || workOrderId} was not found.` });
   }
-  if (wo.status === 'PENDING_APPROVAL') {
-    return res.status(409).json({ error: 'Work order is still awaiting Manager approval.' });
+  if (wo.status === 'CANCELLED') {
+    return res.status(409).json({ error: 'Cancelled work orders cannot be started by scanning.' });
   }
 
   const tech = actorName(req);
@@ -3444,7 +3448,7 @@ apiRouter.post('/maintenance/work-orders', (req: Request, res: Response) => {
         laborCost: labor,
         totalCost: parts + labor,
         downtimeHours: 8,
-        status: 'PENDING_APPROVAL',
+        status: 'SCHEDULED',
       };
 
       db.getWorkOrders().unshift(wo);
@@ -3462,7 +3466,7 @@ apiRouter.post('/maintenance/work-orders/:id/complete', (req: Request, res: Resp
   const { resolutionNotes } = req.body;
   const wo = db.getWorkOrders().find((w) => w.id === req.params.id);
   if (!wo) return res.status(404).json({ error: 'Work order not found' });
-  if (wo.status === 'PENDING_APPROVAL' || wo.status === 'CANCELLED') {
+  if (wo.status === 'CANCELLED') {
     return res.status(409).json({ error: 'The work order must be approved by a Manager before it can be completed.' });
   }
 
