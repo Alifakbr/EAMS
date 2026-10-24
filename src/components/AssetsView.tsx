@@ -948,10 +948,19 @@ export const AssetsView: React.FC<AssetsViewProps> = ({ assets, customers, onRef
               </div>
 
               <div className="py-2">
-                <QrCode className="w-24 h-24 text-slate-900 mx-auto" />
+                <img
+                  className="w-40 h-40 object-contain mx-auto bg-white"
+                  width={160}
+                  height={160}
+                  loading="eager"
+                  alt={`QR asset ${printingLabelAsset.assetTag} - ${printingLabelAsset.name}`}
+                  src={`https://quickchart.io/qr?size=240&margin=2&text=${encodeURIComponent(printingLabelAsset.assetTag)}`}
+                  onError={(event) => { event.currentTarget.style.display = 'none'; }}
+                />
                 <div className="font-mono text-base font-extrabold tracking-widest text-slate-900 mt-1">
-                  *{printingLabelAsset.assetTag}*
+                  {printingLabelAsset.assetTag}
                 </div>
+                <div className="text-[9px] text-slate-500 break-all">QR payload: {printingLabelAsset.assetTag}</div>
               </div>
 
               <div className="text-left bg-slate-50 p-2.5 rounded border border-slate-300 space-y-1 font-mono text-[10px]">

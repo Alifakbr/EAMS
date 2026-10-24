@@ -68,3 +68,9 @@ Verification: `npm run lint` passed after code changes. `npm run build` could no
 - `npm run build`: **not verified**. The available `node_modules` came from a Windows archive and the Linux environment is missing the native Rolldown binding required by Vite 8. Install dependencies fresh on the review host before build.
 - `npm run test:api`: **not run**. Run against a fresh local test instance, never production.
 - Browser verification of customer CRUD, role/API restrictions, approvals rendering, and GPS print fidelity remains part of the manual checklist in `docs/REVISION_2026-10-24_LOCAL_REVIEW.md`.
+
+## Local review revision — QR and Customer Actions (2026-10-24)
+- Asset label now renders an actual QR image whose payload is the unique asset tag, so scanner lookup remains compatible with existing operator/technical service flows. Online access is required for the QR image endpoint.
+- Removed duplicate Edit/Delete action group in Commercial Customer Database.
+- Updated `docs/00_PROJECT_MAP_AND_NEXT_PROMPT.md` and added `docs/REVISION_2026-10-24_QR_CUSTOMER_FINANCE_CONTRACTS.md` to map the affected code and clearly list unfinished Contract Management and consolidated Finance ledger work.
+- Contract Management persistent uploads/reminders and a unified cash-in/cash-out ledger are explicitly recorded as not complete; do not represent these as implemented.

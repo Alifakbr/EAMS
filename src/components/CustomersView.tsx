@@ -282,10 +282,6 @@ export const CustomersView: React.FC<CustomersViewProps> = ({ customers, onRefre
                         <button type="button" onClick={() => openCustomerEditor(customer)} className="text-xs font-semibold text-blue-700 hover:text-blue-900 underline">Edit</button>
                         <button type="button" onClick={() => void handleDeleteCustomer(customer)} className="text-xs font-semibold text-rose-700 hover:text-rose-900 underline">Delete</button>
                       </div>
-                      <div className="mt-2 flex items-center justify-end gap-3">
-                        <button type="button" onClick={() => openCustomerEditor(customer)} className="text-xs font-semibold text-blue-700 hover:text-blue-900 underline">Edit</button>
-                        <button type="button" onClick={() => void handleDeleteCustomer(customer)} className="text-xs font-semibold text-rose-700 hover:text-rose-900 underline">Delete</button>
-                      </div>
                     </td>
                   </tr>
                 );
