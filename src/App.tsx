@@ -29,6 +29,8 @@ import { OperatorScanStatusView } from './components/OperatorScanStatusView.tsx'
 import { TechnicalServiceView } from './components/TechnicalServiceView.tsx';
 import { UserManagementView } from './components/UserManagementView.tsx';
 import { ManagerApprovalsView } from './components/ManagerApprovalsView.tsx';
+import { ContractManagementView } from './components/ContractManagementView.tsx';
+import { FinanceOverviewView } from './components/FinanceOverviewView.tsx';
 import { DraftPersistence } from './components/DraftPersistence.tsx';
 import { X } from 'lucide-react';
 
@@ -448,6 +450,8 @@ export default function App() {
             />
           )}
           {activeTab === 'manager-approvals' && <ManagerApprovalsView />}
+          {activeTab === 'contract-management' && <ContractManagementView salesOrders={salesOrders} onRefresh={loadAllData} />}
+          {activeTab === 'finance-overview' && <FinanceOverviewView invoices={invoices} payments={payments} purchaseOrders={purchaseOrders} vendorBills={vendorBills} />}
         </main>
       </div>
 

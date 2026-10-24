@@ -21,3 +21,7 @@ Read this file before any subsequent AI task. Then read `docs/REVISION_2026-10-2
 4. Never report build, browser, scan, or API tests as passed unless actually run. Run `npm ci`, `npm run lint`, `npm run build`, and `npm run test:api` where environment supports them.
 5. Provide a local ZIP only when requested; do not create a GitHub branch/commit unless explicitly requested.
 6. Update this map and the revision log with exact files, data flow, tests performed, and known limitations.
+
+
+## Latest local revision (2026-10-24)
+Before any next change, read `REVISION_2026-10-24_CONTRACT_MANAGEMENT_FINANCE_OVERVIEW.md`. New module IDs: `contract-management` and `finance-overview`. Main implementation map: `src/shared/access.ts`, `src/components/Sidebar.tsx`, `src/App.tsx`, `src/components/ContractManagementView.tsx`, and `src/components/FinanceOverviewView.tsx`. Contract upload uses existing SO PDF endpoint. Reminder currently creates a `mailto:` draft, not an automated notification. Finance overview aggregates existing record types and does not yet persist universal evidence attachments; do not represent gross sums as audited cashflow.

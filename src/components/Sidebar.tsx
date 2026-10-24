@@ -19,6 +19,8 @@ import {
   ShieldCheck,
   QrCode,
   X,
+  FileCheck,
+  Wallet,
 } from 'lucide-react';
 
 import { UserRole } from '../types/index.ts';
@@ -61,6 +63,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'MANAGEMENT',
       items: [
         { id: 'manager-approvals', label: 'Approvals & Contracts', icon: CheckCircle2 },
+        { id: 'contract-management', label: 'Contract Management', icon: FileCheck },
+        { id: 'contract-management', label: 'Contract Management', icon: FileCheck },
       ],
     },
     {
@@ -96,6 +100,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'invoices', label: 'Invoices & Billing', icon: CreditCard, badge: counts?.openInvoices },
         { id: 'payments', label: 'Payments & Settlement', icon: Banknote },
+        { id: 'finance-overview', label: 'Finance Transaction Overview', icon: Wallet },
+        { id: 'finance-overview', label: 'Finance Transaction Overview', icon: Wallet },
       ],
     },
     {

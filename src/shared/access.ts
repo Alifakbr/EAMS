@@ -11,27 +11,27 @@ export type ModuleId =
   | 'reports' | 'dashboard' | 'customers' | 'quotations' | 'sales' | 'rentals'
   | 'deliveries' | 'invoices' | 'payments' | 'assets' | 'products' | 'procurement'
   | 'maintenance' | 'operator-status' | 'technical-service'
-  | 'user-management' | 'api-explorer' | 'test-runner' | 'settings' | 'manager-approvals';
+  | 'user-management' | 'api-explorer' | 'test-runner' | 'settings' | 'manager-approvals' | 'contract-management' | 'finance-overview';
 
 export const ALL_MODULES: ModuleId[] = [
   'reports', 'dashboard', 'customers', 'quotations', 'sales', 'rentals', 'deliveries',
   'invoices', 'payments', 'assets', 'products', 'procurement', 'maintenance',
-  'operator-status', 'technical-service', 'user-management', 'api-explorer', 'test-runner', 'settings', 'manager-approvals',
+  'operator-status', 'technical-service', 'user-management', 'api-explorer', 'test-runner', 'settings', 'manager-approvals', 'contract-management', 'finance-overview', 'contract-management', 'finance-overview',
 ];
 
 /** Modul bawaan tiap peran (baseline). */
 export const ROLE_MODULES: Record<UserRole, ModuleId[]> = {
-  EXECUTIVE: ['reports', 'dashboard', 'manager-approvals'],
+  EXECUTIVE: ['reports', 'dashboard', 'manager-approvals', 'contract-management', 'finance-overview'],
   ADMIN_IT: [...ALL_MODULES],
   SALES_MARKETING: ['quotations', 'sales', 'customers', 'deliveries', 'products', 'assets', 'reports'],
   ASSET_CONTROL: ['assets', 'deliveries', 'rentals', 'products', 'maintenance', 'reports'],
   MANAGEMENT_OPERATION: ['maintenance', 'assets', 'deliveries', 'rentals', 'reports'],
   PROCUREMENT: ['procurement', 'products', 'reports'],
-  FINANCE_ACCOUNTING_TAX: ['invoices', 'payments', 'customers', 'reports'],
-  AR_MANAGEMENT: ['invoices', 'reports', 'payments', 'customers'],
+  FINANCE_ACCOUNTING_TAX: ['invoices', 'payments', 'customers', 'reports', 'finance-overview'],
+  AR_MANAGEMENT: ['invoices', 'reports', 'payments', 'customers', 'finance-overview'],
   OPERATOR_USER: ['operator-status'],
   TECHNICAL_SERVICE: ['technical-service', 'maintenance', 'assets', 'products', 'reports'],
-  MANAGER: ['manager-approvals'],
+  MANAGER: ['manager-approvals', 'contract-management', 'finance-overview'],
 };
 
 export const DEFAULT_TAB: Record<UserRole, ModuleId> = {
